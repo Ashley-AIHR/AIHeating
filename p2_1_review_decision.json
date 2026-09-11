@@ -1,0 +1,92 @@
+{
+  "fixtureVersion": "physical-fixture-v1.1",
+  "candidateControllerVersion": "traditional-v1.1",
+  "technicalValidation": "PASS",
+  "correctiveAcceptance": "FAIL",
+  "baselinePromotion": false,
+  "supersedesV1_0": false,
+  "P3Started": false,
+  "reason": "Design-load allocation corrected shares and removed Normal underheating but did not resolve persistent severe-overheating or fixed-flow Near authority conflict.",
+  "normal": {
+    "before": {
+      "P10C": 18.410923401669873,
+      "P50C": 23.161718275320148,
+      "P90C": 28.680672416844427,
+      "comfortRate": 0,
+      "complianceRate": 0.984375,
+      "controllerVersion": "traditional-v1.0",
+      "evaluationHours": 24,
+      "excessDeliveredHeatMWh": 0.8725489340709457,
+      "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+      "frameCount": 288,
+      "heatEnergyMWh": 9.978827334070946,
+      "hydraulicBalanceIndex": 0.9962228105057934,
+      "maximumIndoorC": 29.065108807953738,
+      "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+      "minimumIndoorC": 17.92683134799679,
+      "overheatingRate": 0.6710069444444444,
+      "pumpElectricityKWh": 26.001787725445993,
+      "scenarioId": "normal_winter",
+      "severeOverheatingRate": 0.25,
+      "solverFailureCount": 0,
+      "temperatureSpreadC": 10.269749015174554,
+      "underheatingRate": 0.015625
+    },
+    "after": {
+      "P10C": 19.125622325516236,
+      "P50C": 23.08407862734782,
+      "P90C": 28.09305523642545,
+      "comfortRate": 0,
+      "complianceRate": 1,
+      "controllerVersion": "traditional-v1.1",
+      "evaluationHours": 24,
+      "excessDeliveredHeatMWh": 0.8709884067168686,
+      "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+      "frameCount": 288,
+      "heatEnergyMWh": 9.977266806716868,
+      "hydraulicBalanceIndex": 0.9962228105057934,
+      "maximumIndoorC": 28.482800728130947,
+      "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+      "minimumIndoorC": 18.48579253383841,
+      "overheatingRate": 0.5729166666666666,
+      "pumpElectricityKWh": 26.001787725445993,
+      "scenarioId": "normal_winter",
+      "severeOverheatingRate": 0.25,
+      "solverFailureCount": 0,
+      "temperatureSpreadC": 8.967432910909213,
+      "underheatingRate": 0
+    }
+  },
+  "nearSupplyIntervals": [
+    {
+      "outdoorC": -10,
+      "equipmentFeasibleSupplyIntervalC": [
+        55.65929539032846,
+        50.39306630073378
+      ],
+      "lowerBoundBuilding": "B03",
+      "status": "ZONE-LEVEL CONTROL AUTHORITY CONFLICT",
+      "unclippedFeasibleSupplyIntervalC": [
+        55.65929539032846,
+        50.39306630073378
+      ],
+      "upperBoundBuilding": "B01"
+    },
+    {
+      "outdoorC": -5,
+      "equipmentFeasibleSupplyIntervalC": [
+        48.65389806097696,
+        46.59058417672733
+      ],
+      "lowerBoundBuilding": "B03",
+      "status": "ZONE-LEVEL CONTROL AUTHORITY CONFLICT",
+      "unclippedFeasibleSupplyIntervalC": [
+        48.65389806097696,
+        46.59058417672733
+      ],
+      "upperBoundBuilding": "B01"
+    }
+  ],
+  "externalReviewRequired": true,
+  "secondaryCorrectionsApplied": []
+}

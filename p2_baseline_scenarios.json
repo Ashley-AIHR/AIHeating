@@ -1,0 +1,865 @@
+[
+  {
+    "scenarioId": "normal_winter",
+    "scenarioVersion": "1.0",
+    "description": "Moderate daily winter cycle, commissioning adequacy case",
+    "evaluationStart": "2025-01-15T08:00:00+08:00",
+    "evaluationHours": 24,
+    "warmupHours": 96,
+    "warmupConfiguration": {
+      "policy": "daily-repeat-v1",
+      "knots": [
+        [
+          0,
+          -8,
+          20,
+          3
+        ],
+        [
+          4,
+          -4,
+          140,
+          2.8
+        ],
+        [
+          6,
+          -2,
+          180,
+          2.5
+        ],
+        [
+          10,
+          -4,
+          20,
+          3
+        ],
+        [
+          14,
+          -6,
+          0,
+          3.2
+        ],
+        [
+          20,
+          -8,
+          0,
+          3
+        ],
+        [
+          24,
+          -8,
+          20,
+          3
+        ]
+      ],
+      "columns": [
+        "hour",
+        "outdoorC",
+        "solarWm2",
+        "windMs"
+      ],
+      "initialIndoorC": 20
+    },
+    "weatherDefinition": {
+      "method": "linear interpolation, current-time sample held per physical step",
+      "points": [
+        [
+          0,
+          -8
+        ],
+        [
+          4,
+          -4
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          10,
+          -4
+        ],
+        [
+          14,
+          -6
+        ],
+        [
+          20,
+          -8
+        ],
+        [
+          24,
+          -8
+        ]
+      ]
+    },
+    "solarDefinition": {
+      "method": "linear interpolation",
+      "points": [
+        [
+          0,
+          20
+        ],
+        [
+          4,
+          140
+        ],
+        [
+          6,
+          180
+        ],
+        [
+          10,
+          20
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          24,
+          20
+        ]
+      ]
+    },
+    "windDefinition": {
+      "method": "linear interpolation; context only in P1A",
+      "points": [
+        [
+          0,
+          3
+        ],
+        [
+          4,
+          2.8
+        ],
+        [
+          6,
+          2.5
+        ],
+        [
+          10,
+          3
+        ],
+        [
+          14,
+          3.2
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          24,
+          3
+        ]
+      ]
+    },
+    "physicalParameterSetId": "p1a-synthetic-v1.0",
+    "physicalParameterOverrides": {
+      "far.pipeResistanceMultiplier": 1.0
+    },
+    "networkDisturbance": {
+      "atEvaluationSecond": 0,
+      "field": "far.pipe_k_pa_s2_m6",
+      "multiplier": 1.0,
+      "warmupUsesBaseNetwork": true
+    },
+    "controllerConfigVersion": "traditional-v1.0",
+    "randomSeed": null,
+    "physicalTimestepSeconds": 300,
+    "windowFractions": "all zero"
+  },
+  {
+    "scenarioId": "cold_wave",
+    "scenarioVersion": "1.0",
+    "description": "Current outdoor falls from -5 to -14\u00b0C",
+    "evaluationStart": "2025-01-15T08:00:00+08:00",
+    "evaluationHours": 24,
+    "warmupHours": 96,
+    "warmupConfiguration": {
+      "policy": "daily-repeat-v1",
+      "knots": [
+        [
+          0,
+          -5,
+          20,
+          3
+        ],
+        [
+          4,
+          -3,
+          100,
+          3
+        ],
+        [
+          6,
+          -2,
+          140,
+          3
+        ],
+        [
+          10,
+          -3,
+          20,
+          3
+        ],
+        [
+          14,
+          -4,
+          0,
+          3
+        ],
+        [
+          20,
+          -5,
+          0,
+          3
+        ],
+        [
+          24,
+          -5,
+          20,
+          3
+        ]
+      ],
+      "columns": [
+        "hour",
+        "outdoorC",
+        "solarWm2",
+        "windMs"
+      ],
+      "initialIndoorC": 20
+    },
+    "weatherDefinition": {
+      "method": "linear interpolation, current-time sample held per physical step",
+      "points": [
+        [
+          0,
+          -5
+        ],
+        [
+          3,
+          -5
+        ],
+        [
+          6,
+          -8
+        ],
+        [
+          12,
+          -14
+        ],
+        [
+          18,
+          -14
+        ],
+        [
+          24,
+          -12
+        ]
+      ]
+    },
+    "solarDefinition": {
+      "method": "linear interpolation",
+      "points": [
+        [
+          0,
+          20
+        ],
+        [
+          3,
+          100
+        ],
+        [
+          6,
+          130
+        ],
+        [
+          12,
+          0
+        ],
+        [
+          18,
+          0
+        ],
+        [
+          24,
+          20
+        ]
+      ]
+    },
+    "windDefinition": {
+      "method": "linear interpolation; context only in P1A",
+      "points": [
+        [
+          0,
+          3
+        ],
+        [
+          3,
+          3.2
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          12,
+          4.5
+        ],
+        [
+          18,
+          4
+        ],
+        [
+          24,
+          3.5
+        ]
+      ]
+    },
+    "physicalParameterSetId": "p1a-synthetic-v1.0",
+    "physicalParameterOverrides": {
+      "far.pipeResistanceMultiplier": 1.0
+    },
+    "networkDisturbance": {
+      "atEvaluationSecond": 0,
+      "field": "far.pipe_k_pa_s2_m6",
+      "multiplier": 1.0,
+      "warmupUsesBaseNetwork": true
+    },
+    "controllerConfigVersion": "traditional-v1.0",
+    "randomSeed": null,
+    "physicalTimestepSeconds": 300,
+    "windowFractions": "all zero"
+  },
+  {
+    "scenarioId": "rapid_warming",
+    "scenarioVersion": "1.0",
+    "description": "Cold morning to +5\u00b0C with stronger solar; held-out stress case",
+    "evaluationStart": "2025-01-15T08:00:00+08:00",
+    "evaluationHours": 24,
+    "warmupHours": 96,
+    "warmupConfiguration": {
+      "policy": "daily-repeat-v1",
+      "knots": [
+        [
+          0,
+          -8,
+          20,
+          3
+        ],
+        [
+          4,
+          -4,
+          140,
+          2.8
+        ],
+        [
+          6,
+          -2,
+          180,
+          2.5
+        ],
+        [
+          10,
+          -4,
+          20,
+          3
+        ],
+        [
+          14,
+          -6,
+          0,
+          3.2
+        ],
+        [
+          20,
+          -8,
+          0,
+          3
+        ],
+        [
+          24,
+          -8,
+          20,
+          3
+        ]
+      ],
+      "columns": [
+        "hour",
+        "outdoorC",
+        "solarWm2",
+        "windMs"
+      ],
+      "initialIndoorC": 20
+    },
+    "weatherDefinition": {
+      "method": "linear interpolation, current-time sample held per physical step",
+      "points": [
+        [
+          0,
+          -8
+        ],
+        [
+          2,
+          -4
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          10,
+          3
+        ],
+        [
+          12,
+          0
+        ],
+        [
+          18,
+          -6
+        ],
+        [
+          24,
+          -8
+        ]
+      ]
+    },
+    "solarDefinition": {
+      "method": "linear interpolation",
+      "points": [
+        [
+          0,
+          20
+        ],
+        [
+          2,
+          220
+        ],
+        [
+          6,
+          480
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          12,
+          0
+        ],
+        [
+          18,
+          0
+        ],
+        [
+          24,
+          20
+        ]
+      ]
+    },
+    "windDefinition": {
+      "method": "linear interpolation; context only in P1A",
+      "points": [
+        [
+          0,
+          3
+        ],
+        [
+          2,
+          3.4
+        ],
+        [
+          6,
+          2.8
+        ],
+        [
+          10,
+          2.5
+        ],
+        [
+          12,
+          3
+        ],
+        [
+          18,
+          3.5
+        ],
+        [
+          24,
+          3
+        ]
+      ]
+    },
+    "physicalParameterSetId": "p1a-synthetic-v1.0",
+    "physicalParameterOverrides": {
+      "far.pipeResistanceMultiplier": 1.0
+    },
+    "networkDisturbance": {
+      "atEvaluationSecond": 0,
+      "field": "far.pipe_k_pa_s2_m6",
+      "multiplier": 1.0,
+      "warmupUsesBaseNetwork": true
+    },
+    "controllerConfigVersion": "traditional-v1.0",
+    "randomSeed": null,
+    "physicalTimestepSeconds": 300,
+    "windowFractions": "all zero"
+  },
+  {
+    "scenarioId": "sunny_winter",
+    "scenarioVersion": "1.0",
+    "description": "Cold winter outdoor conditions and strong solar; held-out stress case",
+    "evaluationStart": "2025-01-15T08:00:00+08:00",
+    "evaluationHours": 24,
+    "warmupHours": 96,
+    "warmupConfiguration": {
+      "policy": "daily-repeat-v1",
+      "knots": [
+        [
+          0,
+          -6,
+          20,
+          3
+        ],
+        [
+          4,
+          -3,
+          140,
+          2.8
+        ],
+        [
+          6,
+          -2,
+          180,
+          2.5
+        ],
+        [
+          10,
+          -4,
+          20,
+          3
+        ],
+        [
+          14,
+          -5,
+          0,
+          3
+        ],
+        [
+          20,
+          -6,
+          0,
+          3
+        ],
+        [
+          24,
+          -6,
+          20,
+          3
+        ]
+      ],
+      "columns": [
+        "hour",
+        "outdoorC",
+        "solarWm2",
+        "windMs"
+      ],
+      "initialIndoorC": 20
+    },
+    "weatherDefinition": {
+      "method": "linear interpolation, current-time sample held per physical step",
+      "points": [
+        [
+          0,
+          -6
+        ],
+        [
+          4,
+          -2
+        ],
+        [
+          6,
+          0
+        ],
+        [
+          10,
+          -2
+        ],
+        [
+          14,
+          -4
+        ],
+        [
+          20,
+          -6
+        ],
+        [
+          24,
+          -6
+        ]
+      ]
+    },
+    "solarDefinition": {
+      "method": "linear interpolation",
+      "points": [
+        [
+          0,
+          20
+        ],
+        [
+          4,
+          420
+        ],
+        [
+          6,
+          500
+        ],
+        [
+          10,
+          50
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          24,
+          20
+        ]
+      ]
+    },
+    "windDefinition": {
+      "method": "linear interpolation; context only in P1A",
+      "points": [
+        [
+          0,
+          3
+        ],
+        [
+          4,
+          2.5
+        ],
+        [
+          6,
+          2.5
+        ],
+        [
+          10,
+          3
+        ],
+        [
+          14,
+          3
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          24,
+          3
+        ]
+      ]
+    },
+    "physicalParameterSetId": "p1a-synthetic-v1.0",
+    "physicalParameterOverrides": {
+      "far.pipeResistanceMultiplier": 1.0
+    },
+    "networkDisturbance": {
+      "atEvaluationSecond": 0,
+      "field": "far.pipe_k_pa_s2_m6",
+      "multiplier": 1.0,
+      "warmupUsesBaseNetwork": true
+    },
+    "controllerConfigVersion": "traditional-v1.0",
+    "randomSeed": null,
+    "physicalTimestepSeconds": 300,
+    "windowFractions": "all zero"
+  },
+  {
+    "scenarioId": "hydraulic_imbalance",
+    "scenarioVersion": "1.0",
+    "description": "Far pipe resistance doubles at evaluation start; healthy-network warmup",
+    "evaluationStart": "2025-01-15T08:00:00+08:00",
+    "evaluationHours": 24,
+    "warmupHours": 96,
+    "warmupConfiguration": {
+      "policy": "daily-repeat-v1",
+      "knots": [
+        [
+          0,
+          -8,
+          20,
+          3
+        ],
+        [
+          4,
+          -4,
+          140,
+          2.8
+        ],
+        [
+          6,
+          -2,
+          180,
+          2.5
+        ],
+        [
+          10,
+          -4,
+          20,
+          3
+        ],
+        [
+          14,
+          -6,
+          0,
+          3.2
+        ],
+        [
+          20,
+          -8,
+          0,
+          3
+        ],
+        [
+          24,
+          -8,
+          20,
+          3
+        ]
+      ],
+      "columns": [
+        "hour",
+        "outdoorC",
+        "solarWm2",
+        "windMs"
+      ],
+      "initialIndoorC": 20
+    },
+    "weatherDefinition": {
+      "method": "linear interpolation, current-time sample held per physical step",
+      "points": [
+        [
+          0,
+          -8
+        ],
+        [
+          4,
+          -4
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          10,
+          -4
+        ],
+        [
+          14,
+          -6
+        ],
+        [
+          20,
+          -8
+        ],
+        [
+          24,
+          -8
+        ]
+      ]
+    },
+    "solarDefinition": {
+      "method": "linear interpolation",
+      "points": [
+        [
+          0,
+          20
+        ],
+        [
+          4,
+          140
+        ],
+        [
+          6,
+          180
+        ],
+        [
+          10,
+          20
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          24,
+          20
+        ]
+      ]
+    },
+    "windDefinition": {
+      "method": "linear interpolation; context only in P1A",
+      "points": [
+        [
+          0,
+          3
+        ],
+        [
+          4,
+          2.8
+        ],
+        [
+          6,
+          2.5
+        ],
+        [
+          10,
+          3
+        ],
+        [
+          14,
+          3.2
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          24,
+          3
+        ]
+      ]
+    },
+    "physicalParameterSetId": "p1a-synthetic-v1.0",
+    "physicalParameterOverrides": {
+      "far.pipeResistanceMultiplier": 2.0
+    },
+    "networkDisturbance": {
+      "atEvaluationSecond": 0,
+      "field": "far.pipe_k_pa_s2_m6",
+      "multiplier": 2.0,
+      "warmupUsesBaseNetwork": true
+    },
+    "controllerConfigVersion": "traditional-v1.0",
+    "randomSeed": null,
+    "physicalTimestepSeconds": 300,
+    "windowFractions": "all zero"
+  }
+]

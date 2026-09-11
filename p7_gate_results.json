@@ -1,0 +1,328 @@
+{
+  "phase": "P7",
+  "generatedAt": "2026-09-10T17:57:54.101Z",
+  "passed": 22,
+  "failed": 0,
+  "skipped": 0,
+  "total": 22,
+  "gates": [
+    {
+      "gate": "P7-P1",
+      "description": "P0-P6 integrity verification passes",
+      "status": "PASS",
+      "measured": "P0-P6 integrity: PASS (all registered hashes and accepted gate results verified)"
+    },
+    {
+      "gate": "P7-P2",
+      "description": "P6 Formal MPC is the final AI Optimised provider",
+      "status": "PASS",
+      "measured": {
+        "name": "Optimiser",
+        "version": "Formal MPC v1"
+      }
+    },
+    {
+      "gate": "P7-P3",
+      "description": "P4 Preview is not the active final provider",
+      "status": "PASS",
+      "measured": {
+        "role": "Intermediate Prototype / Engineering Benchmark",
+        "version": "Preview Optimiser v0"
+      }
+    },
+    {
+      "gate": "P7-P4",
+      "description": "No frontend hard-coded engineering result on active customer path",
+      "status": "PASS",
+      "measured": {
+        "sharedPayload": "src/p7-runtime-data.json",
+        "engineeringCalculators": []
+      }
+    },
+    {
+      "gate": "P7-P5",
+      "description": "P4/P5/P6 versions are explicit",
+      "status": "PASS",
+      "measured": {
+        "simulation": {
+          "name": "Simulation Engine",
+          "version": "physical-fixture-v1.2"
+        },
+        "loadPrediction": {
+          "name": "Required Heat Predictor",
+          "version": "P4 Predictor v1",
+          "type": "LightGBM"
+        },
+        "thermalPrediction": {
+          "name": "Thermal Predictor",
+          "version": "P5 Thermal Model v1"
+        },
+        "optimisation": {
+          "name": "Optimiser",
+          "version": "Formal MPC v1"
+        },
+        "traditional": {
+          "name": "Traditional Baseline",
+          "version": "traditional-v1.2"
+        }
+      }
+    },
+    {
+      "gate": "P7-P6",
+      "description": "Simulation/Predict/Optimise timestamps and state are compatible",
+      "status": "PASS",
+      "measured": {
+        "simulationTime": "2025-01-15T10:30:00+08:00",
+        "forecastAsOf": "2025-01-15T10:30:00+08:00",
+        "recommendationCreatedAt": "2025-01-15T10:30:00+08:00",
+        "recommendationEffectiveAt": "2025-01-15T11:00:00+08:00"
+      }
+    },
+    {
+      "gate": "P7-S1",
+      "description": "Optimal + Verified displays correctly",
+      "status": "PASS",
+      "measured": {
+        "optimisation": "MPC_OPTIMAL",
+        "verification": "VERIFIED_IN_DIGITAL_TWIN",
+        "fallback": "NOT_ACTIVE",
+        "safety": "NORMAL_VERIFIED"
+      }
+    },
+    {
+      "gate": "P7-S2",
+      "description": "Fallback + Verified displays correctly",
+      "status": "PASS",
+      "measured": {
+        "optimisation": "SOLVER_LIMIT_REACHED",
+        "verification": "VERIFIED_FALLBACK",
+        "fallback": "VERIFIED_FALLBACK_ACTIVE",
+        "safety": "VERIFIED_FALLBACK"
+      }
+    },
+    {
+      "gate": "P7-S3",
+      "description": "Infeasible + Safety Not Guaranteed displays correctly",
+      "status": "PASS",
+      "measured": {
+        "optimisation": "CONSTRAINT_INFEASIBLE",
+        "verification": "NOT_VERIFIED",
+        "fallback": "FALLBACK_ACTIVE",
+        "safety": "SAFETY_NOT_GUARANTEED"
+      }
+    },
+    {
+      "gate": "P7-S4",
+      "description": "Solver user_limit does not appear as MPC success",
+      "status": "PASS",
+      "measured": {
+        "raw": "user_limit",
+        "derived": "SOLVER_LIMIT_REACHED"
+      }
+    },
+    {
+      "gate": "P7-S5",
+      "description": "Fallback does not appear as optimal MPC",
+      "status": "PASS",
+      "measured": {
+        "optimisation": "SOLVER_LIMIT_REACHED",
+        "verification": "VERIFIED_FALLBACK",
+        "fallback": "VERIFIED_FALLBACK_ACTIVE",
+        "safety": "VERIFIED_FALLBACK"
+      }
+    },
+    {
+      "gate": "P7-S6",
+      "description": "Application state is separate from optimisation state",
+      "status": "PASS",
+      "measured": {
+        "optimisationHasApplied": false,
+        "applicationStates": [
+          "NOT_APPLIED",
+          "APPLIED",
+          "SUPERSEDED",
+          "FAILED_TO_APPLY"
+        ]
+      }
+    },
+    {
+      "gate": "P7-S7",
+      "description": "Advisory never auto-applies",
+      "status": "PASS",
+      "measured": "NOT_APPLIED"
+    },
+    {
+      "gate": "P7-S8",
+      "description": "Optimised auto-applies only accepted verified action/fallback",
+      "status": "PASS",
+      "measured": {
+        "optimal": "APPLIED",
+        "verifiedFallback": "APPLIED",
+        "unsafeFallback": "FAILED_TO_APPLY"
+      }
+    },
+    {
+      "gate": "P7-U1",
+      "description": "NOW to VERIFY journey remains understandable",
+      "status": "PASS",
+      "measured": [
+        "journeyNow",
+        "journeyForecast",
+        "journeyPredict",
+        "journeyOptimise",
+        "journeyVerify"
+      ]
+    },
+    {
+      "gate": "P7-U2",
+      "description": "Forecast separates P4 load and P5 thermal prediction",
+      "status": "PASS",
+      "measured": {
+        "p4": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "p5": [
+          0.5,
+          1,
+          2,
+          3,
+          6
+        ]
+      }
+    },
+    {
+      "gate": "P7-U3",
+      "description": "Simulation exposes final MPC status and applied controls",
+      "status": "PASS",
+      "measured": {
+        "statusDimensions": 5,
+        "trajectoryIntervals": 6
+      }
+    },
+    {
+      "gate": "P7-U4",
+      "description": "Results supports Traditional / Preview / MPC",
+      "status": "PASS",
+      "measured": [
+        "traditional",
+        "preview",
+        "mpc"
+      ]
+    },
+    {
+      "gate": "P7-U5",
+      "description": "Settings reflects final P4/P5/P6 configuration",
+      "status": "PASS",
+      "measured": {
+        "controllerVersion": "traditional-v1.2",
+        "decisionIntervalMinutes": 30,
+        "forecastDisplayWindowsHours": [
+          6,
+          24,
+          48
+        ],
+        "objective": {
+          "frozenBeforeCanonicalEvaluation": true,
+          "hardConstraint": "minimum projected indoor temperature must be >=18C unless every policy including Traditional is infeasible",
+          "normalization": {
+            "avoidableOversupply": "MWh divided by predicted demand MWh, floor denominator 0.001",
+            "controlMovement": "sum normalized absolute decision-boundary changes",
+            "pumpElectricity": "kWh divided by Traditional-continuation kWh, floor denominator 0.001",
+            "temperatureDegreeHours": "mean per building across the 3h rollout"
+          },
+          "version": "p6-objective-v1",
+          "weights": {
+            "belowComfortDegreeHoursBelow20": 0.4,
+            "mildOverheatingDegreeHoursAbove23": 2,
+            "severeOverheatingDegreeHoursAbove25": 8,
+            "normalizedAvoidableOversupply": 1,
+            "normalizedPumpElectricity": 0.12,
+            "normalizedControlMovement": 0.04
+          }
+        },
+        "objectiveVersion": "p6-objective-v1",
+        "optimiserVersion": "p6-mpc-v1",
+        "physicalFixtureVersion": "physical-fixture-v1.2",
+        "predictionHorizonsHours": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "previewHorizonMinutes": 180,
+        "optimiserDisplayName": "Formal MPC v1",
+        "thermalModelVersion": "p5-thermal-model-v1",
+        "thermalPredictionHorizonsHours": [
+          0.5,
+          1,
+          2,
+          3,
+          6
+        ],
+        "mpcHorizonHours": 3,
+        "controlIntervalMinutes": 30,
+        "equipmentBounds": {
+          "supplyC": [
+            40,
+            60
+          ],
+          "pumpHz": [
+            30,
+            50
+          ],
+          "valveFraction": [
+            0.2,
+            1
+          ]
+        },
+        "rateLimitsPerStep": {
+          "supplyC": 2,
+          "pumpHz": 2,
+          "valveFraction": 0.1
+        },
+        "robustSafety": "Lower prediction bound >=18°C",
+        "fallbackPolicy": "legal Traditional v1.2 issued-forecast continuation / maximum-heating legal rate-limited continuation"
+      }
+    },
+    {
+      "gate": "P7-U6",
+      "description": "Predicted / optimised / verified / applied / realised are distinct",
+      "status": "PASS",
+      "measured": [
+        "predicted",
+        "optimised",
+        "verified",
+        "applied",
+        "realised"
+      ]
+    },
+    {
+      "gate": "P7-U7",
+      "description": "EN/ZH parity passes",
+      "status": "PASS",
+      "measured": {
+        "locales": [
+          "en",
+          "zh"
+        ],
+        "keyCount": 346
+      }
+    },
+    {
+      "gate": "P7-U8",
+      "description": "No misleading real-site validation claim appears",
+      "status": "PASS",
+      "measured": {
+        "forbiddenClaims": [
+          "Production MPC",
+          "Autonomous Production Control",
+          "Real-world Savings",
+          "Guaranteed Real-site Safety"
+        ]
+      }
+    }
+  ]
+}

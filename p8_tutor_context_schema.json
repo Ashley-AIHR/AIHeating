@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "p8-tutor-context-v1",
+  "title": "TutorContextPacket",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contextId", "contextVersion", "createdAt", "page", "scenario", "controlMode", "selectedBuildingId", "sourceBoundary", "simulationEnvironment", "time", "provenance", "freshness", "limitations"],
+  "properties": {
+    "contextId": { "type": "string", "pattern": "^p8-[0-9a-f]{8}$" },
+    "contextVersion": { "const": "p8-tutor-context-v1" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "page": { "enum": ["overview", "simulation", "forecast", "results", "settings"] },
+    "scenario": { "type": "string" },
+    "controlMode": { "enum": ["traditional", "advisory", "optimised"] },
+    "selectedBuildingId": { "type": ["string", "null"] },
+    "sourceBoundary": { "const": "P7_STRUCTURED_PROVIDER_ONLY" },
+    "simulationEnvironment": { "const": true },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simulationTime", "forecastAsOf", "forecastTargetTime", "recommendationCreatedAt", "recommendationEffectiveAt", "resultEvaluationWindow"],
+      "properties": {
+        "simulationTime": { "type": "string" }, "forecastAsOf": { "type": "string" },
+        "forecastTargetTime": { "type": ["string", "null"] }, "recommendationCreatedAt": { "type": "string" },
+        "recommendationEffectiveAt": { "type": "string" }, "resultEvaluationWindow": { "type": "string" }
+      }
+    },
+    "currentState": { "type": "object" }, "weather": { "type": "object" }, "network": { "type": "object" },
+    "buildings": { "type": "object" }, "forecast": { "type": "array", "maxItems": 12 },
+    "loadPrediction": { "type": "array", "maxItems": 4 }, "thermalPrediction": { "type": "object" },
+    "optimisation": { "type": "object" },
+    "applicationState": { "enum": ["NOT_APPLIED", "APPLIED", "SUPERSEDED", "FAILED_TO_APPLY"] },
+    "comparison": { "type": "object" }, "semanticEvents": { "type": "array", "maxItems": 6 },
+    "configuration": { "type": "object" },
+    "provenance": {
+      "type": "object", "required": ["versions", "evidence"],
+      "properties": {
+        "versions": { "type": "object", "additionalProperties": { "type": "string" } },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object", "required": ["sourceType", "value"],
+            "properties": {
+              "sourceType": { "enum": ["OBSERVED_SIMULATION_STATE", "ISSUED_FORECAST", "MODEL_PREDICTION", "OPTIMISATION_RECOMMENDATION", "NONLINEAR_VERIFICATION", "APPLIED_SIMULATION_ACTION", "REALISED_SIMULATION_RESULT", "STATIC_CONFIGURATION", "DOMAIN_KNOWLEDGE", "LIMITATION"] },
+              "value": { "type": ["string", "number", "boolean", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "freshness": {
+      "type": "object", "additionalProperties": false,
+      "required": ["simulation", "loadPrediction", "thermalPrediction", "optimisation", "results"],
+      "properties": {
+        "simulation": { "$ref": "#/$defs/providerStatus" }, "loadPrediction": { "$ref": "#/$defs/providerStatus" },
+        "thermalPrediction": { "$ref": "#/$defs/providerStatus" }, "optimisation": { "$ref": "#/$defs/providerStatus" },
+        "results": { "$ref": "#/$defs/providerStatus" }
+      }
+    },
+    "limitations": { "type": "array", "items": { "type": "string" }, "minItems": 2 }
+  },
+  "$defs": { "providerStatus": { "enum": ["AVAILABLE", "STALE", "UNAVAILABLE", "TIMEOUT"] } }
+}

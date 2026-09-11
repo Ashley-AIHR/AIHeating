@@ -1,0 +1,39 @@
+{
+  "phase": "P9 clean frontend environment",
+  "passed": true,
+  "failed": 0,
+  "skipped": 0,
+  "temporaryDirectoryRemoved": true,
+  "exactLockfile": true,
+  "offlineInstall": true,
+  "buildArtifactPresent": true,
+  "commands": [
+    {
+      "label": "Clean exact-lockfile dependency install",
+      "command": "npm ci --offline --ignore-scripts",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\nadded 30 packages, and audited 31 packages in 316ms\n\n8 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n"
+    },
+    {
+      "label": "Clean P0 core tests",
+      "command": "npm run test",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n"
+    },
+    {
+      "label": "Clean production build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n✓ 24 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB │ gzip:   0.30 kB\ndist/assets/index-Dp4v0q-7.css   23.84 kB │ gzip:   6.05 kB\ndist/assets/index-CIGyfUFu.js   331.97 kB │ gzip: 104.05 kB\n\n✓ built in 971ms\n"
+    }
+  ]
+}

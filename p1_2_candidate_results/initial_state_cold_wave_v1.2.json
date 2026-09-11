@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "evaluation-initial-state-v1",
+  "physicalParameterHash": "30a7cf11fdad4ddcc55017093ed6c6c888209d34dfa13f473bfd69426b327745",
+  "controllerConfigHash": "3e19fa3f1dcab80229720fa27b557630b9062ff59c6700a45144bd785c9209e7",
+  "elapsedSeconds": 0,
+  "physicalTimestepSeconds": 300,
+  "controls": {
+    "supply_c": 51.0,
+    "frequency_hz": 44.0,
+    "valves": [
+      0.35,
+      0.55,
+      0.85
+    ],
+    "pump_mode": "frequency"
+  },
+  "buildingIndoorC": {
+    "B01": 22.241877823699653,
+    "B02": 22.384726582443022,
+    "B03": 21.96460176311392,
+    "B04": 22.098878168222363,
+    "B05": 22.204550564425293,
+    "B06": 22.30920437856711,
+    "B07": 22.234268579644922,
+    "B08": 22.134112387031248,
+    "B09": 22.02794895165759,
+    "B10": 22.28193920776183,
+    "B11": 22.207130713688148,
+    "B12": 22.107087447404595
+  },
+  "previousHydraulicFlowsM3s": [
+    0.0029060892582087393,
+    0.00365583950113959,
+    0.004055817894447349
+  ],
+  "heatEnergyJ": 100286966793.47382,
+  "pumpEnergyJ": 270577560.138583,
+  "transport": {
+    "near": {
+      "equivalentVolumeM3": 2.966666666666667,
+      "packets": [
+        [
+          2.966666666666667,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.0029060892582087393
+    },
+    "mid": {
+      "equivalentVolumeM3": 4.7333333333333325,
+      "packets": [
+        [
+          4.7333333333333325,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.00365583950113959
+    },
+    "far": {
+      "equivalentVolumeM3": 6.183333333333334,
+      "packets": [
+        [
+          6.183333333333334,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.004055817894447349
+    }
+  },
+  "controllerState": {
+    "controller_version": "traditional-v1.2",
+    "raw_supply_target_c": 51.0,
+    "applied_supply_c": 51.0,
+    "raw_pump_target_hz": 44.0,
+    "applied_pump_hz": 44.0,
+    "fixed_valves": [
+      0.35,
+      0.55,
+      0.85
+    ],
+    "last_boundary_s": -1800,
+    "next_boundary_s": 0
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "version": "p8-domain-knowledge-v1",
+  "sourceBoundary": "Curated accepted project knowledge; no web retrieval",
+  "items": [
+    {
+      "id": "weather_compensation",
+      "title": { "en": "Weather compensation", "zh": "气候补偿" },
+      "summary": { "en": "Traditional control adjusts supply using outdoor conditions.", "zh": "传统控制根据室外条件调整供水。" },
+      "technical_detail": { "en": "Traditional v1.2 combines outdoor weather compensation, pump scheduling and commissioned zone valves, without future indoor prediction or MPC.", "zh": "Traditional v1.2 结合室外气候补偿、水泵调度和已调试分区阀，但不使用未来室温预测或 MPC。" },
+      "related_terms": ["Traditional Weather Compensation", "outdoor temperature"],
+      "applicable_question_types": ["DOMAIN_CONCEPT", "COMPARISON"],
+      "source_project_reference": ["P2_TRADITIONAL_CONTROL_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "required_heat_load",
+      "title": { "en": "Required Heat Load", "zh": "所需热负荷" },
+      "summary": { "en": "Heat buildings need under stated conditions, not heat delivered by the network.", "zh": "楼栋在给定条件下需要的热量，不等于管网实际交付热量。" },
+      "technical_detail": { "en": "AI predicts future requirement; it does not reduce the building's physical requirement.", "zh": "AI 预测未来需求，并不会降低建筑的物理热需求。" },
+      "related_terms": ["demand", "heat loss"], "applicable_question_types": ["CURRENT_STATE", "FORECAST", "DOMAIN_CONCEPT"],
+      "source_project_reference": ["P4_PREDICTION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "actual_heat_supply",
+      "title": { "en": "Actual Heat Supply", "zh": "实际供热量" },
+      "summary": { "en": "Heat actually delivered in the current simulation state.", "zh": "当前仿真状态下实际交付的热量。" },
+      "technical_detail": { "en": "Actual supply is observed simulation state; planned supply remains a recommendation until applied.", "zh": "实际供热属于已观察仿真状态；计划供热在应用前仍只是建议。" },
+      "related_terms": ["delivered heat", "planned heat"], "applicable_question_types": ["CURRENT_STATE", "DOMAIN_CONCEPT", "COMPARISON"],
+      "source_project_reference": ["P7_STATE_SEMANTICS_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "avoidable_oversupply",
+      "title": { "en": "Avoidable Oversupply", "zh": "可避免过量供热" },
+      "summary": { "en": "Delivered heat above instantaneous requirement that better timing can reduce.", "zh": "超过瞬时需求、可通过更好时序减少的交付热量。" },
+      "technical_detail": { "en": "It is reported separately from Required Heat Load and does not imply zero thermal storage.", "zh": "它与所需热负荷分开报告，也不意味着建筑没有蓄热。" },
+      "related_terms": ["oversupply", "thermal storage"], "applicable_question_types": ["DOMAIN_CONCEPT", "COMPARISON"],
+      "source_project_reference": ["P6_CANONICAL_BENCHMARK_REPORT.md"], "version": "1.0"
+    },
+    {
+      "id": "radiator_heat_transfer",
+      "title": { "en": "Radiator heat transfer", "zh": "散热器换热" },
+      "summary": { "en": "Radiator delivery depends on water and room conditions.", "zh": "散热器供热取决于水侧与室内条件。" },
+      "technical_detail": { "en": "Higher delivered supply generally increases heating tendency, subject to flow, return temperature and emitter characteristics.", "zh": "较高的到达供水通常增强供热趋势，但仍受流量、回水温度和末端特性影响。" },
+      "related_terms": ["supply temperature", "radiator"], "applicable_question_types": ["THERMAL", "CURRENT_STATE"],
+      "source_project_reference": ["P1A_PHYSICAL_MODEL_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "building_thermal_inertia",
+      "title": { "en": "Building thermal inertia", "zh": "建筑热惯性" },
+      "summary": { "en": "Stored heat makes indoor temperature respond gradually.", "zh": "蓄存热量使室温逐渐响应。" },
+      "technical_detail": { "en": "Greater effective heat capacity slows temperature response; this differs from network transport delay.", "zh": "较大的有效热容会减慢温度响应；它不同于管网输运延迟。" },
+      "related_terms": ["effective C", "temperature response"], "applicable_question_types": ["THERMAL", "CURRENT_STATE"],
+      "source_project_reference": ["P5_THERMAL_PREDICTION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "effective_H_C",
+      "title": { "en": "Effective H and C", "zh": "有效 H 与 C" },
+      "summary": { "en": "Calibrated predictive heat-loss and heat-capacity parameters.", "zh": "校准得到的预测性热损与热容参数。" },
+      "technical_detail": { "en": "They are effective synthetic Digital Twin parameters, not precise measured material properties.", "zh": "它们是合成数字孪生中的有效参数，不是精确实测材料属性。" },
+      "related_terms": ["heat loss", "heat capacity"], "applicable_question_types": ["THERMAL", "DOMAIN_CONCEPT"],
+      "source_project_reference": ["P5_CALIBRATION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "solar_gain",
+      "title": { "en": "Solar gain", "zh": "太阳得热" },
+      "summary": { "en": "Solar energy can reduce external heating need or increase warming tendency.", "zh": "太阳能可降低外部供热需要或增强升温趋势。" },
+      "technical_detail": { "en": "It is one forecast driver and does not always dominate the decision.", "zh": "它是预测驱动因素之一，并不总是主导控制决策。" },
+      "related_terms": ["solar irradiance", "heat gain"], "applicable_question_types": ["FORECAST", "THERMAL"],
+      "source_project_reference": ["P4_PREDICTION_SPEC.md", "P5_THERMAL_PREDICTION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "hydraulic_coupling",
+      "title": { "en": "Hydraulic coupling", "zh": "水力耦合" },
+      "summary": { "en": "Near, Mid and Far branches share a pump and pressure operating point.", "zh": "近端、中端和远端支路共享水泵与压力工作点。" },
+      "technical_detail": { "en": "Branch resistance and valves interact; a change in one branch can redistribute other flows.", "zh": "支路阻力与阀门相互作用；一个支路的变化可能重新分配其他支路流量。" },
+      "related_terms": ["shared pump", "branch resistance"], "applicable_question_types": ["HYDRAULIC", "CURRENT_STATE"],
+      "source_project_reference": ["P1A_PHYSICAL_MODEL_SPEC.md", "P2_FINAL_SCENARIO_ADEQUACY_REVIEW.md"], "version": "1.0"
+    },
+    {
+      "id": "pump_frequency",
+      "title": { "en": "Pump frequency", "zh": "水泵频率" },
+      "summary": { "en": "Pump frequency shifts the shared hydraulic operating point and electricity use.", "zh": "水泵频率会改变共享水力工作点和耗电量。" },
+      "technical_detail": { "en": "It affects available pressure and coupled branch flow, not each branch independently.", "zh": "它影响可用压差和耦合支路流量，而不是独立控制每条支路。" },
+      "related_terms": ["pressure", "pump electricity"], "applicable_question_types": ["HYDRAULIC", "OPTIMISATION"],
+      "source_project_reference": ["P6_MPC_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "zone_valves",
+      "title": { "en": "Zone valves", "zh": "分区阀" },
+      "summary": { "en": "Valves fine-tune hydraulic redistribution between zones.", "zh": "阀门用于分区间的水力再分配精调。" },
+      "technical_detail": { "en": "Accepted P6 ablation makes supply temperature primary, pump optimisation second and valves third.", "zh": "已验收 P6 消融表明供水温度首要、水泵优化其次、阀门居第三。" },
+      "related_terms": ["valve opening", "redistribution"], "applicable_question_types": ["HYDRAULIC", "OPTIMISATION", "COMPARISON"],
+      "source_project_reference": ["P6_ABLATION_REPORT.md"], "version": "1.0"
+    },
+    {
+      "id": "transport_delay",
+      "title": { "en": "Transport delay", "zh": "输运延迟" },
+      "summary": { "en": "A station supply change takes time to reach each zone.", "zh": "热站供水变化需要时间才能到达各分区。" },
+      "technical_detail": { "en": "Near/Mid/Far delays depend on flow and are distinct from building thermal inertia.", "zh": "Near/Mid/Far 延迟与流量相关，并且不同于建筑热惯性。" },
+      "related_terms": ["flow-dependent delay", "distance"], "applicable_question_types": ["HYDRAULIC", "THERMAL"],
+      "source_project_reference": ["P1A_PHYSICAL_MODEL_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "P4_load_prediction",
+      "title": { "en": "P4 load prediction", "zh": "P4 负荷预测" },
+      "summary": { "en": "Selected LightGBM predicts Required Heat Load at 1/2/3/6 hours.", "zh": "选定 LightGBM 预测 1/2/3/6 小时所需热负荷。" },
+      "technical_detail": { "en": "It uses issued weather and current/lagged state without future truth.", "zh": "它使用已发布天气以及当前/滞后状态，不使用未来真值。" },
+      "related_terms": ["LightGBM", "forecastAsOf"], "applicable_question_types": ["FORECAST", "OPTIMISATION"],
+      "source_project_reference": ["P4_PREDICTION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "P5_thermal_prediction",
+      "title": { "en": "P5 thermal prediction", "zh": "P5 热状态预测" },
+      "summary": { "en": "P5 predicts building thermal response and risk with calibrated intervals.", "zh": "P5 预测楼栋热响应和风险，并提供校准区间。" },
+      "technical_detail": { "en": "Its effective H/C parameters and uncertainty were calibrated in held-out synthetic simulation.", "zh": "其有效 H/C 参数和不确定性在留出合成仿真中校准。" },
+      "related_terms": ["thermal risk", "effective H/C"], "applicable_question_types": ["THERMAL", "OPTIMISATION"],
+      "source_project_reference": ["P5_THERMAL_PREDICTION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "P6_MPC",
+      "title": { "en": "P6 Formal MPC", "zh": "P6 正式 MPC" },
+      "summary": { "en": "A supervisory MPC creates a candidate control trajectory from P4/P5 inputs.", "zh": "监督式 MPC 根据 P4/P5 输入生成候选控制轨迹。" },
+      "technical_detail": { "en": "cvxpy/OSQP solves the local linear problem; OSQP does not simulate the nonlinear network.", "zh": "cvxpy/OSQP 求解局部线性问题；OSQP 并不仿真非线性热网。" },
+      "related_terms": ["cvxpy", "OSQP", "trajectory"], "applicable_question_types": ["OPTIMISATION", "DOMAIN_CONCEPT"],
+      "source_project_reference": ["P6_MPC_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "local_linearisation",
+      "title": { "en": "Local linearisation", "zh": "局部线性化" },
+      "summary": { "en": "Local sensitivities approximate plant response for optimisation.", "zh": "局部灵敏度近似设备响应以供优化。" },
+      "technical_detail": { "en": "The candidate from the linear model still requires full nonlinear verification.", "zh": "线性模型生成的候选仍需完整非线性验证。" },
+      "related_terms": ["sensitivity", "trust region"], "applicable_question_types": ["OPTIMISATION"],
+      "source_project_reference": ["P6_LINEARISATION_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "nonlinear_verification",
+      "title": { "en": "Nonlinear verification", "zh": "非线性验证" },
+      "summary": { "en": "A candidate or fallback is replayed through the full P1A Digital Twin.", "zh": "候选动作或回退会通过完整 P1A 数字孪生复算。" },
+      "technical_detail": { "en": "Verified is distinct from applied and from later realised simulation state.", "zh": "已验证不同于已应用，也不同于后续实现的仿真状态。" },
+      "related_terms": ["P1A", "verification"], "applicable_question_types": ["OPTIMISATION", "FALLBACK", "SAFETY"],
+      "source_project_reference": ["P7_STATE_SEMANTICS_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "prediction_uncertainty",
+      "title": { "en": "Prediction uncertainty", "zh": "预测不确定性" },
+      "summary": { "en": "Intervals are simulation-calibrated bands, not real-world guarantees.", "zh": "区间是仿真校准的不确定性带，不是真实世界保证。" },
+      "technical_detail": { "en": "Robust MPC uses the lower predicted bound to protect the simulated 18°C constraint.", "zh": "稳健 MPC 使用预测下界保护仿真中的 18°C 约束。" },
+      "related_terms": ["interval", "lower bound"], "applicable_question_types": ["FORECAST", "THERMAL", "SAFETY"],
+      "source_project_reference": ["P5_UNCERTAINTY_REPORT.md", "P6_ROBUST_SAFETY_REPORT.md"], "version": "1.0"
+    },
+    {
+      "id": "solver_limit",
+      "title": { "en": "Solver limit", "zh": "求解器限制" },
+      "summary": { "en": "The solver did not return an accepted optimum within configured conditions.", "zh": "求解器在配置条件内没有返回可接受的最优结果。" },
+      "technical_detail": { "en": "A user_limit event is not an application crash and must not be called MPC optimal.", "zh": "user_limit 不是应用崩溃，也不能称为 MPC 最优。" },
+      "related_terms": ["user_limit", "OSQP"], "applicable_question_types": ["FALLBACK", "OPTIMISATION"],
+      "source_project_reference": ["P7_STATE_SEMANTICS_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "fallback",
+      "title": { "en": "Fallback", "zh": "回退" },
+      "summary": { "en": "A predefined policy used when no accepted MPC trajectory is available.", "zh": "没有可接受 MPC 轨迹时使用的预定义策略。" },
+      "technical_detail": { "en": "Fallback has its own verification and safety state; verified fallback is not an MPC optimum.", "zh": "回退具有独立验证和安全状态；已验证回退不是 MPC 最优解。" },
+      "related_terms": ["verified fallback", "Traditional fallback"], "applicable_question_types": ["FALLBACK", "SAFETY"],
+      "source_project_reference": ["P7_FAILURE_FALLBACK_REPORT.md"], "version": "1.0"
+    },
+    {
+      "id": "constraint_infeasibility",
+      "title": { "en": "Constraint infeasibility", "zh": "约束不可行" },
+      "summary": { "en": "No trajectory satisfies every configured robust constraint.", "zh": "不存在同时满足全部稳健约束的轨迹。" },
+      "technical_detail": { "en": "Equipment limits and thermal/network delay can make the requirement physically infeasible.", "zh": "设备上限与热/管网延迟可能使要求在物理上不可行。" },
+      "related_terms": ["equipment limit", "robust constraint"], "applicable_question_types": ["SAFETY", "FALLBACK"],
+      "source_project_reference": ["P6_SAFETY_STRESS_REPORT.md"], "version": "1.0"
+    },
+    {
+      "id": "safety_not_guaranteed",
+      "title": { "en": "Safety Not Guaranteed", "zh": "安全无法保证" },
+      "summary": { "en": "The simulated minimum-temperature requirement cannot be guaranteed in this context.", "zh": "当前上下文无法保证仿真最低温度要求。" },
+      "technical_detail": { "en": "Fallback activation alone does not guarantee 18°C, and the Tutor cannot override physical limits.", "zh": "仅激活回退并不能保证 18°C，Tutor 也不能越过物理限制。" },
+      "related_terms": ["18°C", "infeasible"], "applicable_question_types": ["SAFETY", "FALLBACK"],
+      "source_project_reference": ["P6_SAFETY_STRESS_REPORT.md", "P7_STATE_SEMANTICS_SPEC.md"], "version": "1.0"
+    },
+    {
+      "id": "Traditional_vs_MPC",
+      "title": { "en": "Traditional versus MPC", "zh": "Traditional 与 MPC" },
+      "summary": { "en": "Traditional reacts through frozen compensation; MPC uses forecasts and thermal prediction proactively.", "zh": "Traditional 通过冻结补偿响应；MPC 利用预测和热状态预判进行前瞻控制。" },
+      "technical_detail": { "en": "Both are compared fairly on the same synthetic initial state, weather and result window.", "zh": "两者在相同合成初始状态、天气和结果窗口下公平比较。" },
+      "related_terms": ["baseline", "predictive control"], "applicable_question_types": ["COMPARISON", "DOMAIN_CONCEPT"],
+      "source_project_reference": ["P6_TRADITIONAL_PREVIEW_MPC_COMPARISON.md"], "version": "1.0"
+    },
+    {
+      "id": "synthetic_PoC_limitations",
+      "title": { "en": "Synthetic PoC limitations", "zh": "合成 PoC 限制" },
+      "summary": { "en": "All engineering evidence is from a synthetic Digital Twin.", "zh": "全部工程证据来自合成数字孪生。" },
+      "technical_detail": { "en": "There is no real-site operational data, PLC/DCS command path, or guarantee of real-site savings, accuracy or safety.", "zh": "没有真实站点运行数据、PLC/DCS 指令链，也不保证真实现场节能、精度或安全。" },
+      "related_terms": ["Simulation Environment", "no real equipment"], "applicable_question_types": ["COMPARISON", "SAFETY", "UNSUPPORTED"],
+      "source_project_reference": ["P7_FINAL_REPORT.md"], "version": "1.0"
+    }
+  ]
+}

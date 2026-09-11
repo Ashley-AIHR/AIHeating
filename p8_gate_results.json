@@ -1,0 +1,670 @@
+{
+  "phase": "P8",
+  "generatedAt": "2026-09-11T00:09:17.320Z",
+  "passed": 38,
+  "failed": 0,
+  "skipped": 0,
+  "total": 38,
+  "gates": [
+    {
+      "gate": "P8-C1",
+      "description": "Structured provider state only; no DOM scraping",
+      "measured": {
+        "sourceBoundary": "P7_STRUCTURED_PROVIDER_ONLY",
+        "domApis": false
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C2",
+      "description": "Page-aware context builder implemented",
+      "measured": [
+        "overview",
+        "simulation",
+        "forecast",
+        "results",
+        "settings"
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C3",
+      "description": "Selected-building context works",
+      "measured": {
+        "selected": "B03",
+        "evidence": [
+          "thermalPrediction.B03.h120.pointC"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C4",
+      "description": "Context identity/version/time explicit",
+      "measured": {
+        "contextId": "p8-5adc6639",
+        "contextVersion": "p8-tutor-context-v1",
+        "time": {
+          "simulationTime": "2025-01-15T10:30:00+08:00",
+          "forecastAsOf": "2025-01-15T10:30:00+08:00",
+          "forecastTargetTime": "2025-01-15T16:30:00+08:00",
+          "recommendationCreatedAt": "2025-01-15T10:30:00+08:00",
+          "recommendationEffectiveAt": "2025-01-15T11:00:00+08:00",
+          "resultEvaluationWindow": "2025-01-15T08:00:00+08:00/2025-01-16T08:00:00+08:00"
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C5",
+      "description": "Scenario/time/mode changes rebuild context",
+      "measured": {
+        "base": "p8-5adc6639",
+        "changed": "p8-336a76df",
+        "cold": "p8-b9501e19",
+        "advisory": "p8-3caad838"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C6",
+      "description": "Stale/unavailable state not current",
+      "measured": {
+        "freshness": "STALE",
+        "hasLoad": false,
+        "answer": "GROUNDED"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C7",
+      "description": "Context intentionally bounded",
+      "measured": {
+        "serializedBytes": 12712,
+        "forecastMax": 12,
+        "eventsMax": 6
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-C8",
+      "description": "No forbidden simulation truth in customer context",
+      "measured": {
+        "forbidden": [
+          "h_scale",
+          "c_scale",
+          "truthParameter",
+          "pipeResistance"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G1",
+      "description": "Numeric claims have structured evidence refs",
+      "measured": 0,
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G2",
+      "description": "Missing telemetry produces no invented values",
+      "measured": [
+        {
+          "id": "provider_stale-en",
+          "semanticId": "provider_stale",
+          "language": "en",
+          "category": "FORECAST",
+          "contextVariant": "stale",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "currentState.requiredHeatLoadMw"
+          ],
+          "knowledgeRefs": [
+            "solar_gain",
+            "P4_load_prediction",
+            "prediction_uncertainty"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        },
+        {
+          "id": "provider_stale-zh",
+          "semanticId": "provider_stale",
+          "language": "zh",
+          "category": "FORECAST",
+          "contextVariant": "stale",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "currentState.requiredHeatLoadMw"
+          ],
+          "knowledgeRefs": [
+            "solar_gain",
+            "P4_load_prediction",
+            "prediction_uncertainty"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        },
+        {
+          "id": "provider_unavailable-en",
+          "semanticId": "provider_unavailable",
+          "language": "en",
+          "category": "THERMAL",
+          "contextVariant": "unavailable",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [],
+          "knowledgeRefs": [
+            "radiator_heat_transfer",
+            "building_thermal_inertia",
+            "effective_H_C",
+            "solar_gain",
+            "transport_delay",
+            "P5_thermal_prediction"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        },
+        {
+          "id": "provider_unavailable-zh",
+          "semanticId": "provider_unavailable",
+          "language": "zh",
+          "category": "THERMAL",
+          "contextVariant": "unavailable",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [],
+          "knowledgeRefs": [
+            "radiator_heat_transfer",
+            "building_thermal_inertia",
+            "effective_H_C",
+            "solar_gain",
+            "transport_delay",
+            "P5_thermal_prediction"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G3",
+      "description": "Predicted and observed semantics distinct",
+      "measured": "P5 predicts a two-hour point of 22.24°C for B03; this is a model prediction, not a future observation. Building thermal inertia describes slow stored-heat response, while transport delay is the time for a supply change to reach a building; they are distinct.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G4",
+      "description": "Recommended and applied semantics distinct",
+      "measured": "P6 Formal MPC recommends changing the first supply-temperature action from the current simulated 50.2°C to 48.2°C. It uses P4 load prediction, P5 thermal prediction, and a local linear sensitivity model to solve a candidate trajectory, then verifies it in the full nonlinear P1A Digital Twin. It remains a recommendation and is not applied.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G5",
+      "description": "Verified and realised semantics distinct",
+      "measured": {
+        "id": "nonlinear_verification",
+        "title": {
+          "en": "Nonlinear verification",
+          "zh": "非线性验证"
+        },
+        "summary": {
+          "en": "A candidate or fallback is replayed through the full P1A Digital Twin.",
+          "zh": "候选动作或回退会通过完整 P1A 数字孪生复算。"
+        },
+        "technical_detail": {
+          "en": "Verified is distinct from applied and from later realised simulation state.",
+          "zh": "已验证不同于已应用，也不同于后续实现的仿真状态。"
+        },
+        "related_terms": [
+          "P1A",
+          "verification"
+        ],
+        "applicable_question_types": [
+          "OPTIMISATION",
+          "FALLBACK",
+          "SAFETY"
+        ],
+        "source_project_reference": [
+          "P7_STATE_SEMANTICS_SPEC.md"
+        ],
+        "version": "1.0"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G6",
+      "description": "Simulation and real-site semantics distinct",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G7",
+      "description": "Current context overrides conversation",
+      "measured": [
+        {
+          "id": "context_changed-en",
+          "semanticId": "context_changed",
+          "language": "en",
+          "category": "CURRENT_STATE",
+          "contextVariant": "changed",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "buildings.B03.indoorC"
+          ],
+          "knowledgeRefs": [
+            "required_heat_load",
+            "actual_heat_supply",
+            "radiator_heat_transfer",
+            "building_thermal_inertia",
+            "hydraulic_coupling"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        },
+        {
+          "id": "context_changed-zh",
+          "semanticId": "context_changed",
+          "language": "zh",
+          "category": "CURRENT_STATE",
+          "contextVariant": "changed",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "buildings.B03.indoorC"
+          ],
+          "knowledgeRefs": [
+            "required_heat_load",
+            "actual_heat_supply",
+            "radiator_heat_transfer",
+            "building_thermal_inertia",
+            "hydraulic_coupling"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-G8",
+      "description": "Scenario-change leakage test passes",
+      "measured": "The formal optimiser did not return an accepted optimal trajectory within its configured solver conditions, so the predefined fallback policy was used. That fallback was separately checked in the full Digital Twin: it is a verified fallback, not an MPC optimum and not a complete system failure.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S1",
+      "description": "MPC Optimal explained correctly",
+      "measured": [
+        {
+          "id": "mpc_architecture-en",
+          "semanticId": "mpc_architecture",
+          "language": "en",
+          "category": "OPTIMISATION",
+          "contextVariant": "rapid",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "network.currentControls.supplyC",
+            "optimisation.firstAction.supplyC"
+          ],
+          "knowledgeRefs": [
+            "pump_frequency",
+            "zone_valves",
+            "P4_load_prediction",
+            "P5_thermal_prediction",
+            "P6_MPC",
+            "local_linearisation",
+            "nonlinear_verification"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        },
+        {
+          "id": "mpc_architecture-zh",
+          "semanticId": "mpc_architecture",
+          "language": "zh",
+          "category": "OPTIMISATION",
+          "contextVariant": "rapid",
+          "passed": true,
+          "failures": [],
+          "answerType": "GROUNDED",
+          "evidenceRefs": [
+            "network.currentControls.supplyC",
+            "optimisation.firstAction.supplyC"
+          ],
+          "knowledgeRefs": [
+            "pump_frequency",
+            "zone_valves",
+            "P4_load_prediction",
+            "P5_thermal_prediction",
+            "P6_MPC",
+            "local_linearisation",
+            "nonlinear_verification"
+          ],
+          "validationStatus": "PASSED",
+          "fallbackResponseUsed": false,
+          "provider": {
+            "name": "Built-in Grounded Tutor",
+            "model": "deterministic-grounded-v1"
+          }
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S2",
+      "description": "Solver Limit plus Verified Fallback correct",
+      "measured": "The formal optimiser did not return an accepted optimal trajectory within its configured solver conditions, so the predefined fallback policy was used. That fallback was separately checked in the full Digital Twin: it is a verified fallback, not an MPC optimum and not a complete system failure.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S3",
+      "description": "Constraint Infeasible correct",
+      "measured": "No control trajectory satisfying all robust constraints was found. Equipment limits, network transport delay, and building thermal response can make the requirement physically infeasible; activating fallback does not automatically guarantee ≥18°C. This is a simulation validation state, and the Tutor cannot override physical or equipment limits.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S4",
+      "description": "Safety Not Guaranteed never becomes safe",
+      "measured": "No control trajectory satisfying all robust constraints was found. Equipment limits, network transport delay, and building thermal response can make the requirement physically infeasible; activating fallback does not automatically guarantee ≥18°C. This is a simulation validation state, and the Tutor cannot override physical or equipment limits.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S5",
+      "description": "Fallback never becomes MPC optimal",
+      "measured": "The formal optimiser did not return an accepted optimal trajectory within its configured solver conditions, so the predefined fallback policy was used. That fallback was separately checked in the full Digital Twin: it is a verified fallback, not an MPC optimum and not a complete system failure.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S6",
+      "description": "Physical infeasibility not blamed on optimiser",
+      "measured": "No control trajectory satisfying all robust constraints was found. Equipment limits, network transport delay, and building thermal response can make the requirement physically infeasible; activating fallback does not automatically guarantee ≥18°C. This is a simulation validation state, and the Tutor cannot override physical or equipment limits.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S7",
+      "description": "Tutor cannot execute control commands",
+      "measured": {
+        "answerType": "REFUSAL",
+        "controlActionRequested": true
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-S8",
+      "description": "Advisory NOT_APPLIED preserved",
+      "measured": "P6 Formal MPC recommends changing the first supply-temperature action from the current simulated 50.2°C to 48.2°C. It uses P4 load prediction, P5 thermal prediction, and a local linear sensitivity model to solve a candidate trajectory, then verifies it in the full nonlinear P1A Digital Twin. It remains a recommendation and is not applied.",
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D1",
+      "description": "Required Heat Load versus supply correct",
+      "measured": [
+        "required_heat_load",
+        "actual_heat_supply",
+        "avoidable_oversupply"
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D2",
+      "description": "Weather compensation explained fairly",
+      "measured": {
+        "id": "weather_compensation",
+        "title": {
+          "en": "Weather compensation",
+          "zh": "气候补偿"
+        },
+        "summary": {
+          "en": "Traditional control adjusts supply using outdoor conditions.",
+          "zh": "传统控制根据室外条件调整供水。"
+        },
+        "technical_detail": {
+          "en": "Traditional v1.2 combines outdoor weather compensation, pump scheduling and commissioned zone valves, without future indoor prediction or MPC.",
+          "zh": "Traditional v1.2 结合室外气候补偿、水泵调度和已调试分区阀，但不使用未来室温预测或 MPC。"
+        },
+        "related_terms": [
+          "Traditional Weather Compensation",
+          "outdoor temperature"
+        ],
+        "applicable_question_types": [
+          "DOMAIN_CONCEPT",
+          "COMPARISON"
+        ],
+        "source_project_reference": [
+          "P2_TRADITIONAL_CONTROL_SPEC.md"
+        ],
+        "version": "1.0"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D3",
+      "description": "Transport delay and thermal inertia distinct",
+      "measured": {
+        "id": "transport_delay",
+        "title": {
+          "en": "Transport delay",
+          "zh": "输运延迟"
+        },
+        "summary": {
+          "en": "A station supply change takes time to reach each zone.",
+          "zh": "热站供水变化需要时间才能到达各分区。"
+        },
+        "technical_detail": {
+          "en": "Near/Mid/Far delays depend on flow and are distinct from building thermal inertia.",
+          "zh": "Near/Mid/Far 延迟与流量相关，并且不同于建筑热惯性。"
+        },
+        "related_terms": [
+          "flow-dependent delay",
+          "distance"
+        ],
+        "applicable_question_types": [
+          "HYDRAULIC",
+          "THERMAL"
+        ],
+        "source_project_reference": [
+          "P1A_PHYSICAL_MODEL_SPEC.md"
+        ],
+        "version": "1.0"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D4",
+      "description": "Hydraulic coupling correct",
+      "measured": {
+        "id": "hydraulic_coupling",
+        "title": {
+          "en": "Hydraulic coupling",
+          "zh": "水力耦合"
+        },
+        "summary": {
+          "en": "Near, Mid and Far branches share a pump and pressure operating point.",
+          "zh": "近端、中端和远端支路共享水泵与压力工作点。"
+        },
+        "technical_detail": {
+          "en": "Branch resistance and valves interact; a change in one branch can redistribute other flows.",
+          "zh": "支路阻力与阀门相互作用；一个支路的变化可能重新分配其他支路流量。"
+        },
+        "related_terms": [
+          "shared pump",
+          "branch resistance"
+        ],
+        "applicable_question_types": [
+          "HYDRAULIC",
+          "CURRENT_STATE"
+        ],
+        "source_project_reference": [
+          "P1A_PHYSICAL_MODEL_SPEC.md",
+          "P2_FINAL_SCENARIO_ADEQUACY_REVIEW.md"
+        ],
+        "version": "1.0"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D5",
+      "description": "P4/P5/P6 roles correct",
+      "measured": [
+        "P4_load_prediction",
+        "P5_thermal_prediction",
+        "P6_MPC"
+      ],
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D6",
+      "description": "Actuator ablation story follows P6 evidence",
+      "measured": {
+        "id": "zone_valves",
+        "title": {
+          "en": "Zone valves",
+          "zh": "分区阀"
+        },
+        "summary": {
+          "en": "Valves fine-tune hydraulic redistribution between zones.",
+          "zh": "阀门用于分区间的水力再分配精调。"
+        },
+        "technical_detail": {
+          "en": "Accepted P6 ablation makes supply temperature primary, pump optimisation second and valves third.",
+          "zh": "已验收 P6 消融表明供水温度首要、水泵优化其次、阀门居第三。"
+        },
+        "related_terms": [
+          "valve opening",
+          "redistribution"
+        ],
+        "applicable_question_types": [
+          "HYDRAULIC",
+          "OPTIMISATION",
+          "COMPARISON"
+        ],
+        "source_project_reference": [
+          "P6_ABLATION_REPORT.md"
+        ],
+        "version": "1.0"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-D7",
+      "description": "Synthetic accuracy never called real-site accuracy",
+      "measured": 0,
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U1",
+      "description": "English Tutor works",
+      "measured": {
+        "passed": 50,
+        "failed": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U2",
+      "description": "Simplified Chinese Tutor works",
+      "measured": {
+        "passed": 50,
+        "failed": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U3",
+      "description": "Equivalent EN/ZH evaluation set exists",
+      "measured": {
+        "semanticCases": 50,
+        "cases": 100
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U4",
+      "description": "Tutor UI preserves existing pages",
+      "measured": {
+        "routes": [
+          "/overview",
+          "/simulation",
+          "/forecast",
+          "/results",
+          "/settings"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U5",
+      "description": "Suggested questions context-aware",
+      "measured": {
+        "overview": [
+          "Why is heat demand falling?",
+          "Why is MPC acting before temperature changes?"
+        ],
+        "forecast": [
+          "Why is Required Heat Load falling?",
+          "What does the prediction interval mean?"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U6",
+      "description": "Tutor timeout/failure isolated from core application",
+      "measured": {
+        "providerTimeoutCovered": true,
+        "controlCallbacksInTutor": false
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P8-U7",
+      "description": "UI clearly indicates explanation role",
+      "measured": {
+        "en": "Explanation only",
+        "zh": "仅提供解释"
+      },
+      "status": "PASS"
+    }
+  ]
+}

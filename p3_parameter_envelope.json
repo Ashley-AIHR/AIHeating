@@ -1,0 +1,28 @@
+{
+  "baseFixtureVersion": "physical-fixture-v1.2",
+  "datasetVersion": "p3-dataset-v1.0",
+  "officialMultipliers": {
+    "thermalResistance": [0.8, 1.2],
+    "thermalCapacitance": [0.8, 1.2],
+    "internalGain": [0.8, 1.2],
+    "effectiveSolarArea": [0.8, 1.2],
+    "pipeResistance": [0.8, 1.2],
+    "valveReferenceResistance": [0.8, 1.2],
+    "pumpShutoffHead": [0.9, 1.1],
+    "pumpCurveCoefficient": [0.9, 1.1],
+    "radiatorSizingMargin": [0.9, 1.1],
+    "transportVolume": [1.0, 1.0]
+  },
+  "stressMultipliers": {
+    "thermalResistance": [0.7, 1.3],
+    "thermalCapacitance": [0.7, 1.3],
+    "internalGain": [0.7, 1.3],
+    "effectiveSolarArea": [0.7, 1.3],
+    "pipeResistance": [0.7, 1.3],
+    "valveReferenceResistance": [0.7, 1.3],
+    "pumpCurveParameters": [0.8, 1.2],
+    "radiatorSizingMargin": [0.7, 1.3]
+  },
+  "dependencyRule": "Recompute v1.2 design load, design flow and base radiator UA after independent building changes; apply radiator margin last.",
+  "sampling": "deterministic bounded uniform; per-building/per-branch where applicable"
+}

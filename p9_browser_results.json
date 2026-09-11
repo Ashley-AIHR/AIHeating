@@ -1,0 +1,483 @@
+{
+  "phase": "P9 browser matrix",
+  "passed": 82,
+  "failed": 0,
+  "skipped": 0,
+  "total": 82,
+  "pages": [
+    "Overview",
+    "Simulation",
+    "Forecast",
+    "Results",
+    "Settings",
+    "AI Tutor"
+  ],
+  "languages": [
+    "en",
+    "zh"
+  ],
+  "modes": [
+    "traditional",
+    "advisory",
+    "optimised"
+  ],
+  "statuses": [
+    "optimal",
+    "verified fallback",
+    "safety not guaranteed"
+  ],
+  "viewports": [
+    "1672x941",
+    "1366x768",
+    "900x800"
+  ],
+  "responsiveIssues": [
+    {
+      "viewport": "900x800",
+      "route": "/overview",
+      "issue": "horizontal overflow; narrow/mobile redesign is outside RC1 scope",
+      "scrollWidth": 1186,
+      "clientWidth": 900
+    },
+    {
+      "viewport": "900x800",
+      "route": "/simulation",
+      "issue": "horizontal overflow; narrow/mobile redesign is outside RC1 scope",
+      "scrollWidth": 1186,
+      "clientWidth": 900
+    },
+    {
+      "viewport": "900x800",
+      "route": "/forecast",
+      "issue": "horizontal overflow; narrow/mobile redesign is outside RC1 scope",
+      "scrollWidth": 1186,
+      "clientWidth": 900
+    },
+    {
+      "viewport": "900x800",
+      "route": "/results",
+      "issue": "horizontal overflow; narrow/mobile redesign is outside RC1 scope",
+      "scrollWidth": 1186,
+      "clientWidth": 900
+    },
+    {
+      "viewport": "900x800",
+      "route": "/settings",
+      "issue": "horizontal overflow; narrow/mobile redesign is outside RC1 scope",
+      "scrollWidth": 1186,
+      "clientWidth": 900
+    }
+  ],
+  "checks": [
+    {
+      "id": "text:/overview:en:NOW",
+      "pass": true,
+      "detail": "missing NOW"
+    },
+    {
+      "id": "text:/overview:en:FORECAST",
+      "pass": true,
+      "detail": "missing FORECAST"
+    },
+    {
+      "id": "text:/overview:en:PREDICT",
+      "pass": true,
+      "detail": "missing PREDICT"
+    },
+    {
+      "id": "text:/overview:en:OPTIMISE",
+      "pass": true,
+      "detail": "missing OPTIMISE"
+    },
+    {
+      "id": "text:/overview:en:VERIFY",
+      "pass": true,
+      "detail": "missing VERIFY"
+    },
+    {
+      "id": "text:/overview:en:Simulation Environment",
+      "pass": true,
+      "detail": "missing Simulation Environment"
+    },
+    {
+      "id": "no-production:/overview:en",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/forecast:en:Required heat-load prediction",
+      "pass": true,
+      "detail": "missing Required heat-load prediction"
+    },
+    {
+      "id": "text:/forecast:en:Building thermal prediction",
+      "pass": true,
+      "detail": "missing Building thermal prediction"
+    },
+    {
+      "id": "text:/forecast:en:95% simulation-calibrated prediction interval",
+      "pass": true,
+      "detail": "missing 95% simulation-calibrated prediction interval"
+    },
+    {
+      "id": "no-production:/forecast:en",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/simulation:en:MPC Optimal",
+      "pass": true,
+      "detail": "missing MPC Optimal"
+    },
+    {
+      "id": "text:/simulation:en:Verified in Digital Twin",
+      "pass": true,
+      "detail": "missing Verified in Digital Twin"
+    },
+    {
+      "id": "text:/simulation:en:APPLIED",
+      "pass": true,
+      "detail": "missing APPLIED"
+    },
+    {
+      "id": "text:/simulation:en:Current Applied Controls",
+      "pass": true,
+      "detail": "missing Current Applied Controls"
+    },
+    {
+      "id": "no-production:/simulation:en",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "status-en:Solver Limit Reached",
+      "pass": true,
+      "detail": "missing Solver Limit Reached"
+    },
+    {
+      "id": "status-en:Verified Fallback Active",
+      "pass": true,
+      "detail": "missing Verified Fallback Active"
+    },
+    {
+      "id": "status-en:Constraint Infeasible",
+      "pass": true,
+      "detail": "missing Constraint Infeasible"
+    },
+    {
+      "id": "status-en:Safety Not Guaranteed",
+      "pass": true,
+      "detail": "missing Safety Not Guaranteed"
+    },
+    {
+      "id": "unsafe-not-green",
+      "pass": true,
+      "detail": "unsafe row uses success class"
+    },
+    {
+      "id": "advisory-not-applied-en",
+      "pass": true,
+      "detail": "Advisory did not remain NOT_APPLIED"
+    },
+    {
+      "id": "traditional-not-applied-en",
+      "pass": true,
+      "detail": "Traditional applied MPC"
+    },
+    {
+      "id": "optimised-applied-en",
+      "pass": true,
+      "detail": "Optimised verified evidence not applied"
+    },
+    {
+      "id": "text:/results:en:Traditional",
+      "pass": true,
+      "detail": "missing Traditional"
+    },
+    {
+      "id": "text:/results:en:Preview v0",
+      "pass": true,
+      "detail": "missing Preview v0"
+    },
+    {
+      "id": "text:/results:en:Formal MPC v1",
+      "pass": true,
+      "detail": "missing Formal MPC v1"
+    },
+    {
+      "id": "text:/results:en:Held-out simulation evaluation",
+      "pass": true,
+      "detail": "missing Held-out simulation evaluation"
+    },
+    {
+      "id": "no-production:/results:en",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/settings:en:Accepted Provider Configuration",
+      "pass": true,
+      "detail": "missing Accepted Provider Configuration"
+    },
+    {
+      "id": "text:/settings:en:P4 Predictor v1",
+      "pass": true,
+      "detail": "missing P4 Predictor v1"
+    },
+    {
+      "id": "text:/settings:en:P5 Thermal Model v1",
+      "pass": true,
+      "detail": "missing P5 Thermal Model v1"
+    },
+    {
+      "id": "text:/settings:en:Formal MPC v1",
+      "pass": true,
+      "detail": "missing Formal MPC v1"
+    },
+    {
+      "id": "no-production:/settings:en",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/overview:zh:当前",
+      "pass": true,
+      "detail": "missing 当前"
+    },
+    {
+      "id": "text:/overview:zh:天气预测",
+      "pass": true,
+      "detail": "missing 天气预测"
+    },
+    {
+      "id": "text:/overview:zh:负荷预测",
+      "pass": true,
+      "detail": "missing 负荷预测"
+    },
+    {
+      "id": "text:/overview:zh:优化",
+      "pass": true,
+      "detail": "missing 优化"
+    },
+    {
+      "id": "text:/overview:zh:验证",
+      "pass": true,
+      "detail": "missing 验证"
+    },
+    {
+      "id": "text:/overview:zh:仿真环境",
+      "pass": true,
+      "detail": "missing 仿真环境"
+    },
+    {
+      "id": "no-production:/overview:zh",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/forecast:zh:所需热负荷预测",
+      "pass": true,
+      "detail": "missing 所需热负荷预测"
+    },
+    {
+      "id": "text:/forecast:zh:楼栋热状态预测",
+      "pass": true,
+      "detail": "missing 楼栋热状态预测"
+    },
+    {
+      "id": "text:/forecast:zh:95% 仿真校准预测区间",
+      "pass": true,
+      "detail": "missing 95% 仿真校准预测区间"
+    },
+    {
+      "id": "no-production:/forecast:zh",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/simulation:zh:MPC 最优",
+      "pass": true,
+      "detail": "missing MPC 最优"
+    },
+    {
+      "id": "text:/simulation:zh:已在数字孪生中验证",
+      "pass": true,
+      "detail": "missing 已在数字孪生中验证"
+    },
+    {
+      "id": "text:/simulation:zh:APPLIED",
+      "pass": true,
+      "detail": "missing APPLIED"
+    },
+    {
+      "id": "no-production:/simulation:zh",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "status-zh:达到求解器上限",
+      "pass": true,
+      "detail": "missing 达到求解器上限"
+    },
+    {
+      "id": "status-zh:已验证回退已激活",
+      "pass": true,
+      "detail": "missing 已验证回退已激活"
+    },
+    {
+      "id": "status-zh:约束不可行",
+      "pass": true,
+      "detail": "missing 约束不可行"
+    },
+    {
+      "id": "status-zh:无法保证安全",
+      "pass": true,
+      "detail": "missing 无法保证安全"
+    },
+    {
+      "id": "advisory-not-applied-zh",
+      "pass": true,
+      "detail": "ZH Advisory did not remain NOT_APPLIED"
+    },
+    {
+      "id": "optimised-applied-zh",
+      "pass": true,
+      "detail": "ZH Optimised evidence not applied"
+    },
+    {
+      "id": "text:/results:zh:Traditional",
+      "pass": true,
+      "detail": "missing Traditional"
+    },
+    {
+      "id": "text:/results:zh:预览 v0",
+      "pass": true,
+      "detail": "missing 预览 v0"
+    },
+    {
+      "id": "text:/results:zh:正式 MPC v1",
+      "pass": true,
+      "detail": "missing 正式 MPC v1"
+    },
+    {
+      "id": "text:/results:zh:留出仿真场景评估",
+      "pass": true,
+      "detail": "missing 留出仿真场景评估"
+    },
+    {
+      "id": "no-production:/results:zh",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "text:/settings:zh:已验收 Provider 配置",
+      "pass": true,
+      "detail": "missing 已验收 Provider 配置"
+    },
+    {
+      "id": "text:/settings:zh:P4 Predictor v1",
+      "pass": true,
+      "detail": "missing P4 Predictor v1"
+    },
+    {
+      "id": "text:/settings:zh:P5 Thermal Model v1",
+      "pass": true,
+      "detail": "missing P5 Thermal Model v1"
+    },
+    {
+      "id": "text:/settings:zh:Formal MPC v1",
+      "pass": true,
+      "detail": "missing Formal MPC v1"
+    },
+    {
+      "id": "no-production:/settings:zh",
+      "pass": true,
+      "detail": "unsupported customer claim"
+    },
+    {
+      "id": "tutor-grounded-role",
+      "pass": true,
+      "detail": "Tutor role/source missing"
+    },
+    {
+      "id": "tutor-grounded-answer",
+      "pass": true,
+      "detail": "Tutor answer not grounded"
+    },
+    {
+      "id": "tutor-control-refusal",
+      "pass": true,
+      "detail": "Tutor did not refuse control"
+    },
+    {
+      "id": "responsive:desktop:/overview",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1672,\"clientWidth\":1672}"
+    },
+    {
+      "id": "responsive:desktop:/simulation",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1672,\"clientWidth\":1672}"
+    },
+    {
+      "id": "responsive:desktop:/forecast",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1672,\"clientWidth\":1672}"
+    },
+    {
+      "id": "responsive:desktop:/results",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1672,\"clientWidth\":1672}"
+    },
+    {
+      "id": "responsive:desktop:/settings",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1672,\"clientWidth\":1672}"
+    },
+    {
+      "id": "responsive:laptop:/overview",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1366,\"clientWidth\":1366}"
+    },
+    {
+      "id": "responsive:laptop:/simulation",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1366,\"clientWidth\":1366}"
+    },
+    {
+      "id": "responsive:laptop:/forecast",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1366,\"clientWidth\":1366}"
+    },
+    {
+      "id": "responsive:laptop:/results",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1366,\"clientWidth\":1366}"
+    },
+    {
+      "id": "responsive:laptop:/settings",
+      "pass": true,
+      "detail": "document horizontal clipping/overflow {\"scrollWidth\":1366,\"clientWidth\":1366}"
+    },
+    {
+      "id": "keyboard-navigation",
+      "pass": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"⌂Overview\",\"outline\":\"auto\"}"
+    },
+    {
+      "id": "visible-focus",
+      "pass": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"⌂Overview\",\"outline\":\"auto\"}"
+    },
+    {
+      "id": "button-labels",
+      "pass": true,
+      "detail": "main navigation buttons not discoverable"
+    },
+    {
+      "id": "tutor-close-accessible",
+      "pass": true,
+      "detail": "Tutor close label missing"
+    }
+  ]
+}

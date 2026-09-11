@@ -1,0 +1,21 @@
+# P9 Known Limitations
+
+- Evidence is synthetic only; there is no real sensor or site validation.
+- No real weather-service accuracy, outage or forecast-revision behavior is validated.
+- There is no real-data distribution-shift validation.
+- The release optimises the secondary supervisory network only; no primary-network optimisation is implemented.
+- Building-level valves are not individually controlled; only three synthetic zone valves are represented.
+- There is no PLC/DCS integration, field protocol, command channel or independent equipment interlock.
+- Real actuator dynamics, deadband, minimum movement, hold time, wear, backlash and communication latency are not modelled. Small P6 valve direction reversals remain an operational follow-up.
+- There is no tariff, market or economic optimisation.
+- P5 UA, solar-gain and internal-gain terms remain priors; only effective H/C is calibrated.
+- P5 has no real sensor-noise validation, no distribution-shift validation and insufficient `<18°C` positives in TEST.
+- P4 metrics are held-out synthetic simulation metrics, not field accuracy.
+- P6 uses a local linearisation and can reach the solver limit. A verified fallback is accepted PoC behavior; an unverified fallback does not apply.
+- Uncertainty intervals are calibrated only on synthetic data.
+- P8 uses Deterministic Grounded Tutor v1, not a live LLM; it is bounded rather than open-ended.
+- The active browser runtime is guided evidence replay. Live P1A/P4/P5/P6 state progression, re-solving and recommendation supersession are deferred.
+- Results do not refresh from browser actions. The scenario selector exposes only Rapid Warming in the official journey.
+- Persistent audit-grade engineering logging is not implemented; technical fields are present in the structured snapshot and Tutor evidence detail only.
+- Clean-environment validation covers an exact-lockfile frontend install/build in a temporary directory and core tests in the pinned local Python environment; it is not a fresh operating-system/container certification.
+- RC1 is suitable for a customer PoC demonstration, not production deployment or closed-loop certification.

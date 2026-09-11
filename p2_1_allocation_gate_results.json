@@ -1,0 +1,95 @@
+{
+  "fixtureVersion": "physical-fixture-v1.1",
+  "gates": [
+    {
+      "gate": "GFA1",
+      "description": "Zone mass conservation",
+      "measured": {
+        "allFiveFrames": 1440,
+        "maxRelativeResidual": 1.4338946509806438e-16
+      },
+      "threshold": "<1e-6",
+      "status": "PASS"
+    },
+    {
+      "gate": "GFA2",
+      "description": "Design-load proportionality",
+      "measured": {
+        "maxAbsoluteShareResidual": 5.551115123125783e-17
+      },
+      "threshold": "<1e-14",
+      "status": "PASS"
+    },
+    {
+      "gate": "GFA3",
+      "description": "Same-area insulation differentiation",
+      "measured": {
+        "high": "B02",
+        "low": "B03",
+        "areaM2": 980,
+        "internalGainW": 2940,
+        "highWeightW": 24402.0,
+        "lowWeightW": 51744.0
+      },
+      "threshold": "B03 load/share > B02, otherwise same design area/internal gains",
+      "status": "PASS"
+    },
+    {
+      "gate": "GFA4",
+      "description": "No benchmark-derived weights",
+      "measured": {
+        "imports": [
+          "dataclasses",
+          "parameters"
+        ],
+        "generationArguments": [
+          "static profile"
+        ],
+        "sourceHash": "9b442074d15c2291d5966282766ad7edbe5b81616478921d152ddc3c543f4070",
+        "noBenchmarkOrIO": true
+      },
+      "threshold": "static profile/constants only",
+      "status": "PASS"
+    },
+    {
+      "gate": "GFA5",
+      "description": "Determinism",
+      "measured": {
+        "firstWeights": {
+          "B01": 29880.0,
+          "B02": 24402.0,
+          "B03": 51744.0,
+          "B04": 27390.0,
+          "B05": 41030.0,
+          "B06": 39165.0,
+          "B07": 34316.0,
+          "B08": 44014.0,
+          "B09": 47520.0,
+          "B10": 39165.0,
+          "B11": 48490.0,
+          "B12": 42895.0
+        },
+        "repeatWeights": {
+          "B01": 29880.0,
+          "B02": 24402.0,
+          "B03": 51744.0,
+          "B04": 27390.0,
+          "B05": 41030.0,
+          "B06": 39165.0,
+          "B07": 34316.0,
+          "B08": 44014.0,
+          "B09": 47520.0,
+          "B10": 39165.0,
+          "B11": 48490.0,
+          "B12": 42895.0
+        },
+        "sha256": "e1bf16be21ef3980e8baaa1128d56ae54ec8720479c61cd2998af580904f22b5"
+      },
+      "threshold": "exact equality",
+      "status": "PASS"
+    }
+  ],
+  "passed": 5,
+  "failed": 0,
+  "skipped": 0
+}

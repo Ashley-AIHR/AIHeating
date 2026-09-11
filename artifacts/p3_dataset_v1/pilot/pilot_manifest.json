@@ -1,0 +1,186 @@
+{
+  "datasetVersion": "p3-dataset-v1.0",
+  "episodeManifestHashes": {
+    "manifests/pilot/pilot-cold_wave-000.json": "c0ae84c276f081b652f473609e44546d0a0332f39bf4581b046917d30afe37cb",
+    "manifests/pilot/pilot-cold_wave-001.json": "ada74dead8237b8900c5b6787353496abc747f9f853fba061964d755aa818258",
+    "manifests/pilot/pilot-cold_wave-002.json": "e5da19c820e1fa04e090947597b5d48d2c78c4a97a9687c7f390562f6b6ff5b5",
+    "manifests/pilot/pilot-hydraulic_imbalance-000.json": "d8fd66eb1f1816d73cc83ace06533f65db1abcce9328917c81cf1618fbb2cad8",
+    "manifests/pilot/pilot-hydraulic_imbalance-001.json": "587365589fd25772dee6483deb9d4559f007810ca704c22495a37fc891ce93e5",
+    "manifests/pilot/pilot-hydraulic_imbalance-002.json": "dd60a5043a91a0aeb685d1fbb8ef6d47253d7c1e8931cf30b4f201d3b4cc88bc",
+    "manifests/pilot/pilot-normal_winter-000.json": "2fb6abf75422815cb77b1075dd00d024797df9c4179d96d7dd89f8cc1bcb82ef",
+    "manifests/pilot/pilot-normal_winter-001.json": "4bc3ef3ff12d93b3195cd08fc30b67b4e70c8d06cc64063b0a01fb6bf9a580f3",
+    "manifests/pilot/pilot-normal_winter-002.json": "897258beb3ef28103e5ab0c0093f070a16f567865449415ed37da1a917e06f04",
+    "manifests/pilot/pilot-rapid_warming-000.json": "71d66efc5ae9dd71a93b87a7214d3c9a3a31eb828cdee115fca16216b62dfb81",
+    "manifests/pilot/pilot-rapid_warming-001.json": "00355406d5a1d599cf4431ac051c8929718fef4a934dd07c937da68bf5a3d8e4",
+    "manifests/pilot/pilot-rapid_warming-002.json": "36450f78fa33624a1235dc2b16b986e0ab5ed2e81d66b46a3d95b8741b722759",
+    "manifests/pilot/pilot-sunny_winter-000.json": "368dd065964ba3e5b5499073de0737f9ea8081ff45b5ad552ae98fd85b418a13",
+    "manifests/pilot/pilot-sunny_winter-001.json": "75dd306d4481d4a54996b02858f67fb37b38015d8f49cddf8d9a06dce3e3169c",
+    "manifests/pilot/pilot-sunny_winter-002.json": "3e957a023551d7b16bc6d57bbb4d10b7e76bb71238a45cdd3e950571382d485b"
+  },
+  "schemaHash": "69e0bd1e52cbcf8b78cb46390f9d5a1bb5d7e59fb67909d55bc1b4c4856249d1",
+  "warmupPolicy": {
+    "cases": [
+      {
+        "case": "high_capacitance",
+        "firstFrameStationReturnDifferenceC": 0.02756933673916251,
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "maxIndoorDifferenceC": 0.1860490228740055,
+        "maxInventoryEnergyDifferenceJ": 0.0,
+        "maxInventoryVolumeDifferenceM3": 0.0,
+        "packetInventoriesIdentical": true,
+        "perBuildingDifferenceC": {
+          "B01": 0.15722028485711093,
+          "B02": 0.1860490228740055,
+          "B03": 0.03384153501417231,
+          "B04": 0.17964813184763884,
+          "B05": 0.07226785382240664,
+          "B06": 0.08776129640861896,
+          "B07": 0.09383241099545714,
+          "B08": 0.09731739643383719,
+          "B09": 0.024153964878379952,
+          "B10": 0.08675853688892943,
+          "B11": 0.09269779709248738,
+          "B12": 0.09604701099359758
+        },
+        "recommendedWarmupHours": 72,
+        "scenarioFamily": "normal_winter",
+        "thresholdC": 0.2
+      },
+      {
+        "case": "low_capacitance",
+        "firstFrameStationReturnDifferenceC": 0.010367700697756277,
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "maxIndoorDifferenceC": 0.10018328642662766,
+        "maxInventoryEnergyDifferenceJ": 0.0,
+        "maxInventoryVolumeDifferenceM3": 0.0,
+        "packetInventoriesIdentical": true,
+        "perBuildingDifferenceC": {
+          "B01": 0.07439780743437296,
+          "B02": 0.09302493583179228,
+          "B03": 0.006321817429597587,
+          "B04": 0.10018328642662766,
+          "B05": 0.020302617461833705,
+          "B06": 0.02670551305812907,
+          "B07": 0.03096260885882174,
+          "B08": 0.034612199108796204,
+          "B09": 0.0036064668339044204,
+          "B10": 0.0264098673587867,
+          "B11": 0.030598857143978364,
+          "B12": 0.03417212044112716
+        },
+        "recommendedWarmupHours": 72,
+        "scenarioFamily": "normal_winter",
+        "thresholdC": 0.2
+      },
+      {
+        "case": "cold_low_side",
+        "firstFrameStationReturnDifferenceC": 7.729546834411849e-05,
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "maxIndoorDifferenceC": 0.0028086354500587163,
+        "maxInventoryEnergyDifferenceJ": 0.0,
+        "maxInventoryVolumeDifferenceM3": 0.0,
+        "packetInventoriesIdentical": true,
+        "perBuildingDifferenceC": {
+          "B01": 0.0006419929661589663,
+          "B02": 0.0028086354500587163,
+          "B03": 0.00037097644757011494,
+          "B04": 0.0005182966944161649,
+          "B05": 2.4664295239062994e-05,
+          "B06": 0.0003588954289561741,
+          "B07": 0.00028719356170370247,
+          "B08": 4.5808793387891455e-05,
+          "B09": 0.00010198148424223064,
+          "B10": 0.0001910949740988599,
+          "B11": 7.696518716926448e-05,
+          "B12": 0.00021195582323585427
+        },
+        "recommendedWarmupHours": 72,
+        "scenarioFamily": "cold_wave",
+        "thresholdC": 0.2
+      },
+      {
+        "case": "rapid_warming_high_side",
+        "firstFrameStationReturnDifferenceC": 0.06603110320718031,
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "maxIndoorDifferenceC": 0.4430580444866372,
+        "maxInventoryEnergyDifferenceJ": 0.0,
+        "maxInventoryVolumeDifferenceM3": 0.0,
+        "packetInventoriesIdentical": true,
+        "perBuildingDifferenceC": {
+          "B01": 0.3848220414723542,
+          "B02": 0.4430580444866372,
+          "B03": 0.11038198404304111,
+          "B04": 0.42028527821343076,
+          "B05": 0.20063264343217924,
+          "B06": 0.2362438836156997,
+          "B07": 0.24778353088670713,
+          "B08": 0.2530671474915209,
+          "B09": 0.08123611212761617,
+          "B10": 0.23508315698325788,
+          "B11": 0.24646033885668572,
+          "B12": 0.2515721348360387
+        },
+        "recommendedWarmupHours": 96,
+        "scenarioFamily": "rapid_warming",
+        "thresholdC": 0.2
+      },
+      {
+        "case": "hydraulic_high_side",
+        "firstFrameStationReturnDifferenceC": 0.07022200762860109,
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "maxIndoorDifferenceC": 0.4430580444866372,
+        "maxInventoryEnergyDifferenceJ": 0.0,
+        "maxInventoryVolumeDifferenceM3": 0.0,
+        "packetInventoriesIdentical": true,
+        "perBuildingDifferenceC": {
+          "B01": 0.3848220414723542,
+          "B02": 0.4430580444866372,
+          "B03": 0.11038198404304111,
+          "B04": 0.42028527821343076,
+          "B05": 0.20063264343217924,
+          "B06": 0.2362438836156997,
+          "B07": 0.24778353088670713,
+          "B08": 0.2530671474915209,
+          "B09": 0.08123611212761617,
+          "B10": 0.23508315698325788,
+          "B11": 0.24646033885668572,
+          "B12": 0.2515721348360387
+        },
+        "recommendedWarmupHours": 96,
+        "scenarioFamily": "hydraulic_imbalance",
+        "thresholdC": 0.2
+      }
+    ],
+    "comparisonHours": [
+      72,
+      96
+    ],
+    "selectedWarmupHours": 96,
+    "thresholdC": 0.2
+  }
+}

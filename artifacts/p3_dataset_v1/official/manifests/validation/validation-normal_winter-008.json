@@ -1,0 +1,480 @@
+{
+  "baseFixtureVersion": "physical-fixture-v1.2",
+  "controllerConfigHash": "6ec4555b4be4b07654670f9fe2904afc444f6db33ba8d90ea4806b18951d574e",
+  "controllerVersion": "traditional-v1.2",
+  "datasetVersion": "p3-dataset-v1.0",
+  "descriptor": {
+    "canonical": false,
+    "episode_id": "validation-normal_winter-008",
+    "episode_index": 8,
+    "forecast_seed": 670136639860813203,
+    "parameter_mode": "random",
+    "scenario_family": "normal_winter",
+    "seed": 482794557534479096,
+    "split": "validation"
+  },
+  "episodeId": "validation-normal_winter-008",
+  "forecastSeed": 670136639860813203,
+  "generationTimestamp": "2026-09-09T00:00:00+00:00",
+  "generatorVersion": "p3-dataset-factory-v1.0",
+  "outputFileHashes": {
+    "validation/normal_winter/validation-normal_winter-008.building_state.csv.gz": "5dc10d3d5bd6844b39f693f2da62309c319c35cf9a701f4e3a989d2a4383109f",
+    "validation/normal_winter/validation-normal_winter-008.building_temperature_target.csv.gz": "30db5f99095202eb02a7304e86e7d9ad189a86212d748d1504b969257b43890f",
+    "validation/normal_winter/validation-normal_winter-008.load_target.csv.gz": "cfe41528cd8cbdf2a189da6eb4ee5b18cfe356abfd7c0909948613093b2dc71c",
+    "validation/normal_winter/validation-normal_winter-008.raw_state.csv.gz": "1c063614956419f4d544621282bf3a77f853476d0fd5da9e65969e9b1d5afd30",
+    "validation/normal_winter/validation-normal_winter-008.weather_forecast.csv.gz": "22ea3967828412f331e582efaf6fc1430feaab5f321004ad364bccbd2fdfdbc3"
+  },
+  "outputFiles": {
+    "building_state": "validation/normal_winter/validation-normal_winter-008.building_state.csv.gz",
+    "building_temperature_target": "validation/normal_winter/validation-normal_winter-008.building_temperature_target.csv.gz",
+    "load_target": "validation/normal_winter/validation-normal_winter-008.load_target.csv.gz",
+    "raw_state": "validation/normal_winter/validation-normal_winter-008.raw_state.csv.gz",
+    "weather_forecast": "validation/normal_winter/validation-normal_winter-008.weather_forecast.csv.gz"
+  },
+  "parameterSampling": {
+    "mode": "random",
+    "multipliers": {
+      "c": [
+        0.9575868521515231,
+        0.9252449016570077,
+        0.9184508833475189,
+        0.9937215669001641,
+        0.927405822899245,
+        0.955713115426564,
+        0.8024614698949969,
+        1.1536829506962187,
+        0.8513364477423199,
+        0.9120067673069943,
+        1.1463154919252427,
+        0.805980693479168
+      ],
+      "internal_gain": [
+        1.104706859859045,
+        1.0197379823223582,
+        1.1720758124736297,
+        1.1123439129767854,
+        1.1777085003173027,
+        1.1449496592093502,
+        0.8283730086672275,
+        1.0768059392585954,
+        1.1293889641640507,
+        0.8832308900233791,
+        0.9621897081237127,
+        0.8681933892254903
+      ],
+      "kpipe": [
+        1.1997003124802132,
+        0.9455895151076017,
+        1.073112009821245
+      ],
+      "kvalve": [
+        0.8755179619231986,
+        1.0958616431589157,
+        1.079782549314265
+      ],
+      "pump_curve": [
+        0.9697263786070731
+      ],
+      "pump_head": [
+        0.9614247231035586
+      ],
+      "r": [
+        0.9219919632976297,
+        0.927663435469238,
+        0.8983572772956453,
+        1.1308455588188355,
+        1.0469885649271997,
+        0.8749334107750428,
+        1.1289805260823123,
+        1.1997567805557714,
+        1.1780082341758908,
+        0.8152517859203494,
+        0.8147319419908698,
+        0.950114235289598
+      ],
+      "radiator_margin": [
+        1.0132564516132214,
+        1.0115783875670783,
+        0.9756582971191115,
+        1.0370820041899935,
+        0.9736426542014315,
+        0.9819201165455052,
+        0.905081361212114,
+        1.0739848519947288,
+        1.0578848357840562,
+        1.0651232792684708,
+        1.0932120801605887,
+        1.0649954321984554
+      ],
+      "solar": [
+        0.8991510528506894,
+        0.810524175254978,
+        1.1123188569715643,
+        1.0035841948468633,
+        0.9176513002743418,
+        1.0662248807822308,
+        0.8248164030871298,
+        0.8144705047506324,
+        1.1448072425598947,
+        1.0880801973809788,
+        0.8469663646537805,
+        1.1992391983350066
+      ]
+    }
+  },
+  "physicalParameterHash": "de53a49685b9849d8f5037d0b5c2da7a45ad8d750dd03a9d54c8ea7296716227",
+  "physicalParameterSetId": "p3-parameters-6b33b179555a2f8",
+  "physicalQA": {
+    "allFinite": true,
+    "allHydraulicConverged": true,
+    "equipmentValid": true,
+    "maxBuildingHeatBalanceResidual": 7.711532237737953e-14,
+    "maxHeatBalanceResidual": 1.7908838168856147e-15,
+    "maxHydraulicResidual": 4.108406848932864e-16,
+    "maxMassResidual": 1.4800869353498457e-16,
+    "maxPipeHeatBalanceResidual": 7.441545712102704e-15,
+    "maxPipeVolumeResidual": 1.8764332810566028e-16,
+    "passed": true
+  },
+  "rowCounts": {
+    "building_state": 3456,
+    "building_temperature_target": 2160,
+    "load_target": 144,
+    "raw_state": 288,
+    "weather_forecast": 432
+  },
+  "scenarioFamily": "normal_winter",
+  "scenarioParameters": {
+    "farPipeResistanceMultiplier": 1.0,
+    "solarMultiplier": 0.6770072367672281,
+    "temperatureAmplitudeMultiplier": 1.1046174473364285,
+    "temperatureOffsetC": -1.4786065028847442,
+    "windMultiplier": 0.9856127807714953
+  },
+  "scenarioVariantId": "normal_winter-variant-6b33b179555a2f8",
+  "scenarioVersion": "p3-scenario-variant-v1",
+  "schemaQA": {
+    "errors": [],
+    "passed": true,
+    "schemaTables": [
+      "building_state",
+      "building_temperature_target",
+      "load_target",
+      "raw_state",
+      "weather_forecast"
+    ]
+  },
+  "seed": 482794557534479096,
+  "split": "validation",
+  "statistics": {
+    "actual_heat_supply_mw": {
+      "count": 288,
+      "max": 0.4743658465926992,
+      "mean": 0.4397074882714619,
+      "min": 0.3889511434756505
+    },
+    "comfortCount": 1608,
+    "far_flow_m3_h": {
+      "count": 288,
+      "max": 14.534979929668346,
+      "mean": 14.208412725875348,
+      "min": 13.695235691343493
+    },
+    "forecastErrors": {
+      "120": {
+        "outdoorC": {
+          "count": 36,
+          "max": 1.7269643559511634,
+          "mean": -0.18435069899557205,
+          "min": -1.5681570007713344
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 142.6564057291149,
+          "mean": 0.48669124122618385,
+          "min": -128.48818484920494
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.6948788850187044,
+          "mean": 0.006338178387596512,
+          "min": -0.8072347418662043
+        }
+      },
+      "150": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.0102064409919267,
+          "mean": 0.16649978344330807,
+          "min": -1.8020585519716468
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 119.34771690032463,
+          "mean": 8.161296529634479,
+          "min": -144.82445694577777
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.8698501559329533,
+          "mean": 0.022384989583634565,
+          "min": -0.8500895524673806
+        }
+      },
+      "180": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.988704405087824,
+          "mean": -0.15678710772673338,
+          "min": -2.269810021545952
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 172.81045456028292,
+          "mean": -5.722596594850901,
+          "min": -89.32248552854662
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.9796779049754837,
+          "mean": 0.10584907243803084,
+          "min": -1.043689619855769
+        }
+      },
+      "210": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.2698124953098358,
+          "mean": -0.0023501354364086364,
+          "min": -2.005931072030078
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 123.47498938076586,
+          "mean": -14.39823528690185,
+          "min": -142.60266317021262
+        },
+        "windMs": {
+          "count": 36,
+          "max": 1.1799424267216492,
+          "mean": -0.11262887094138592,
+          "min": -0.9757666207025778
+        }
+      },
+      "240": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.651498383760908,
+          "mean": -0.20745310691061283,
+          "min": -2.6483924720817376
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 210.55450863068134,
+          "mean": 29.351315180414947,
+          "min": -73.94840565431811
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.8445586857327942,
+          "mean": -0.1276213322774452,
+          "min": -1.4456475544543945
+        }
+      },
+      "270": {
+        "outdoorC": {
+          "count": 36,
+          "max": 1.6385262141441923,
+          "mean": -0.3008169145004254,
+          "min": -2.0228412794877872
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 232.94794583539564,
+          "mean": 2.387447735170885,
+          "min": -207.4016736626617
+        },
+        "windMs": {
+          "count": 36,
+          "max": 1.095481663649149,
+          "mean": -0.08074221071980497,
+          "min": -1.389405047164796
+        }
+      },
+      "30": {
+        "outdoorC": {
+          "count": 36,
+          "max": 0.8517805080983402,
+          "mean": -0.07394014377309413,
+          "min": -1.871411112465
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 110.60045830527167,
+          "mean": -11.471034335306596,
+          "min": -92.21548139941174
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.49434472209646774,
+          "mean": -0.029775049440791266,
+          "min": -0.5079449078509475
+        }
+      },
+      "300": {
+        "outdoorC": {
+          "count": 36,
+          "max": 1.3290871752086264,
+          "mean": -0.12358210726916795,
+          "min": -1.8180832738564745
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 174.3890483457769,
+          "mean": -25.55588932622275,
+          "min": -192.77327002785384
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.767880183287006,
+          "mean": -0.04488733682766027,
+          "min": -1.2668990162708464
+        }
+      },
+      "330": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.783161133702178,
+          "mean": 0.1058411397255416,
+          "min": -2.096784860727895
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 176.74436455137362,
+          "mean": 4.657441259914087,
+          "min": -198.17732399512772
+        },
+        "windMs": {
+          "count": 36,
+          "max": 1.4371692509196452,
+          "mean": 0.08146944863098089,
+          "min": -1.1942010684490834
+        }
+      },
+      "360": {
+        "outdoorC": {
+          "count": 36,
+          "max": 2.979049508744642,
+          "mean": -0.06680139316604648,
+          "min": -2.4076537827551596
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 181.93570717297547,
+          "mean": -21.813271334264904,
+          "min": -213.61354690577667
+        },
+        "windMs": {
+          "count": 36,
+          "max": 1.0144333789619553,
+          "mean": 0.0072547260308646255,
+          "min": -1.5181213423428024
+        }
+      },
+      "60": {
+        "outdoorC": {
+          "count": 36,
+          "max": 1.1092495923429273,
+          "mean": 0.041116295168049696,
+          "min": -0.9169983520300351
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 73.14044596000093,
+          "mean": 4.723249653483588,
+          "min": -73.56282286573581
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.6194833677483845,
+          "mean": -0.04344568382902732,
+          "min": -1.0349529190777313
+        }
+      },
+      "90": {
+        "outdoorC": {
+          "count": 36,
+          "max": 0.9798382714194098,
+          "mean": -0.05089260700648745,
+          "min": -1.3290814439157812
+        },
+        "solarWm2": {
+          "count": 36,
+          "max": 101.08938691538722,
+          "mean": -3.736847361411247,
+          "min": -116.68982423491309
+        },
+        "windMs": {
+          "count": 36,
+          "max": 0.8946759295499416,
+          "mean": 0.12984775035544818,
+          "min": -0.4813112583984356
+        }
+      }
+    },
+    "indoor_temperature_c": {
+      "count": 3456,
+      "max": 22.708314624977305,
+      "mean": 21.924893685851753,
+      "min": 20.49766915144406
+    },
+    "mid_flow_m3_h": {
+      "count": 288,
+      "max": 13.226897842042257,
+      "mean": 12.929720201341523,
+      "min": 12.462726765954654
+    },
+    "near_flow_m3_h": {
+      "count": 288,
+      "max": 11.370620578176286,
+      "mean": 11.115149171571401,
+      "min": 10.713694104049438
+    },
+    "outdoor_temperature_c": {
+      "count": 288,
+      "max": -3.0900274127780096,
+      "mean": -7.140291386344915,
+      "min": -9.717732096796581
+    },
+    "overheatCount": 0,
+    "pump_frequency_hz": {
+      "count": 288,
+      "max": 45.88709283871863,
+      "mean": 44.85611655453797,
+      "min": 43.236010965111205
+    },
+    "required_heat_load_mw": {
+      "count": 288,
+      "max": 0.47955596024167857,
+      "mean": 0.42312311089293114,
+      "min": 0.31796477534261397
+    },
+    "solar_radiation_w_m2": {
+      "count": 288,
+      "max": 121.86130261810105,
+      "mean": 31.593671049137306,
+      "min": 0.0
+    },
+    "supply_setpoint_c": {
+      "count": 288,
+      "max": 54.774185677437266,
+      "mean": 52.71223310907593,
+      "min": 49.47202193022241
+    },
+    "underheatCount": 0
+  },
+  "warmupPolicy": {
+    "hours": 96,
+    "method": "daily-repeat-controller-consistent-v1"
+  }
+}

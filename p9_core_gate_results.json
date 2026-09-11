@@ -1,0 +1,316 @@
+{
+  "phase": "P9 core gates",
+  "generatedAt": "2026-09-11T03:12:05.351Z",
+  "passed": 31,
+  "failed": 0,
+  "skipped": 0,
+  "total": 31,
+  "gates": [
+    {
+      "gate": "P9-F1",
+      "description": "P0-P8 accepted integrity passes before P9 validation",
+      "measured": "P0-P8 integrity: PASS (registered P0-P7 plus hash-bound P8 Tutor/UI/evaluation boundary)",
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-F3",
+      "description": "Five canonical evidence manifests remain exact",
+      "measured": {
+        "artifacts/p3_dataset_v1/official/manifests/benchmark_holdout/benchmark_holdout-cold_wave-canonical.json": "b31b469c8165ff56790a865b167c5b0ea6c67d8a78380d2606d3b6f512593aad",
+        "artifacts/p3_dataset_v1/official/manifests/benchmark_holdout/benchmark_holdout-hydraulic_imbalance-canonical.json": "cffc0e7fa702c81ad913bd75f22314dc4328246b861ba3dfd001e53f4fb2359e",
+        "artifacts/p3_dataset_v1/official/manifests/benchmark_holdout/benchmark_holdout-normal_winter-canonical.json": "1397dc3e28b42a7742b57c7b1092fe2d10f59810182a0811e23143c88a9f4063",
+        "artifacts/p3_dataset_v1/official/manifests/benchmark_holdout/benchmark_holdout-rapid_warming-canonical.json": "dd661bcfe475bc8f77b033a91e39c8b70d454f70c55288e282e882ac1051b0d6",
+        "artifacts/p3_dataset_v1/official/manifests/benchmark_holdout/benchmark_holdout-sunny_winter-canonical.json": "1a16901816c976ad914830147f0c2b064b56d6cc32f1590592cd48acac3b667b"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-F4",
+      "description": "Final model/provider versions and hashes are pinned and reproduce",
+      "measured": {
+        "loadingPolicy": "Exact identities and hashes only; no latest aliases",
+        "registryHashErrors": []
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-F5",
+      "description": "No live LLM dependency or credential is added",
+      "measured": {
+        "dependencies": {
+          "@vitejs/plugin-react": "latest",
+          "react": "latest",
+          "react-dom": "latest",
+          "typescript": "latest",
+          "vite": "latest"
+        },
+        "tutorProvider": "deterministic-grounded-v1"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-F6",
+      "description": "No production-ready or guaranteed claim exists on active UI",
+      "measured": {
+        "forbidden": [
+          "Production-ready AI Heating",
+          "Guaranteed Savings",
+          "Guaranteed Comfort",
+          "Guaranteed Safety",
+          "Autonomous real-site control"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R1",
+      "description": "Official runtime is explicitly Guided Validated Digital Twin Demonstration",
+      "measured": "Guided Validated Digital Twin Demonstration",
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R2",
+      "description": "Guided Evidence Mode has the complete customer route chain",
+      "measured": {
+        "routes": [
+          "overview",
+          "forecast",
+          "simulation",
+          "results"
+        ],
+        "providerVersion": "p7-final-provider-v1"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R3",
+      "description": "Live Interactive Runtime is truthfully classified as deferred",
+      "measured": {
+        "configured": "DEFERRED",
+        "activeComponent": true,
+        "liveComponentMounted": false
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R4",
+      "description": "No active live/autonomous runtime claim exists",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R5",
+      "description": "Primary customer panels use the accepted P7 provider seam",
+      "measured": {
+        "providerImport": true,
+        "staticProvider": true
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-R6",
+      "description": "Legacy P0 telemetry is collapsed and explicitly technical",
+      "measured": {
+        "legacyLabel": true,
+        "collapsed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S1",
+      "description": "MPC Optimal displays only for accepted optimal/verified evidence",
+      "measured": {
+        "optimisation": "MPC_OPTIMAL",
+        "verification": "VERIFIED_IN_DIGITAL_TWIN",
+        "fallback": "NOT_ACTIVE",
+        "safety": "NORMAL_VERIFIED"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S2",
+      "description": "Solver limit remains Verified Fallback, not optimal",
+      "measured": {
+        "optimisation": "SOLVER_LIMIT_REACHED",
+        "verification": "VERIFIED_FALLBACK",
+        "fallback": "VERIFIED_FALLBACK_ACTIVE",
+        "safety": "VERIFIED_FALLBACK"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S3",
+      "description": "Constraint infeasible remains Safety Not Guaranteed",
+      "measured": {
+        "optimisation": "CONSTRAINT_INFEASIBLE",
+        "verification": "NOT_VERIFIED",
+        "fallback": "FALLBACK_ACTIVE",
+        "safety": "SAFETY_NOT_GUARANTEED"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S4",
+      "description": "Stale/unavailable/timeout providers are unusable and cannot auto-apply",
+      "measured": {
+        "unavailable": {
+          "status": "UNAVAILABLE",
+          "usable": false,
+          "stale": false
+        },
+        "stale": {
+          "status": "STALE",
+          "usable": false,
+          "stale": true
+        },
+        "timeout": {
+          "status": "TIMEOUT",
+          "usable": false,
+          "stale": false
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S5",
+      "description": "Unverified fallback cannot auto-apply",
+      "measured": "FAILED_TO_APPLY",
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S6",
+      "description": "Advisory remains NOT_APPLIED until explicit Apply",
+      "measured": "NOT_APPLIED",
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-S7",
+      "description": "Optimised applies only verified accepted action or verified fallback",
+      "measured": {
+        "optimal": "APPLIED",
+        "verifiedFallback": "APPLIED",
+        "unsafe": "FAILED_TO_APPLY"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C1",
+      "description": "Savings claims are labelled simulation-based",
+      "measured": 56,
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C2",
+      "description": "No real-world validated accuracy claim appears",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C3",
+      "description": "No guaranteed real-site safety claim appears",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C4",
+      "description": "P4/P5 metrics and intervals are labelled synthetic",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C5",
+      "description": "Tutor is deterministic, grounded and explanation-only",
+      "measured": {
+        "provider": "deterministic-grounded-v1",
+        "ui": [
+          "Explanation only",
+          "P7 structured state"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-C6",
+      "description": "MPC is not described as production autonomous control",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X1",
+      "description": "Hydraulic Imbalance remains a 2x secondary engineering benchmark",
+      "measured": {
+        "multiplier": 2,
+        "role": "secondary engineering benchmark"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X2",
+      "description": "All required status/application vocabulary remains distinct",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X3",
+      "description": "Active EN/ZH release terminology is present",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X4",
+      "description": "Tutor has no DOM scrape or control callback",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X5",
+      "description": "Tutor control request is refused without affecting core state",
+      "measured": {
+        "answerType": "REFUSAL",
+        "controlActionRequested": true
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X6",
+      "description": "Safety status is not colour-only and danger styling exists",
+      "measured": {},
+      "status": "PASS"
+    },
+    {
+      "gate": "P9-X7",
+      "description": "Release carries core engineering identity fields without secrets",
+      "measured": {
+        "scenario": "Rapid Daytime Warming",
+        "simulationTime": "2025-01-15T10:30:00+08:00",
+        "forecastAsOf": "2025-01-15T10:30:00+08:00",
+        "providers": {
+          "simulation": {
+            "name": "Simulation Engine",
+            "version": "physical-fixture-v1.2"
+          },
+          "loadPrediction": {
+            "name": "Required Heat Predictor",
+            "version": "P4 Predictor v1",
+            "type": "LightGBM"
+          },
+          "thermalPrediction": {
+            "name": "Thermal Predictor",
+            "version": "P5 Thermal Model v1"
+          },
+          "optimisation": {
+            "name": "Optimiser",
+            "version": "Formal MPC v1"
+          },
+          "traditional": {
+            "name": "Traditional Baseline",
+            "version": "traditional-v1.2"
+          }
+        },
+        "recommendationId": "p6-5dbb05cffcfd847b26f4",
+        "contextId": "p8-fdf1f902"
+      },
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "fixtureVersion": "physical-fixture-v1.2",
+  "designPoint": {
+    "indoorC": 21.0,
+    "outdoorC": -10.0,
+    "supplyC": 55.0,
+    "returnC": 45.0,
+    "solarWm2": 0,
+    "windows": "closed"
+  },
+  "gates": [
+    {
+      "gate": "SIZ1",
+      "description": "Radiator output equals design load",
+      "measured": 1.4551915228366852e-11,
+      "threshold": "absolute error < 1e-8 W",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ2",
+      "description": "Water-side design balance",
+      "measured": 7.275957614183426e-12,
+      "threshold": "absolute error < 1e-8 W",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ3",
+      "description": "All UA values positive and finite",
+      "measured": true,
+      "threshold": "true",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ4",
+      "description": "All positive-load design flows positive and finite",
+      "measured": true,
+      "threshold": "true",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ5",
+      "description": "Within-zone shares normalize",
+      "measured": 0.0,
+      "threshold": "absolute residual < 1e-15",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ6",
+      "description": "Generator has no benchmark/KPI/scenario input",
+      "measured": {
+        "bannedTerms": [
+          "benchmark",
+          "comfort",
+          "csv",
+          "mpc",
+          "overheating",
+          "scenario"
+        ],
+        "present": []
+      },
+      "threshold": "none present",
+      "status": "PASS"
+    },
+    {
+      "gate": "SIZ7",
+      "description": "Only allowed fixture fields differ from v1.1 physical values",
+      "measured": {
+        "buildingChangedFields": {
+          "B01": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B02": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B03": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B04": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B05": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B06": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B07": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B08": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B09": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B10": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B11": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ],
+          "B12": [
+            "radiator_ua_w_k",
+            "flow_share_weight"
+          ]
+        },
+        "allNonBuildingSectionsUnchanged": true
+      },
+      "threshold": "radiator_ua_w_k and flow_share_weight only",
+      "status": "PASS"
+    }
+  ],
+  "passed": 7,
+  "failed": 0,
+  "skipped": 0
+}

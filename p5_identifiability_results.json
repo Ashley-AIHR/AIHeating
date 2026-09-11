@@ -1,0 +1,1043 @@
+{
+  "aggregate": {
+    "maximumAbsoluteCorrelation": 0.9999314232258438,
+    "maximumConditionNumber": 424.3984574879752,
+    "medianRecoveryError": {
+      "c_scale": 8.670257043097429e-06,
+      "h_scale": 1.025938201493215e-05,
+      "solar_scale": 1.0706649153369163e-05,
+      "ua_scale": 1.3462715697798444e-05
+    },
+    "medianTrajectoryFitMaeC": 5.874285364434092e-07,
+    "minimumRank": 4,
+    "pilotCount": 9
+  },
+  "classification": "B \u2014 predictive effective H/C; UA/solar fixed to configured priors",
+  "configurationHash": "6061cad4c7c7a2b47761a54dc053ce80fabaa737b54273efb577dd0d0c21d30c",
+  "datasetManifestHash": "5a989d62e8daaffb1631db8fdef9ee2ee6aad2d8c0f528c73f080d846b4394a4",
+  "dedicatedDatasetRequired": true,
+  "excitationRichness": {
+    "delivered_zone_supply_c": {
+      "maximum": 58.0,
+      "minimum": 40.897102836609285,
+      "standardDeviation": 3.471202684310968
+    },
+    "derived_building_flow_kg_s": {
+      "maximum": 1.8959400967077211,
+      "minimum": 0.41834423887870337,
+      "standardDeviation": 0.27481625125002984
+    },
+    "pump_frequency_hz": {
+      "maximum": 47.023939333943694,
+      "minimum": 38.058242088591,
+      "standardDeviation": 1.8412397333023622
+    },
+    "solar_radiation_w_m2": {
+      "maximum": 619.9203263503462,
+      "minimum": 0.0,
+      "standardDeviation": 146.10417266981042
+    },
+    "station_supply_setpoint_c": {
+      "maximum": 58.0,
+      "minimum": 40.897102836609285,
+      "standardDeviation": 3.474366234345094
+    },
+    "zone_valve_fraction": {
+      "maximum": 0.85,
+      "minimum": 0.35,
+      "standardDeviation": 0.12990381056766578
+    }
+  },
+  "fullParameterisationPasses": false,
+  "initialCandidateParameterisation": [
+    "h_scale",
+    "c_scale",
+    "ua_scale",
+    "solar_scale"
+  ],
+  "internalGainBiasDecision": "dropped before TEST; confounded with envelope/solar forcing",
+  "observabilitySchemaHash": "04656c046d1dcda59d2bc7a9882e515292c98a2b6cc9286cb1c10e332c714498",
+  "p3Decision": "C",
+  "p3HistoryAssessment": {
+    "bySplit": {
+      "benchmark_holdout": {
+        "episodes": 5,
+        "maximumEpisodesPerParameterSet": 5,
+        "uniqueParameterSets": 1
+      },
+      "test": {
+        "episodes": 75,
+        "maximumEpisodesPerParameterSet": 1,
+        "uniqueParameterSets": 75
+      },
+      "train": {
+        "episodes": 350,
+        "maximumEpisodesPerParameterSet": 1,
+        "uniqueParameterSets": 350
+      },
+      "validation": {
+        "episodes": 75,
+        "maximumEpisodesPerParameterSet": 1,
+        "uniqueParameterSets": 75
+      }
+    },
+    "canonicalBaseFixtureEpisodes": 5,
+    "decision": "C \u2014 P3 excitation / same-asset history insufficient",
+    "episodes": 505,
+    "nonCanonicalRepeatedParameterSets": 0,
+    "uniqueParameterSets": 501
+  },
+  "pilotCases": [
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 8.21927305250103e-06,
+        "h_scale": 9.891688629970474e-06,
+        "solar_scale": 1.0706649153369163e-05,
+        "ua_scale": 1.2844056497707257e-05
+      },
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 376.13231274083194,
+        "correlationMatrix": [
+          [
+            1.0,
+            0.9914285160860051,
+            0.999913481019296,
+            0.9860583287843663
+          ],
+          [
+            0.9914285160859969,
+            0.9999999999999998,
+            0.9904036436519729,
+            0.9970659669230325
+          ],
+          [
+            0.9999134810192964,
+            0.9904036436519815,
+            1.0,
+            0.984330902050036
+          ],
+          [
+            0.986058328784356,
+            0.9970659669230304,
+            0.9843309020500252,
+            0.9999999999999999
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.999913481019296,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0008798966256580609,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          879.8966256580609,
+          105.8137130163306,
+          29.824377874332324,
+          2.339327401164653
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1261830978919594,
+        "h_scale": 1.136391746760654,
+        "solar_scale": 0.9045535128053782,
+        "ua_scale": 1.1656754021016658
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 5.230443357873149e-07,
+      "trueScalesPostFit": {
+        "c_scale": 1.1261923543744297,
+        "h_scale": 1.1364029877051665,
+        "solar_scale": 0.9045631976461724,
+        "ua_scale": 1.165690374294692
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 1.2401538559525527e-05,
+        "h_scale": 1.4399036956658229e-05,
+        "solar_scale": 1.5144001333067258e-05,
+        "ua_scale": 1.864656370043072e-05
+      },
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 404.07178854016615,
+        "correlationMatrix": [
+          [
+            1.0000000000000002,
+            0.9904044148398384,
+            0.9998434506337951,
+            0.9877782060161975
+          ],
+          [
+            0.9904044148398436,
+            1.0000000000000002,
+            0.9882523269944433,
+            0.9984580918985253
+          ],
+          [
+            0.9998434506337942,
+            0.988252326994437,
+            0.9999999999999999,
+            0.985135135754848
+          ],
+          [
+            0.9877782060162041,
+            0.9984580918985269,
+            0.9851351357548557,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9998434506337951,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0011259654071506795,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          1125.9654071506795,
+          156.28090821792986,
+          35.47976153153382,
+          2.7865479330259024
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.9469575150417979,
+        "h_scale": 1.0095199967316932,
+        "solar_scale": 1.0884602047094964,
+        "ua_scale": 0.9634378283609719
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 7.025653774861418e-07,
+      "trueScalesPostFit": {
+        "c_scale": 0.9469692589175771,
+        "h_scale": 1.0095345330567438,
+        "solar_scale": 1.0884766886019197,
+        "ua_scale": 0.963455793500798
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 1.5122172099202302e-05,
+        "h_scale": 1.693746626940662e-05,
+        "solar_scale": 1.8970802560858147e-05,
+        "ua_scale": 2.229489387906014e-05
+      },
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 424.3984574879752,
+        "correlationMatrix": [
+          [
+            1.0,
+            0.9932458782578273,
+            0.9999314232258438,
+            0.9896039207231043
+          ],
+          [
+            0.9932458782578243,
+            0.9999999999999998,
+            0.9924097717697303,
+            0.9977083307195522
+          ],
+          [
+            0.9999314232258442,
+            0.9924097717697337,
+            1.0000000000000002,
+            0.9882471096506275
+          ],
+          [
+            0.9896039207231002,
+            0.997708330719551,
+            0.9882471096506229,
+            0.9999999999999999
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9999314232258438,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0009546681048933919,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          954.668104893392,
+          111.217862269883,
+          33.09093873216857,
+          2.2494617688860035
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1753093072533403,
+        "h_scale": 1.018964233116009,
+        "solar_scale": 1.0381710519045657,
+        "ua_scale": 1.0941319413623687
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 6.882374856317005e-07,
+      "trueScalesPostFit": {
+        "c_scale": 1.1753270807517282,
+        "h_scale": 1.0189814920806601,
+        "solar_scale": 1.0381907472162517,
+        "ua_scale": 1.094156335461755
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 4.566463175148527e-06,
+        "h_scale": 2.9184295655682035e-06,
+        "solar_scale": 4.8767828826346005e-06,
+        "ua_scale": 3.940579817562906e-06
+      },
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 339.10232026275867,
+        "correlationMatrix": [
+          [
+            1.0000000000000002,
+            0.9845896503721983,
+            0.9998149478411485,
+            0.9744071312299598
+          ],
+          [
+            0.9845896503721993,
+            1.0000000000000002,
+            0.9818390338201114,
+            0.9963624623720343
+          ],
+          [
+            0.9998149478411484,
+            0.9818390338201103,
+            1.0,
+            0.970449266510092
+          ],
+          [
+            0.9744071312299609,
+            0.9963624623720343,
+            0.9704492665100933,
+            0.9999999999999999
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9998149478411485,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0007728894660457432,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          772.8894660457432,
+          103.05465290461991,
+          21.02824896413374,
+          2.279221992485507
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.0831259290867665,
+        "h_scale": 0.9545167657474334,
+        "solar_scale": 0.8033958321861058,
+        "ua_scale": 0.896829761599689
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 3.334326758771174e-07,
+      "trueScalesPostFit": {
+        "c_scale": 1.0831209830546833,
+        "h_scale": 0.9545139800656132,
+        "solar_scale": 0.8033919142181705,
+        "ua_scale": 0.8968262275843566
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 9.336150413097322e-06,
+        "h_scale": 1.025938201493215e-05,
+        "solar_scale": 1.1181462038489798e-05,
+        "ua_scale": 1.3462715697798444e-05
+      },
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 389.00396117305735,
+        "correlationMatrix": [
+          [
+            0.9999999999999999,
+            0.9862371481871145,
+            0.9997396550884013,
+            0.9815375177815938
+          ],
+          [
+            0.9862371481870963,
+            1.0,
+            0.9826460505231299,
+            0.998237919971019
+          ],
+          [
+            0.9997396550884046,
+            0.9826460505231511,
+            1.0,
+            0.9771836543021964
+          ],
+          [
+            0.9815375177815722,
+            0.9982379199710155,
+            0.9771836543021716,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9997396550884013,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0010698534214757197,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          1069.8534214757199,
+          154.74795537475134,
+          28.39488320151235,
+          2.750237859402596
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.9519717063901101,
+        "h_scale": 0.964149142396494,
+        "solar_scale": 1.0388247424178723,
+        "ua_scale": 0.8784788204746448
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 5.874285364434092e-07,
+      "trueScalesPostFit": {
+        "c_scale": 0.9519805942241281,
+        "h_scale": 0.9641590340723477,
+        "solar_scale": 1.038836358127175,
+        "ua_scale": 0.8784906473444731
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 1.2404075107164125e-05,
+        "h_scale": 1.636691367512544e-05,
+        "solar_scale": 1.8186422547916692e-05,
+        "ua_scale": 2.204638074587706e-05
+      },
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 396.69358472224184,
+        "correlationMatrix": [
+          [
+            0.9999999999999999,
+            0.9883231586507933,
+            0.9999153633138379,
+            0.980631356918292
+          ],
+          [
+            0.9883231586507941,
+            1.0,
+            0.9870023325178391,
+            0.9953322863699053
+          ],
+          [
+            0.9999153633138382,
+            0.9870023325178386,
+            0.9999999999999998,
+            0.9785095112319007
+          ],
+          [
+            0.9806313569182931,
+            0.9953322863699056,
+            0.9785095112319013,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9999153633138379,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0011644577128681628,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          1164.4577128681628,
+          105.40217432694001,
+          31.8547262973144,
+          2.9354084807887593
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.9498248992258889,
+        "h_scale": 1.129123796337598,
+        "solar_scale": 0.8206111765950205,
+        "ua_scale": 1.250772725697476
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 1.1898219724841101e-06,
+      "trueScalesPostFit": {
+        "c_scale": 0.9498366810714204,
+        "h_scale": 1.1291422769117712,
+        "solar_scale": 0.8206261008480443,
+        "ua_scale": 1.250800301317156
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 6.856082969686206e-06,
+        "h_scale": 8.654029389987272e-06,
+        "solar_scale": 9.26243728249787e-06,
+        "ua_scale": 1.1245339822885114e-05
+      },
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 373.94781429366543,
+        "correlationMatrix": [
+          [
+            1.0,
+            0.9913499587576062,
+            0.9999158682323105,
+            0.9858164152995558
+          ],
+          [
+            0.9913499587576108,
+            1.0,
+            0.9903743631486185,
+            0.996826917950953
+          ],
+          [
+            0.9999158682323107,
+            0.9903743631486143,
+            1.0,
+            0.9841250491929497
+          ],
+          [
+            0.9858164152995618,
+            0.9968269179509546,
+            0.9841250491929556,
+            1.0000000000000002
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9999158682323105,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0009100213700427925,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          910.0213700427926,
+          105.59670391726736,
+          30.85124660762875,
+          2.433551782517286
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.090420791495243,
+        "h_scale": 1.1511428161678865,
+        "solar_scale": 0.8786597762300768,
+        "ua_scale": 1.1956027269131833
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 5.560042062313642e-07,
+      "trueScalesPostFit": {
+        "c_scale": 1.090428267561918,
+        "h_scale": 1.151152778277862,
+        "solar_scale": 0.8786679148365302,
+        "ua_scale": 1.1956161720233354
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 8.670257043097429e-06,
+        "h_scale": 1.2035344536753811e-05,
+        "solar_scale": 1.051080323954956e-05,
+        "ua_scale": 1.6138604223669972e-05
+      },
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 415.64640402626685,
+        "correlationMatrix": [
+          [
+            1.0,
+            0.9818924277987702,
+            0.999721179917414,
+            0.9698003184900719
+          ],
+          [
+            0.9818924277987487,
+            1.0,
+            0.9775508507305419,
+            0.9967774415424938
+          ],
+          [
+            0.9997211799174165,
+            0.9775508507305657,
+            0.9999999999999998,
+            0.9640361346867149
+          ],
+          [
+            0.9698003184900436,
+            0.996777441542487,
+            0.9640361346866845,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.999721179917414,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.0009252617643048721,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          925.2617643048721,
+          121.39915954949673,
+          18.7944045155639,
+          2.2260790790972416
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1800588639994287,
+        "h_scale": 0.9890655176143017,
+        "solar_scale": 0.8861155198670733,
+        "ua_scale": 0.9011099097500674
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 5.555836039931409e-07,
+      "trueScalesPostFit": {
+        "c_scale": 1.1800690955018154,
+        "h_scale": 0.9890774215018431,
+        "solar_scale": 0.8861248337508465,
+        "ua_scale": 0.9011244526409649
+      }
+    },
+    {
+      "absoluteRelativeRecoveryError": {
+        "c_scale": 3.0692894216199917e-06,
+        "h_scale": 7.983933201449744e-06,
+        "solar_scale": 4.9825782814094666e-06,
+        "ua_scale": 1.0975101377042051e-05
+      },
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 377.18282428620915,
+        "correlationMatrix": [
+          [
+            1.0,
+            0.9747598944248783,
+            0.9996696097525876,
+            0.9571219531365168
+          ],
+          [
+            0.9747598944248743,
+            1.0000000000000002,
+            0.9692201767022811,
+            0.9948197075788894
+          ],
+          [
+            0.9996696097525882,
+            0.9692201767022858,
+            1.0,
+            0.9497164176132543
+          ],
+          [
+            0.9571219531365118,
+            0.9948197075788884,
+            0.9497164176132487,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.9996696097525876,
+        "numericalRank": 4,
+        "parameterNames": [
+          "h_scale",
+          "c_scale",
+          "ua_scale",
+          "solar_scale"
+        ],
+        "rankTolerance": 0.001156216839399801,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          1156.216839399801,
+          126.96896122644701,
+          21.650106067083932,
+          3.0654016168097176
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.8031351359728655,
+        "h_scale": 0.9917574876735872,
+        "solar_scale": 0.8307445292391487,
+        "ua_scale": 0.925520589948156
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 1.1750669197304238e-06,
+      "trueScalesPostFit": {
+        "c_scale": 0.8031376010346084,
+        "h_scale": 0.9917654058623391,
+        "solar_scale": 0.8307486685094216,
+        "ua_scale": 0.92553074774194
+      }
+    }
+  ],
+  "selectedAggregate": {
+    "maximumAbsoluteCorrelation": 0.402153239169602,
+    "maximumConditionNumber": 8.58080300990193,
+    "medianTrajectoryFitMaeC": 0.024152352127938054,
+    "minimumRank": 2
+  },
+  "selectedParameterisation": [
+    "h_scale",
+    "c_scale"
+  ],
+  "selectedPilotCases": [
+    {
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 6.9731454844815985,
+        "correlationMatrix": [
+          [
+            0.9999999999999999,
+            -0.401074498577183
+          ],
+          [
+            -0.4010744985771829,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.401074498577183,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0006403406212009174,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          640.3406212009174,
+          91.82952264884834
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1657048426544125,
+        "h_scale": 1.0234541447609664,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 0.03878334794919094
+    },
+    {
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 8.002392752728765,
+        "correlationMatrix": [
+          [
+            1.0,
+            -0.14583659296046117
+          ],
+          [
+            -0.1458365929604612,
+            1.0000000000000002
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.14583659296046117,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0009637672174351003,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          963.7672174351004,
+          120.43488081817304
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.8930662517278044,
+        "h_scale": 1.0294235658513389,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 0.024152352127938054
+    },
+    {
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 8.175769968179155,
+        "correlationMatrix": [
+          [
+            1.0,
+            -0.34812557520675064
+          ],
+          [
+            -0.3481255752067505,
+            0.9999999999999999
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.34812557520675064,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0007625524065376836,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          762.5524065376836,
+          93.26979715740626
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1252522291208222,
+        "h_scale": 0.9539062598500098,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S01",
+      "trajectoryFitMaeC": 0.007729886478139325
+    },
+    {
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 6.808148020580906,
+        "correlationMatrix": [
+          [
+            1.0,
+            -0.3212350612005433
+          ],
+          [
+            -0.32123506120054335,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.3212350612005433,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0005946577954782356,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          594.6577954782357,
+          87.34501566073419
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.2788799457396633,
+        "h_scale": 1.0425787980542494,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 0.01417336641906027
+    },
+    {
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 7.8481349046830475,
+        "correlationMatrix": [
+          [
+            1.0,
+            -0.09003806330813002
+          ],
+          [
+            -0.09003806330813004,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.09003806330813002,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0009338256325256625,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          933.8256325256625,
+          118.98694962142419
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.9414408486740823,
+        "h_scale": 1.0502292495680912,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 0.024486368137063414
+    },
+    {
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 8.58080300990193,
+        "correlationMatrix": [
+          [
+            1.0000000000000002,
+            -0.27194685529800927
+          ],
+          [
+            -0.27194685529800916,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.27194685529800927,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0008200454092574284,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          820.0454092574284,
+          95.56744378249057
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.0317072174740365,
+        "h_scale": 0.9736093939579168,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S02",
+      "trajectoryFitMaeC": 0.06989410938229541
+    },
+    {
+      "buildingId": "B01",
+      "diagnostic": {
+        "conditionNumber": 7.00327264828195,
+        "correlationMatrix": [
+          [
+            1.0,
+            -0.402153239169602
+          ],
+          [
+            -0.40215323916960205,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.402153239169602,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0006488243929568888,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          648.8243929568888,
+          92.64588508003598
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.1439543614389447,
+        "h_scale": 1.0195576545034495,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 0.048665797989382385
+    },
+    {
+      "buildingId": "B06",
+      "diagnostic": {
+        "conditionNumber": 7.483301795003394,
+        "correlationMatrix": [
+          [
+            0.9999999999999999,
+            -0.0964366314144737
+          ],
+          [
+            -0.0964366314144737,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.0964366314144737,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0007472578215671733,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          747.2578215671733,
+          99.85669989497389
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 1.3067089597553498,
+        "h_scale": 1.0722044229252197,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 0.003962436462312906
+    },
+    {
+      "buildingId": "B11",
+      "diagnostic": {
+        "conditionNumber": 8.455010824023717,
+        "correlationMatrix": [
+          [
+            0.9999999999999998,
+            0.0044978291875211705
+          ],
+          [
+            0.0044978291875211705,
+            1.0
+          ]
+        ],
+        "maximumAbsoluteOffDiagonalCorrelation": 0.0044978291875211705,
+        "numericalRank": 2,
+        "parameterNames": [
+          "h_scale",
+          "c_scale"
+        ],
+        "rankTolerance": 0.0009099468134068145,
+        "scaledJacobianRows": 192,
+        "singularValues": [
+          909.9468134068145,
+          107.62219379084996
+        ]
+      },
+      "fittedScales": {
+        "c_scale": 0.9222518000799678,
+        "h_scale": 1.0589291831372893,
+        "solar_scale": 1.0,
+        "ua_scale": 1.0
+      },
+      "siteId": "P5-S03",
+      "trajectoryFitMaeC": 0.013537502177074242
+    }
+  ],
+  "selectionFrozenBeforeFinalCalibration": true,
+  "truthAccess": "simulation_truth loaded only after calibrate() returned, for recovery reporting",
+  "version": "p5-identifiability-results-v1"
+}

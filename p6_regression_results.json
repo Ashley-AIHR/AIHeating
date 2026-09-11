@@ -1,0 +1,74 @@
+{
+  "P5RegressionPassed": true,
+  "P6Gates": {
+    "failed": 0,
+    "passed": 40,
+    "skipped": 0
+  },
+  "P6RegistryErrors": [],
+  "browserUITests": {
+    "reason": "P6 made no UI-visible change; browser tests are not required",
+    "skipped": 1
+  },
+  "commands": [
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python -m pytest physical_core/tests/test_p6.py -q",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P6 unit tests",
+      "output": ".....                                                                    [100%]\n=============================== warnings summary ===============================\ntests/test_p6.py::test_mpc_solution_is_constrained_verified_and_deterministic\ntests/test_p6.py::test_infeasible_qp_returns_explicit_nonoptimal_fallback\ntests/test_p6.py::test_ablation_modes_keep_disabled_actuators_on_reference\n  /Users/yl/Documents/Codex/Heat/physical_core/src/ai_heating_core/p6/mpc.py:244: UserWarning: The problem includes expressions that don't support CPP backend. Defaulting to the SCIPY backend for canonicalization.\n    problem.solve(solver=\"OSQP\", warm_start=self.solver[\"warmStart\"],\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n5 passed, 3 warnings in 0.56s\n",
+      "passed": 5,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p6_evaluation.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P6 linearisation, safety, solver and canonical gates",
+      "output": "p6 canonical normal_winter\np6 canonical cold_wave\np6 canonical rapid_warming\np6 canonical sunny_winter\np6 canonical hydraulic_imbalance\n{\n  \"linearisation\": {\n    \"indoor3hMaeC\": 0.0008784896981649723,\n    \"indoor3hMaxErrorC\": 0.01031835322134711,\n    \"meanHeatSupplyRelativeError\": 0.0007965173918923566,\n    \"meanZoneFlowRelativeError\": 0.001134831219790685\n  },\n  \"safety\": [\n    {\n      \"case\": \"feasible_active\",\n      \"minimumIndoorC\": 19.08585249629691,\n      \"fallback\": \"not_used\"\n    },\n    {\n      \"case\": \"infeasible_fallback\",\n      \"minimumIndoorC\": 18.418076083563328,\n      \"fallback\": \"fallback_unverified\"\n    }\n  ],\n  \"rapid\": {\n    \"traditional\": {\n      \"scenarioId\": \"rapid_warming\",\n      \"controllerVersion\": \"traditional-v1.2\",\n      \"metricDefinitionVersion\": \"building-time-endpoints-lower-percentiles-v1\",\n      \"evaluationHours\": 24,\n      \"frameCount\": 288,\n      \"complianceRate\": 1.0,\n      \"comfortRate\": 0.027777777777777776,\n      \"overheatingRate\": 0.6192129629629629,\n      \"severeOverheatingRate\": 0.0,\n      \"underheatingRate\": 0.0,\n      \"minimumIndoorC\": 21.71645497968269,\n      \"maximumIndoorC\": 24.32983599785113,\n      \"P10C\": 22.241745380921056,\n      \"P50C\": 23.16591502748843,\n      \"P90C\": 23.792137034838053,\n      \"temperatureSpreadC\": 1.5503916539169964,\n      \"heatEnergyMWh\": 8.372903019015443,\n      \"pumpElectricityKWh\": 23.407319099307674,\n      \"excessDeliveredHeatMWh\": 1.479514848463191,\n      \"excessHeatLabel\": \"Excess Delivered Heat Above Instantaneous Required Load\",\n      \"hydraulicBalanceIndex\": 0.9437243678953864,\n      \"solverFailureCount\": 0,\n      \"requiredHeatEnergyMWh\": 7.0107006541666665,\n      \"actualHeatSupplyMeanMW\": 0.3488709591256434,\n      \"requiredHeatLoadMeanMW\": 0.2921125272569445,\n      \"zoneMeanIndoorC\": {\n        \"near\": 23.166831039957074,\n        \"mid\": 23.12006359929832,\n        \"far\": 23.03835804755363\n      },\n      \"allControlsLegal\": true\n    },\n    \"preview\": {\n      \"P10C\": 22.13112791281203,\n      \"P50C\": 22.829081170172522,\n      \"P90C\": 23.530342351279682,\n      \"actualHeatSupplyMeanMW\": 0.33313486975223616,\n      \"allControlsLegal\": true,\n      \"comfortRate\": 0.041666666666666664,\n      \"complianceRate\": 1.0,\n      \"controllerVersion\": \"traditional-v1.2\",\n      \"evaluationHours\": 24,\n      \"excessDeliveredHeatMWh\": 1.2512585197716486,\n      \"excessHeatLabel\": \"Excess Delivered Heat Above Instantaneous Required Load\",\n      \"frameCount\": 288,\n      \"heatEnergyMWh\": 7.995236874053668,\n      \"hydraulicBalanceIndex\": 0.9437243678953864,\n      \"maximumIndoorC\": 24.146812913215744,\n      \"metricDefinitionVersion\": \"building-time-endpoints-lower-percentiles-v1\",\n      \"minimumIndoorC\": 21.71645497968269,\n      \"overheatingRate\": 0.37818287037037035,\n      \"pumpElectricityKWh\": 21.57251263029436,\n      \"requiredHeatEnergyMWh\": 7.0107006541666665,\n      \"requiredHeatLoadMeanMW\": 0.2921125272569445,\n      \"scenarioId\": \"rapid_warming\",\n      \"severeOverheatingRate\": 0.0,\n      \"solverFailureCount\": 0,\n      \"temperatureSpreadC\": 1.3992144384676521,\n      \"underheatingRate\": 0.0,\n      \"zoneMeanIndoorC\": {\n        \"far\": 22.743701411041265,\n        \"mid\": 22.84338526518644,\n        \"near\": 22.927731487513945\n      }\n    },\n    \"mpc\": {\n      \"scenarioId\": \"rapid_warming\",\n      \"controllerVersion\": \"p6-mpc-v1\",\n      \"metricDefinitionVersion\": \"building-time-endpoints-lower-percentiles-v1\",\n      \"evaluationHours\": 24,\n      \"frameCount\": 288,\n      \"complianceRate\": 1.0,\n      \"comfortRate\": 0.06597222222222222,\n      \"overheatingRate\": 0.30844907407407407,\n      \"severeOverheatingRate\": 0.0,\n      \"underheatingRate\": 0.0,\n      \"minimumIndoorC\": 21.653497405055177,\n      \"maximumIndoorC\": 24.04526296665311,\n      \"P10C\": 22.08732326148903,\n      \"P50C\": 22.718472706605823,\n      \"P90C\": 23.44521116593502,\n      \"temperatureSpreadC\": 1.3578879044459917,\n      \"heatEnergyMWh\": 7.874496769976794,\n      \"pumpElectricityKWh\": 21.503223814755774,\n      \"excessDeliveredHeatMWh\": 1.184468923170793,\n      \"excessHeatLabel\": \"Excess Delivered Heat Above Instantaneous Required Load\",\n      \"hydraulicBalanceIndex\": 0.9174970443901245,\n      \"solverFailureCount\": 0,\n      \"requiredHeatEnergyMWh\": 7.0107006541666665,\n      \"actualHeatSupplyMeanMW\": 0.3281040320823664,\n      \"requiredHeatLoadMeanMW\": 0.2921125272569445,\n      \"zoneMeanIndoorC\": {\n        \"near\": 22.77356097060558,\n        \"mid\": 22.76143576544911,\n        \"far\": 22.707696409063164\n      },\n      \"allControlsLegal\": true\n    },\n    \"objective\": {\n      \"traditional\": 1.5994625856617644,\n      \"preview\": 1.0730862219450215,\n      \"mpc\": 0.9236478015132947\n    }\n  },\n  \"performance\": {\n    \"version\": \"p6-solver-performance-v1\",\n    \"decisionCount\": 160,\n    \"medianEndToEndS\": 0.5208861874998547,\n    \"p95EndToEndS\": 1.014477079500648,\n    \"maximumEndToEndS\": 1.0446297500020592,\n    \"solver\": \"OSQP\",\n    \"statusCounts\": {\n      \"optimal\": 151,\n      \"optimal_inaccurate\": 2,\n      \"user_limit\": 7\n    },\n    \"medianIterations\": 8512.5,\n    \"verificationFailureCount\": 0,\n    \"relinearisationCount\": 0,\n    \"fallbackCount\": 7,\n    \"warmStart\": false,\n    \"reviewTargetP95S\": 5.0\n  },\n  \"gates\": {\n    \"passed\": 40,\n    \"failed\": 0\n  }\n}\n",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p5_regression.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P5 and inherited P4/P3/P2/P1A/P0 regression",
+      "output": "P5 identifiability and dataset gates: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP5 calibration and prediction gates: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP5 tests: exit 0; {'passed': 10, 'failed': 0, 'skipped': 0}\nP4 UI/provider invariants: exit 0; {'passed': 20, 'failed': 0, 'skipped': 0}\nP4 artifact and hash verification: exit 0; {'passed': 32, 'failed': 0, 'skipped': 0}\nP4/P3/P2/P1A/P0 inherited regression: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP5 regression: PASS\n",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "npm run test:p4-alignment",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P4 UI data alignment invariants",
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test:p4-alignment\n> node scripts/p4-ui-alignment-invariants.mjs\n\nPASS UI-A1 Simulation route/provider\nPASS UI-A2 No active mock label\nPASS UI-A3 Control-state semantics\nPASS UI-A4 Display precision\nPASS UI-A5 10:30 snapshot semantics\nPASS UI-A6 Explicit +2h Overview horizon\nPASS UI-A7 Full-day VERIFY label\nPASS UI-A8 Provider-backed 1/2/3/6h predictions\nPASS UI-A9 Simulation-derived distribution\nPASS UI-A10 Separate horizon concepts\nPASS UI-A11 Accepted objective source\nPASS UI-A12 Flow-dependent delay semantics\nPASS UI-A13 Shared cross-page provider\nPASS UI-A14 EN/ZH key parity\nPASS UI-A15 Frozen P0 domain/modes\nP4 UI alignment gates: 15 passed, 0 failed, 0 skipped\n",
+      "passed": 15,
+      "skipped": 0
+    }
+  ],
+  "freezeErrorsAfter": [],
+  "freezeErrorsBefore": [],
+  "inheritedRegression": {
+    "P1AGates": {
+      "passed": 32,
+      "total": 32
+    },
+    "P2Gates": {
+      "passed": 20,
+      "total": 20
+    },
+    "P3Gates": {
+      "datasetIntegrityVerifiedBy": "P4-P1",
+      "passed": 14,
+      "total": 14
+    },
+    "P4Gates": {
+      "passed": 32,
+      "total": 32
+    }
+  },
+  "passed": true,
+  "phase": "P6 regression"
+}

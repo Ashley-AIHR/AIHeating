@@ -1,0 +1,19 @@
+{
+  "version": "p4-preview-objective-v0",
+  "frozenBeforeCanonicalEvaluation": true,
+  "hardConstraint": "minimum projected indoor temperature must be >=18C unless every policy including Traditional is infeasible",
+  "normalization": {
+    "avoidableOversupply": "MWh divided by predicted demand MWh, floor denominator 0.001",
+    "pumpElectricity": "kWh divided by Traditional-continuation kWh, floor denominator 0.001",
+    "temperatureDegreeHours": "mean per building across the 3h rollout",
+    "controlMovement": "sum normalized absolute decision-boundary changes"
+  },
+  "weights": {
+    "normalizedAvoidableOversupply": 1.0,
+    "normalizedPumpElectricity": 0.15,
+    "mildOverheatingDegreeHoursAbove23": 2.0,
+    "severeOverheatingDegreeHoursAbove25": 8.0,
+    "belowComfortDegreeHoursBelow20": 1.0,
+    "normalizedControlMovement": 0.05
+  }
+}

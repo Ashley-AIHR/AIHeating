@@ -1,0 +1,145 @@
+{
+  "P2IntegrityErrors": [],
+  "P3IntegrityErrors": [],
+  "P4ArtifactHashErrors": [],
+  "P4Gates": {
+    "failed": 0,
+    "passed": 32,
+    "skipped": 0
+  },
+  "P5Gates": {
+    "failed": 0,
+    "passed": 32,
+    "skipped": 0
+  },
+  "browserUITests": {
+    "reason": "P5 made no UI-visible change; browser run not required",
+    "skipped": 1
+  },
+  "commands": [
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p5_identifiability.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P5 identifiability and dataset gates",
+      "output": "{\n  \"p3Decision\": \"C\",\n  \"datasetSites\": 31,\n  \"attempts\": 31,\n  \"identifiability\": {\n    \"pilotCount\": 9,\n    \"minimumRank\": 4,\n    \"maximumConditionNumber\": 424.3984574879752,\n    \"maximumAbsoluteCorrelation\": 0.9999314232258438,\n    \"medianTrajectoryFitMaeC\": 5.874285364434092e-07,\n    \"medianRecoveryError\": {\n      \"h_scale\": 1.025938201493215e-05,\n      \"c_scale\": 8.670257043097429e-06,\n      \"ua_scale\": 1.3462715697798444e-05,\n      \"solar_scale\": 1.0706649153369163e-05\n    }\n  },\n  \"selected\": [\n    \"h_scale\",\n    \"c_scale\"\n  ]\n}\n",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p5_calibration.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P5 calibration and prediction gates",
+      "output": "{\n  \"gates\": {\n    \"passed\": 32,\n    \"failed\": 0\n  },\n  \"oracleMaeC\": {\n    \"30\": 0.002210797963695856,\n    \"60\": 0.0041807913436585865,\n    \"120\": 0.007130302770107302,\n    \"180\": 0.009027683823241095,\n    \"360\": 0.014376788949166363\n  },\n  \"forecastMaeC\": {\n    \"30\": 0.008477820952584158,\n    \"60\": 0.014986455572840361,\n    \"120\": 0.027023413304082068,\n    \"180\": 0.0378666943106523,\n    \"360\": 0.06459446306513711\n  },\n  \"worstBuilding\": {\n    \"180\": 0.014195999479281341,\n    \"360\": 0.023501583861840102\n  },\n  \"transportShadow\": {\n    \"aligned3hOracleMaeC\": 0.009027683823241095,\n    \"stationSupplySameTime3hOracleMaeC\": 0.02040902869274272,\n    \"errorWorsened\": true,\n    \"selectedInput\": \"P1A FIFO delivered zone supply\"\n  },\n  \"coverage\": [\n    {\n      \"mode\": \"oracle_exogenous\",\n      \"horizonMinutes\": 30,\n      \"coverage\": 0.9286274509803921,\n      \"meanWidthC\": 0.01258517566826356\n    },\n    {\n      \"mode\": \"oracle_exogenous\",\n      \"horizonMinutes\": 60,\n      \"coverage\": 0.9280392156862745,\n      \"meanWidthC\": 0.023703902456460924\n    },\n    {\n      \"mode\": \"oracle_exogenous\",\n      \"horizonMinutes\": 120,\n      \"coverage\": 0.927843137254902,\n      \"meanWidthC\": 0.040460956578137086\n    },\n    {\n      \"mode\": \"oracle_exogenous\",\n      \"horizonMinutes\": 180,\n      \"coverage\": 0.9301960784313725,\n      \"meanWidthC\": 0.050880650646064396\n    },\n    {\n      \"mode\": \"oracle_exogenous\",\n      \"horizonMinutes\": 360,\n      \"coverage\": 0.9319607843137255,\n      \"meanWidthC\": 0.08286471564294118\n    },\n    {\n      \"mode\": \"forecast_driven\",\n      \"horizonMinutes\": 30,\n      \"coverage\": 0.9556862745098039,\n      \"meanWidthC\": 0.049807308072495005\n    },\n    {\n      \"mode\": \"forecast_driven\",\n      \"horizonMinutes\": 60,\n      \"coverage\": 0.9429411764705883,\n      \"meanWidthC\": 0.0836319284293765\n    },\n    {\n      \"mode\": \"forecast_driven\",\n      \"horizonMinutes\": 120,\n      \"coverage\": 0.937843137254902,\n      \"meanWidthC\": 0.13692958219108675\n    },\n    {\n      \"mode\": \"forecast_driven\",\n      \"horizonMinutes\": 180,\n      \"coverage\": 0.932156862745098,\n      \"meanWidthC\": 0.18343950007950127\n    },\n    {\n      \"mode\": \"forecast_driven\",\n      \"horizonMinutes\": 360,\n      \"coverage\": 0.9641176470588235,\n      \"meanWidthC\": 0.3332753908031094\n    }\n  ]\n}\n",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python -m pytest physical_core/tests/test_p5.py -q",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P5 tests",
+      "output": "..........                                                               [100%]\n10 passed in 0.29s\n",
+      "passed": 10,
+      "skipped": 0
+    },
+    {
+      "command": "npx tsx scripts/p4-invariants.ts",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P4 UI/provider invariants",
+      "output": "PASS provider version is explicit\nPASS scenario is canonical Rapid Daytime Warming\nPASS simulation and forecast times agree\nPASS all required horizons are exposed\nPASS every interval brackets its point\nPASS provider identifies selected frozen model\nPASS provider test MAE matches evidence\nPASS provider comparison matches canonical preview\nPASS provider comparison matches canonical traditional\nPASS canonical initial state is shared\nPASS preview controls stayed legal\nPASS preview preserved compliance\nPASS preview reduced heat in primary benchmark\nPASS preview reduced overheating in primary benchmark\nPASS UI imports provider boundary\nPASS UI renders the five-step journey\nPASS UI exposes model intervals\nPASS UI avoids production claims\nPASS visible optimised label says Preview\nPASS UI explicitly says not final MPC\nP4 UI/provider invariant tests: 20 passed, 0 failed, 0 skipped\n",
+      "passed": 20,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p4_gates.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P4 artifact and hash verification",
+      "output": "P4 Gates: 32 passed, 0 failed, 0 skipped\n",
+      "passed": 32,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python physical_core/scripts/run_p4_regression.py",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P4/P3/P2/P1A/P0 inherited regression",
+      "output": "P4 model/leakage/Preview tests: exit 0; {'passed': 11, 'failed': 0, 'skipped': 0}\nP3 tests: exit 0; {'passed': 7, 'failed': 0, 'skipped': 0}\nP2 tests: exit 0; {'passed': 34, 'failed': 0, 'skipped': 0}\nP1A tests: exit 0; {'passed': 84, 'failed': 0, 'skipped': 0}\nP0 typecheck: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP0 tests: exit 0; {'passed': 62, 'failed': 0, 'skipped': 0}\nP0 build: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP4 regression: PASS\n",
+      "passed": 0,
+      "skipped": 0
+    }
+  ],
+  "freezeErrorsAfter": [],
+  "freezeErrorsBefore": [],
+  "inheritedCommandEvidence": [
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python -m pytest physical_core/tests/test_p4.py -q",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P4 model/leakage/Preview tests",
+      "output": "...........                                                              [100%]\n11 passed in 0.16s\n",
+      "passed": 11,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python -m pytest physical_core/tests/test_p3_dataset.py -q",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P3 tests",
+      "output": ".......                                                                  [100%]\n7 passed in 0.72s\n",
+      "passed": 7,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p1_2_regression.py p2",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P2 tests",
+      "output": "Fixture override: physical-fixture-v1.2; assertions/thresholds unchanged\n..................................                                       [100%]\n34 passed in 2.66s\n",
+      "passed": 34,
+      "skipped": 0
+    },
+    {
+      "command": "/tmp/heat-uv-cache/builds-v0/.tmpkw2lJf/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p1_2_regression.py p1a",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P1A tests",
+      "output": "Fixture override: physical-fixture-v1.2; assertions/thresholds unchanged\n........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.35s\n",
+      "passed": 84,
+      "skipped": 0
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P0 typecheck",
+      "output": "",
+      "passed": null,
+      "skipped": 0
+    },
+    {
+      "command": "npm run test",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P0 tests",
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n",
+      "passed": 62,
+      "skipped": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "failed": 0,
+      "label": "P0 build",
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 21 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-BJsHvksU.css   20.64 kB \u2502 gzip:  5.36 kB\ndist/assets/index-DOPQunqN.js   263.50 kB \u2502 gzip: 82.72 kB\n\n\u2713 built in 49ms\n",
+      "passed": null,
+      "skipped": 0
+    }
+  ],
+  "inheritedRegressionPassed": true,
+  "passed": true,
+  "phase": "P5 regression"
+}

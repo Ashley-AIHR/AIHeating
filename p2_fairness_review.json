@@ -1,0 +1,109 @@
+{
+  "selfReviewStatus": "FAIR_WITH_DISCLOSED_LIMITATIONS",
+  "freezeEligible": true,
+  "externalReviewRequired": true,
+  "curveChanges": [],
+  "questions": [
+    {
+      "question": "Is the baseline intentionally weak?",
+      "finding": "No. Supplied recommended curves are unchanged; area-share commissioning improves the network. No AI comparison exists."
+    },
+    {
+      "question": "Does it use current outdoor conditions sensibly?",
+      "finding": "Yes. Piecewise-linear outdoor reset and pump schedules, recalculated at actual 30-minute boundaries."
+    },
+    {
+      "question": "Does it heat more when colder?",
+      "finding": "Yes. Raw supply/pump curves are monotonic; Cold Wave actions and delivered heat are measured."
+    },
+    {
+      "question": "Does it back off when warmer?",
+      "finding": "Yes. Raw targets fall; applied values follow only documented slew and interval constraints."
+    },
+    {
+      "question": "Does it use reasonable fixed commissioning?",
+      "finding": "Yes. Static area shares at 45 Hz, limiting valve 85%, practical 5pp rounding; valves fixed at 50/60/85%."
+    },
+    {
+      "question": "Does it violate comfort simply to save energy?",
+      "finding": "No energy minimisation is performed. Normal comfort is 0% and overheating 67.10%, disclosed as a real limitation of these curves with the heterogeneous accepted building fixture, not an energy-saving target."
+    },
+    {
+      "question": "Was it tuned using stress scenarios?",
+      "finding": "No. Normal and Cold Wave were evaluated before the three stress families; no breakpoint was changed using any scenario."
+    },
+    {
+      "question": "Does it use future information?",
+      "finding": "No. Controller signature admits only timestamp/current outdoor/self state; paired differing-future tests prove identical actions."
+    },
+    {
+      "question": "Is an arbitrary delay added?",
+      "finding": "No. Only 30-minute updates, frozen slew limits, accepted FIFO transit and building inertia."
+    },
+    {
+      "question": "Is AI logic hidden inside it?",
+      "finding": "No. No predictor, optimiser, indoor/solar feedback or forbidden dependency is present."
+    }
+  ],
+  "staticNearZoneFeasibility": {
+    "B01": {
+      "insulation": "High",
+      "supplyNeededFor18C": 33.21154190955261,
+      "supplyCeilingFor25C": 45.62581953837642
+    },
+    "B02": {
+      "insulation": "High",
+      "supplyNeededFor18C": 33.21154190955261,
+      "supplyCeilingFor25C": 45.62581953837641
+    },
+    "B03": {
+      "insulation": "Low",
+      "supplyNeededFor18C": 51.001311261402265,
+      "supplyCeilingFor25C": 68.82986651904989
+    },
+    "B04": {
+      "insulation": "High",
+      "supplyNeededFor18C": 33.21154190955261,
+      "supplyCeilingFor25C": 45.62581953837642
+    }
+  },
+  "diagnosticConditions": {
+    "outdoorC": -5,
+    "solarWm2": 0,
+    "pumpHz": 44.0,
+    "fixedValves": [
+      0.5,
+      0.6,
+      0.85
+    ]
+  },
+  "normalSummary": {
+    "scenarioId": "normal_winter",
+    "controllerVersion": "traditional-v1.0",
+    "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+    "evaluationHours": 24,
+    "frameCount": 288,
+    "complianceRate": 0.984375,
+    "comfortRate": 0.0,
+    "overheatingRate": 0.6710069444444444,
+    "severeOverheatingRate": 0.25,
+    "underheatingRate": 0.015625,
+    "minimumIndoorC": 17.92683134799679,
+    "maximumIndoorC": 29.065108807953738,
+    "P10C": 18.410923401669873,
+    "P50C": 23.161718275320148,
+    "P90C": 28.680672416844427,
+    "temperatureSpreadC": 10.269749015174554,
+    "heatEnergyMWh": 9.978827334070946,
+    "pumpElectricityKWh": 26.001787725445993,
+    "excessDeliveredHeatMWh": 0.8725489340709457,
+    "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+    "hydraulicBalanceIndex": 0.9962228105057934,
+    "solverFailureCount": 0
+  },
+  "nonBlockingIssues": [
+    "Synthetic plant and conventional curves are uncalibrated",
+    "High insulation buildings severely overheat while low insulation buildings approach compliance floor",
+    "No within-zone individual balancing or indoor feedback is available in this accepted benchmark scope"
+  ]
+}

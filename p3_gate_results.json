@@ -1,0 +1,491 @@
+{
+  "coverage": {
+    "c": {
+      "count": 6000,
+      "max": 1.1999744646786608,
+      "min": 0.8002168168113921
+    },
+    "internal_gain": {
+      "count": 6000,
+      "max": 1.1999916362887162,
+      "min": 0.800033725389339
+    },
+    "kpipe": {
+      "count": 1500,
+      "max": 1.199752882178811,
+      "min": 0.8003211350320538
+    },
+    "kvalve": {
+      "count": 1500,
+      "max": 1.1999778276229323,
+      "min": 0.8000168372754198
+    },
+    "pump_curve": {
+      "count": 500,
+      "max": 1.0976361916678168,
+      "min": 0.9004119843815218
+    },
+    "pump_head": {
+      "count": 500,
+      "max": 1.0999091218746717,
+      "min": 0.9000211557807318
+    },
+    "r": {
+      "count": 6000,
+      "max": 1.1999902262078919,
+      "min": 0.8000524046189603
+    },
+    "radiator_margin": {
+      "count": 6000,
+      "max": 1.099990174072146,
+      "min": 0.9000572075233018
+    },
+    "solar": {
+      "count": 6000,
+      "max": 1.1999842585652583,
+      "min": 0.8000143322997523
+    }
+  },
+  "datasetVersion": "p3-dataset-v1.0",
+  "episodeCount": 505,
+  "familySplitCounts": {
+    "benchmark_holdout:cold_wave": 1,
+    "benchmark_holdout:hydraulic_imbalance": 1,
+    "benchmark_holdout:normal_winter": 1,
+    "benchmark_holdout:rapid_warming": 1,
+    "benchmark_holdout:sunny_winter": 1,
+    "test:cold_wave": 15,
+    "test:hydraulic_imbalance": 15,
+    "test:normal_winter": 15,
+    "test:rapid_warming": 15,
+    "test:sunny_winter": 15,
+    "train:cold_wave": 70,
+    "train:hydraulic_imbalance": 70,
+    "train:normal_winter": 70,
+    "train:rapid_warming": 70,
+    "train:sunny_winter": 70,
+    "validation:cold_wave": 15,
+    "validation:hydraulic_imbalance": 15,
+    "validation:normal_winter": 15,
+    "validation:rapid_warming": 15,
+    "validation:sunny_winter": 15
+  },
+  "freezeErrors": [],
+  "gates": [
+    {
+      "description": "Required episode counts",
+      "gate": "B1",
+      "measured": {
+        "failures": [],
+        "splits": {
+          "benchmark_holdout": 5,
+          "test": 75,
+          "train": 350,
+          "validation": 75
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Scenario balance",
+      "gate": "B2",
+      "measured": {
+        "familySplit": {
+          "benchmark_holdout:cold_wave": 1,
+          "benchmark_holdout:hydraulic_imbalance": 1,
+          "benchmark_holdout:normal_winter": 1,
+          "benchmark_holdout:rapid_warming": 1,
+          "benchmark_holdout:sunny_winter": 1,
+          "test:cold_wave": 15,
+          "test:hydraulic_imbalance": 15,
+          "test:normal_winter": 15,
+          "test:rapid_warming": 15,
+          "test:sunny_winter": 15,
+          "train:cold_wave": 70,
+          "train:hydraulic_imbalance": 70,
+          "train:normal_winter": 70,
+          "train:rapid_warming": 70,
+          "train:sunny_winter": 70,
+          "validation:cold_wave": 15,
+          "validation:hydraulic_imbalance": 15,
+          "validation:normal_winter": 15,
+          "validation:rapid_warming": 15,
+          "validation:sunny_winter": 15
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No split leakage",
+      "gate": "B3",
+      "measured": {
+        "canonicalLeaks": [],
+        "collisions": [],
+        "holdoutErrors": [],
+        "passed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Canonical holdout isolation",
+      "gate": "B4",
+      "measured": {
+        "canonicalLeaks": [],
+        "collisions": [],
+        "holdoutErrors": [],
+        "passed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No duplicate episodes",
+      "gate": "B5",
+      "measured": {
+        "episodeIds": 505,
+        "manifestIdentities": 505,
+        "uniqueManifestHashes": 505
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Physical QA",
+      "gate": "B6",
+      "measured": {
+        "failed": []
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Numeric QA",
+      "gate": "B7",
+      "measured": {
+        "episodes": 505
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Timestamp QA",
+      "gate": "B8",
+      "measured": {
+        "schemaErrors": [],
+        "stepMinutes": 5
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Label alignment",
+      "gate": "B9",
+      "measured": {
+        "episodes": 505
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Forecast separation",
+      "gate": "B10",
+      "measured": {
+        "columns": [
+          "dataset_version",
+          "episode_id",
+          "split",
+          "scenario_family",
+          "scenario_variant_id",
+          "physical_fixture_base_version",
+          "parameter_set_id",
+          "parameter_set_hash",
+          "controller_version",
+          "scenario_version",
+          "generator_version",
+          "seed",
+          "simulation_time",
+          "forecast_as_of",
+          "forecast_target_time",
+          "horizon_minutes",
+          "forecast_outdoor_temperature_c",
+          "forecast_solar_radiation_w_m2",
+          "forecast_wind_m_s",
+          "forecast_model_version",
+          "forecast_seed"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Distribution report data",
+      "gate": "B11",
+      "measured": {
+        "c": {
+          "count": 6000,
+          "max": 1.1999744646786608,
+          "min": 0.8002168168113921
+        },
+        "internal_gain": {
+          "count": 6000,
+          "max": 1.1999916362887162,
+          "min": 0.800033725389339
+        },
+        "kpipe": {
+          "count": 1500,
+          "max": 1.199752882178811,
+          "min": 0.8003211350320538
+        },
+        "kvalve": {
+          "count": 1500,
+          "max": 1.1999778276229323,
+          "min": 0.8000168372754198
+        },
+        "pump_curve": {
+          "count": 500,
+          "max": 1.0976361916678168,
+          "min": 0.9004119843815218
+        },
+        "pump_head": {
+          "count": 500,
+          "max": 1.0999091218746717,
+          "min": 0.9000211557807318
+        },
+        "r": {
+          "count": 6000,
+          "max": 1.1999902262078919,
+          "min": 0.8000524046189603
+        },
+        "radiator_margin": {
+          "count": 6000,
+          "max": 1.099990174072146,
+          "min": 0.9000572075233018
+        },
+        "solar": {
+          "count": 6000,
+          "max": 1.1999842585652583,
+          "min": 0.8000143322997523
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Scenario coverage",
+      "gate": "B12",
+      "measured": {
+        "c": {
+          "count": 6000,
+          "max": 1.1999744646786608,
+          "min": 0.8002168168113921
+        },
+        "internal_gain": {
+          "count": 6000,
+          "max": 1.1999916362887162,
+          "min": 0.800033725389339
+        },
+        "kpipe": {
+          "count": 1500,
+          "max": 1.199752882178811,
+          "min": 0.8003211350320538
+        },
+        "kvalve": {
+          "count": 1500,
+          "max": 1.1999778276229323,
+          "min": 0.8000168372754198
+        },
+        "pump_curve": {
+          "count": 500,
+          "max": 1.0976361916678168,
+          "min": 0.9004119843815218
+        },
+        "pump_head": {
+          "count": 500,
+          "max": 1.0999091218746717,
+          "min": 0.9000211557807318
+        },
+        "r": {
+          "count": 6000,
+          "max": 1.1999902262078919,
+          "min": 0.8000524046189603
+        },
+        "radiator_margin": {
+          "count": 6000,
+          "max": 1.099990174072146,
+          "min": 0.9000572075233018
+        },
+        "solar": {
+          "count": 6000,
+          "max": 1.1999842585652583,
+          "min": 0.8000143322997523
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Stratified deterministic replay",
+      "gate": "B13",
+      "measured": {
+        "test-cold_wave-000": true,
+        "test-cold_wave-001": true,
+        "test-hydraulic_imbalance-000": true,
+        "test-hydraulic_imbalance-001": true,
+        "test-normal_winter-000": true,
+        "test-normal_winter-001": true,
+        "test-rapid_warming-000": true,
+        "test-rapid_warming-001": true,
+        "test-sunny_winter-000": true,
+        "test-sunny_winter-001": true,
+        "train-cold_wave-000": true,
+        "train-cold_wave-001": true,
+        "train-hydraulic_imbalance-000": true,
+        "train-hydraulic_imbalance-001": true,
+        "train-normal_winter-000": true,
+        "train-normal_winter-001": true,
+        "train-rapid_warming-000": true,
+        "train-rapid_warming-001": true,
+        "train-sunny_winter-000": true,
+        "train-sunny_winter-001": true,
+        "validation-cold_wave-000": true,
+        "validation-cold_wave-001": true,
+        "validation-hydraulic_imbalance-000": true,
+        "validation-hydraulic_imbalance-001": true,
+        "validation-normal_winter-000": true,
+        "validation-normal_winter-001": true,
+        "validation-rapid_warming-000": true,
+        "validation-rapid_warming-001": true,
+        "validation-sunny_winter-000": true,
+        "validation-sunny_winter-001": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Dataset hashes",
+      "gate": "B14",
+      "measured": {
+        "episodeManifestHashesVerified": 505,
+        "hashErrors": [],
+        "schemaHash": "69e0bd1e52cbcf8b78cb46390f9d5a1bb5d7e59fb67909d55bc1b4c4856249d1",
+        "shardHashesVerified": 2525
+      },
+      "status": "PASS"
+    }
+  ],
+  "leakageAudit": {
+    "canonicalLeaks": [],
+    "collisions": [],
+    "holdoutErrors": [],
+    "passed": true
+  },
+  "passed": true,
+  "phase": "P3B",
+  "regression": {
+    "P1AGates": {
+      "passed": 32,
+      "total": 32
+    },
+    "P2Gates": {
+      "passed": 20,
+      "total": 20
+    },
+    "commands": [
+      {
+        "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python3 -m pytest physical_core/tests/test_p3_dataset.py -q",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P3 tests",
+        "output": ".......                                                                  [100%]\n7 passed in 0.71s\n",
+        "passed": 7,
+        "skipped": 0
+      },
+      {
+        "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python3 -m pytest physical_core/tests/test_physical_fixture_v1_2.py -q",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P1.2 tests",
+        "output": "....                                                                     [100%]\n4 passed in 0.01s\n",
+        "passed": 4,
+        "skipped": 0
+      },
+      {
+        "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python3 /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p1_2_regression.py p2",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P2 tests",
+        "output": "Fixture override: physical-fixture-v1.2; assertions/thresholds unchanged\n..................................                                       [100%]\n34 passed in 2.64s\n",
+        "passed": 34,
+        "skipped": 0
+      },
+      {
+        "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python3 /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p1_2_regression.py p1a",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P1A tests",
+        "output": "Fixture override: physical-fixture-v1.2; assertions/thresholds unchanged\n........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.35s\n",
+        "passed": 84,
+        "skipped": 0
+      },
+      {
+        "command": "npx tsc --noEmit",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P0 typecheck",
+        "output": "",
+        "passed": null,
+        "skipped": 0
+      },
+      {
+        "command": "npm run test",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P0 tests",
+        "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n",
+        "passed": 62,
+        "skipped": 0
+      },
+      {
+        "command": "npm run build",
+        "exitCode": 0,
+        "failed": 0,
+        "label": "P0 build",
+        "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-C2i2aTou.css   17.11 kB \u2502 gzip:  4.67 kB\ndist/assets/index-Dx143W9w.js   252.56 kB \u2502 gzip: 78.48 kB\n\n\u2713 built in 78ms\n",
+        "passed": null,
+        "skipped": 0
+      }
+    ],
+    "freezeErrorsAfter": [],
+    "freezeErrorsBefore": [],
+    "passed": true,
+    "phase": "P3 regression"
+  },
+  "replaySample": {
+    "test-cold_wave-000": true,
+    "test-cold_wave-001": true,
+    "test-hydraulic_imbalance-000": true,
+    "test-hydraulic_imbalance-001": true,
+    "test-normal_winter-000": true,
+    "test-normal_winter-001": true,
+    "test-rapid_warming-000": true,
+    "test-rapid_warming-001": true,
+    "test-sunny_winter-000": true,
+    "test-sunny_winter-001": true,
+    "train-cold_wave-000": true,
+    "train-cold_wave-001": true,
+    "train-hydraulic_imbalance-000": true,
+    "train-hydraulic_imbalance-001": true,
+    "train-normal_winter-000": true,
+    "train-normal_winter-001": true,
+    "train-rapid_warming-000": true,
+    "train-rapid_warming-001": true,
+    "train-sunny_winter-000": true,
+    "train-sunny_winter-001": true,
+    "validation-cold_wave-000": true,
+    "validation-cold_wave-001": true,
+    "validation-hydraulic_imbalance-000": true,
+    "validation-hydraulic_imbalance-001": true,
+    "validation-normal_winter-000": true,
+    "validation-normal_winter-001": true,
+    "validation-rapid_warming-000": true,
+    "validation-rapid_warming-001": true,
+    "validation-sunny_winter-000": true,
+    "validation-sunny_winter-001": true
+  },
+  "splitCounts": {
+    "benchmark_holdout": 5,
+    "test": 75,
+    "train": 350,
+    "validation": 75
+  }
+}

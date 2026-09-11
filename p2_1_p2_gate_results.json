@@ -1,0 +1,813 @@
+{
+  "fixtureVersion": "physical-fixture-v1.1",
+  "controllerVersion": "traditional-v1.1",
+  "inputAdapter": "Process-local static parameter/config/scenario providers; same Gate checks and thresholds",
+  "gates": [
+    {
+      "gate": "G2.1",
+      "description": "Weather compensation monotonicity",
+      "inputs": {
+        "outdoorRangeC": [
+          -20,
+          15
+        ],
+        "samples": 351
+      },
+      "baseline": 58.0,
+      "changedInput": "warming sweep",
+      "measured": {
+        "min": 40.0,
+        "max": 58.0,
+        "monotonicityViolations": 0
+      },
+      "threshold": {
+        "outputBounds": [
+          40,
+          60
+        ],
+        "violations": 0
+      },
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.2",
+      "description": "Pump policy monotonicity",
+      "inputs": {
+        "outdoorRangeC": [
+          -20,
+          15
+        ],
+        "samples": 351
+      },
+      "baseline": 48.0,
+      "changedInput": "warming sweep",
+      "measured": {
+        "min": 34.0,
+        "max": 48.0,
+        "monotonicityViolations": 0
+      },
+      "threshold": {
+        "outputBounds": [
+          30,
+          50
+        ],
+        "violations": 0
+      },
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.3",
+      "description": "Absolute equipment bounds",
+      "inputs": {
+        "scenarios": 5,
+        "frames": 1440
+      },
+      "baseline": "frozen limits",
+      "changedInput": "five complete evaluations",
+      "measured": {
+        "violations": 0
+      },
+      "threshold": {
+        "violations": 0
+      },
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.4",
+      "description": "Rate limits, 30-minute interval and fixed runtime valves",
+      "inputs": {
+        "physicalStepSeconds": 300,
+        "controlIntervalSeconds": 1800
+      },
+      "baseline": "evaluation initial applied state",
+      "changedInput": "all accepted transitions",
+      "measured": {
+        "rateViolations": 0,
+        "offBoundaryChanges": 0,
+        "valveChanges": 0,
+        "maxSupplyDeltaC": 0.9000000000000057,
+        "maxPumpDeltaHz": 0.9000000000000057
+      },
+      "threshold": {
+        "supplyMaxC": 2,
+        "pumpMaxHz": 2,
+        "runtimeValveChangePct": 0,
+        "offBoundaryChanges": 0
+      },
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.5",
+      "description": "No future-weather leakage",
+      "inputs": {
+        "timestamp": 0,
+        "commonStateHash": "6c0e279a78db3f0e0d82fdcf4e5e097f84ff3e47f5f519ee1adc346a9c4357c7"
+      },
+      "baseline": {
+        "controller_version": "traditional-v1.1",
+        "raw_supply_target_c": 53.4,
+        "applied_supply_c": 53.4,
+        "raw_pump_target_hz": 45.2,
+        "applied_pump_hz": 45.2,
+        "fixed_valves": [
+          0.5,
+          0.6,
+          0.85
+        ],
+        "last_boundary_s": 0,
+        "next_boundary_s": 1800
+      },
+      "changedInput": {
+        "futureHour1": {
+          "outdoor_c": 15.0,
+          "solar_w_m2": 900.0,
+          "wind_m_s": 10.0
+        }
+      },
+      "measured": {
+        "controllerOutputA": {
+          "controller_version": "traditional-v1.1",
+          "raw_supply_target_c": 53.4,
+          "applied_supply_c": 53.4,
+          "raw_pump_target_hz": 45.2,
+          "applied_pump_hz": 45.2,
+          "fixed_valves": [
+            0.5,
+            0.6,
+            0.85
+          ],
+          "last_boundary_s": 0,
+          "next_boundary_s": 1800
+        },
+        "controllerOutputB": {
+          "controller_version": "traditional-v1.1",
+          "raw_supply_target_c": 53.4,
+          "applied_supply_c": 53.4,
+          "raw_pump_target_hz": 45.2,
+          "applied_pump_hz": 45.2,
+          "fixed_valves": [
+            0.5,
+            0.6,
+            0.85
+          ],
+          "last_boundary_s": 0,
+          "next_boundary_s": 1800
+        },
+        "differentFutureWeather": true
+      },
+      "threshold": "outputs identical despite different future",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.6",
+      "description": "No indoor/prediction/AI feedback",
+      "inputs": {
+        "allowedSignature": [
+          "timestamp_s",
+          "outdoor_c",
+          "state"
+        ]
+      },
+      "baseline": "c5bce429c4ea4a0a26719ec7e3fa4c8add24c905577a70ad2de5ea8890afeefa",
+      "changedInput": {
+        "allInitialIndoorCAdded": 3
+      },
+      "measured": {
+        "changedStateActionsHash": "c5bce429c4ea4a0a26719ec7e3fa4c8add24c905577a70ad2de5ea8890afeefa",
+        "physicalSummaryChanged": true
+      },
+      "threshold": "same actions at all 48 boundaries; no indoor/AI argument",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.7",
+      "description": "Warm-up excluded from official metrics",
+      "inputs": {
+        "warmupHours": 96
+      },
+      "baseline": "lifetime accumulators include warmup",
+      "changedInput": "evaluate [0,86400] seconds",
+      "measured": {
+        "normal_winter": {
+          "firstEndSecond": 300,
+          "lastEndSecond": 86400,
+          "rows": 288,
+          "warmupHeatJ": 147975526922.9568,
+          "evaluationHeatJ": 35918160504.180725,
+          "lifetimeDifferenceErrorJ": 9.1552734375e-05
+        },
+        "cold_wave": {
+          "firstEndSecond": 300,
+          "lastEndSecond": 86400,
+          "rows": 288,
+          "warmupHeatJ": 139754470925.95285,
+          "evaluationHeatJ": 41361055911.83167,
+          "lifetimeDifferenceErrorJ": 0.00019073486328125
+        },
+        "rapid_warming": {
+          "firstEndSecond": 300,
+          "lastEndSecond": 86400,
+          "rows": 288,
+          "warmupHeatJ": 147975526922.9568,
+          "evaluationHeatJ": 31093832162.55419,
+          "lifetimeDifferenceErrorJ": 0.00011444091796875
+        },
+        "sunny_winter": {
+          "firstEndSecond": 300,
+          "lastEndSecond": 86400,
+          "rows": 288,
+          "warmupHeatJ": 142775080777.63525,
+          "evaluationHeatJ": 32743531641.782085,
+          "lifetimeDifferenceErrorJ": 0.000232696533203125
+        },
+        "hydraulic_imbalance": {
+          "firstEndSecond": 300,
+          "lastEndSecond": 86400,
+          "rows": 288,
+          "warmupHeatJ": 147975526922.9568,
+          "evaluationHeatJ": 35668837009.01928,
+          "lifetimeDifferenceErrorJ": 6.866455078125e-05
+        }
+      },
+      "threshold": {
+        "rowsPerCase": 288,
+        "firstEndSecond": 300,
+        "maxEnergyDifferenceErrorJ": 0.001
+      },
+      "status": "PASS",
+      "notes": "Exposure/percentiles are calculated only from these evaluation frames; no burn-in samples are passed to metrics."
+    },
+    {
+      "gate": "G2.8",
+      "description": "Warm-up convergence and documented fallback",
+      "inputs": {
+        "initialComparisonHours": [
+          72,
+          96
+        ]
+      },
+      "baseline": {
+        "hoursCompared": [
+          72,
+          96
+        ],
+        "perBuildingDifferenceC": {
+          "B01": 0.27236954885325915,
+          "B02": 0.31437329138086767,
+          "B03": 0.013759413985880542,
+          "B04": 0.3722103578679672,
+          "B05": 0.05743611872642518,
+          "B06": 0.0707908432241453,
+          "B07": 0.07944703292135102,
+          "B08": 0.08674939009544502,
+          "B09": 0.015057997365200748,
+          "B10": 0.0675367254122925,
+          "B11": 0.07556247664126303,
+          "B12": 0.08218018969782648
+        },
+        "maxIndoorDifferenceC": 0.3722103578679672,
+        "maxDeliveredSupplyDifferenceC": 0.0,
+        "maxFlowDifferenceM3s": 0.0,
+        "packetInventoriesIdentical": false,
+        "maxInventoryEnergyDifferenceJ": 3.5762786865234375e-07,
+        "maxInventoryVolumeDifferenceM3": 1.7763568394002505e-15,
+        "firstFrameStationReturnDifferenceC": 0.03744113261438997,
+        "thresholdC": 0.2,
+        "recommendedWarmupHours": 96
+      },
+      "changedInput": {
+        "officialWarmupHours": 96
+      },
+      "measured": {
+        "fallbackComparison": {
+          "hoursCompared": [
+            96,
+            120
+          ],
+          "perBuildingDifferenceC": {
+            "B01": 0.10363888309467129,
+            "B02": 0.12586237157497493,
+            "B03": 0.003678921387074041,
+            "B04": 0.1625925350525641,
+            "B05": 0.017630501124717313,
+            "B06": 0.02312344140943523,
+            "B07": 0.027444119226188946,
+            "B08": 0.03152247791413032,
+            "B09": 0.0035466786973259445,
+            "B10": 0.022223419137645806,
+            "B11": 0.026285335080256544,
+            "B12": 0.030061608817931074
+          },
+          "maxIndoorDifferenceC": 0.1625925350525641,
+          "maxDeliveredSupplyDifferenceC": 0.0,
+          "maxFlowDifferenceM3s": 0.0,
+          "packetInventoriesIdentical": false,
+          "maxInventoryEnergyDifferenceJ": 4.76837158203125e-07,
+          "maxInventoryVolumeDifferenceM3": 1.7763568394002505e-15,
+          "firstFrameStationReturnDifferenceC": 0.014503427246474132,
+          "thresholdC": 0.2,
+          "recommendedWarmupHours": 96
+        },
+        "selectedMaxIndoorDifferenceC": 0.1625925350525641
+      },
+      "threshold": {
+        "maxDifferenceC": 0.2,
+        "fallbackAllowed": 96
+      },
+      "status": "PASS",
+      "notes": "72h fails; 96h adopted per specification, independently checked against 120h. Original 0.2\u00b0C threshold unchanged."
+    },
+    {
+      "gate": "G2.9",
+      "description": "Normal Winter adequacy",
+      "inputs": {
+        "predeclaredComplianceMinimum": 0.95
+      },
+      "baseline": "recommended curves",
+      "changedInput": "96h warmup then 24h normal",
+      "measured": {
+        "scenarioId": "normal_winter",
+        "controllerVersion": "traditional-v1.1",
+        "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+        "evaluationHours": 24,
+        "frameCount": 288,
+        "complianceRate": 1.0,
+        "comfortRate": 0.0,
+        "overheatingRate": 0.5729166666666666,
+        "severeOverheatingRate": 0.25,
+        "underheatingRate": 0.0,
+        "minimumIndoorC": 18.48579253383841,
+        "maximumIndoorC": 28.482800728130947,
+        "P10C": 19.125622325516236,
+        "P50C": 23.08407862734782,
+        "P90C": 28.09305523642545,
+        "temperatureSpreadC": 8.967432910909213,
+        "heatEnergyMWh": 9.977266806716868,
+        "pumpElectricityKWh": 26.001787725445993,
+        "excessDeliveredHeatMWh": 0.8709884067168686,
+        "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+        "hydraulicBalanceIndex": 0.9962228105057934,
+        "solverFailureCount": 0
+      },
+      "threshold": {
+        "complianceMinimum": 0.95,
+        "solverFailures": 0
+      },
+      "status": "PASS",
+      "notes": "Comfort=0 and high overheating are disclosed in fairness review; no narrow comfort requirement or stress tuning imposed."
+    },
+    {
+      "gate": "G2.10",
+      "description": "Cold-wave causality",
+      "inputs": {
+        "case": "cold_wave"
+      },
+      "baseline": "previous control-boundary outdoor/target",
+      "changedInput": "falling current outdoor",
+      "measured": {
+        "comparedTransitions": 18,
+        "minimumSupplyDeltaC": 0.29999999999999716,
+        "minimumPumpDeltaHz": 0.19999999999999574
+      },
+      "threshold": "targets rise or hold",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.11",
+      "description": "Rapid-warming causality",
+      "inputs": {
+        "case": "rapid_warming"
+      },
+      "baseline": "prior raw target",
+      "changedInput": "increasing current outdoor",
+      "measured": {
+        "transitions": 12,
+        "largestRawSupplyChangeC": -0.7999999999999972
+      },
+      "threshold": "raw supply falls or holds; no added lag",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.12",
+      "description": "Solar cannot influence conventional actions",
+      "inputs": {
+        "outdoorAndStartingControllerIdentical": true
+      },
+      "baseline": "c5bce429c4ea4a0a26719ec7e3fa4c8add24c905577a70ad2de5ea8890afeefa",
+      "changedInput": {
+        "solarWm2Added": 300
+      },
+      "measured": {
+        "changedSolarActionsHash": "c5bce429c4ea4a0a26719ec7e3fa4c8add24c905577a70ad2de5ea8890afeefa",
+        "physicalHeatChanged": true
+      },
+      "threshold": "all actions identical",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.13",
+      "description": "Imbalance is a physical resistance disturbance",
+      "inputs": {
+        "fixedValves": [
+          0.5,
+          0.6,
+          0.85
+        ]
+      },
+      "baseline": {
+        "farPipeK": 2000000000.0,
+        "firstZoneFlowsM3s": [
+          0.0038438689038090895,
+          0.003756990589319157,
+          0.003916214340150946
+        ]
+      },
+      "changedInput": {
+        "farPipeMultiplier": 2
+      },
+      "measured": {
+        "firstZoneFlowsM3s": [
+          0.003990749866653793,
+          0.003900551779611274,
+          0.003269667404550739
+        ],
+        "solver": {
+          "status": "converged",
+          "normalized_residual": 0.0,
+          "iterations": 6,
+          "message": "`gtol` termination condition is satisfied."
+        },
+        "initialTemperaturesIdentical": true
+      },
+      "threshold": "same warm physical state, lower Far flow, solver converges, valves fixed",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.14",
+      "description": "Five 24-hour evaluations remain physically stable",
+      "inputs": {
+        "dtSeconds": 300
+      },
+      "baseline": "accepted P1A tolerances",
+      "changedInput": "five cases",
+      "measured": {
+        "normal_winter": {
+          "frames": 288,
+          "allFinite": true,
+          "allReturnsValid": true,
+          "minFlowM3s": 0.003557504363337608,
+          "minPumpW": 978.3676041980879,
+          "maxHydraulicResidual": 3.0413478861152326e-16,
+          "mass_residual": 1.1833737511273759e-16,
+          "heat_balance_residual": 1.9214534334424796e-15,
+          "pipe_heat_balance_residual": 6.871024643521695e-15,
+          "building_heat_balance_residual": 7.73218104164286e-14,
+          "pipe_volume_residual": 2.8441668496015247e-15
+        },
+        "cold_wave": {
+          "frames": 288,
+          "allFinite": true,
+          "allReturnsValid": true,
+          "minFlowM3s": 0.0036572474763288346,
+          "minPumpW": 1062.9890389052437,
+          "maxHydraulicResidual": 2.4750134849298585e-13,
+          "mass_residual": 1.1679695840535153e-16,
+          "heat_balance_residual": 1.8452755746283663e-15,
+          "pipe_heat_balance_residual": 5.488353490557051e-15,
+          "building_heat_balance_residual": 5.981747007263093e-14,
+          "pipe_volume_residual": 2.9938598416858152e-15
+        },
+        "rapid_warming": {
+          "frames": 288,
+          "allFinite": true,
+          "allReturnsValid": true,
+          "minFlowM3s": 0.0031585319113745123,
+          "minPumpW": 684.7334539680123,
+          "maxHydraulicResidual": 1.0511484785848551e-13,
+          "mass_residual": 1.3697653760627612e-16,
+          "heat_balance_residual": 2.3489959617074623e-15,
+          "pipe_heat_balance_residual": 8.803939298191166e-15,
+          "building_heat_balance_residual": 8.562444308822754e-14,
+          "pipe_volume_residual": 2.2453948812643613e-15
+        },
+        "sunny_winter": {
+          "frames": 288,
+          "allFinite": true,
+          "allReturnsValid": true,
+          "minFlowM3s": 0.003491008954677092,
+          "minPumpW": 924.5249332552503,
+          "maxHydraulicResidual": 2.390551130416141e-13,
+          "mass_residual": 1.259647640146552e-16,
+          "heat_balance_residual": 2.0357461498697945e-15,
+          "pipe_heat_balance_residual": 7.357469593995798e-15,
+          "building_heat_balance_residual": 6.952087158924982e-14,
+          "pipe_volume_residual": 5.987719683371631e-16
+        },
+        "hydraulic_imbalance": {
+          "frames": 288,
+          "allFinite": true,
+          "allReturnsValid": true,
+          "minFlowM3s": 0.0030960567459020266,
+          "minPumpW": 987.5351363623581,
+          "maxHydraulicResidual": 2.9111319225728784e-16,
+          "mass_residual": 1.4338946509806438e-16,
+          "heat_balance_residual": 2.0212128193158835e-15,
+          "pipe_heat_balance_residual": 6.945965707465245e-15,
+          "building_heat_balance_residual": 7.339756635440186e-14,
+          "pipe_volume_residual": 3.2932458258543967e-15
+        }
+      },
+      "threshold": {
+        "finite": true,
+        "massResidualLt": 1e-06,
+        "heatResidualLt": 1e-05,
+        "solverFailures": 0
+      },
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.15",
+      "description": "Reproducibility from identical serialized evaluation state",
+      "inputs": {
+        "scenarios": 5
+      },
+      "baseline": "first complete run",
+      "changedInput": "JSON round-trip and repeat",
+      "measured": {
+        "normal_winter": {
+          "originalSha256": "b87c5f641722e6f438aed83774813e40798b73c08225f15b14fa9277f5209de9",
+          "repeatSha256": "b87c5f641722e6f438aed83774813e40798b73c08225f15b14fa9277f5209de9",
+          "identical": true
+        },
+        "cold_wave": {
+          "originalSha256": "f585ee9183ac10fc73a74c540803ac4b10b7c178f78485f55e8881ffb2e3b220",
+          "repeatSha256": "f585ee9183ac10fc73a74c540803ac4b10b7c178f78485f55e8881ffb2e3b220",
+          "identical": true
+        },
+        "rapid_warming": {
+          "originalSha256": "15f133e40afe82c0fb24e73c151c25eff366444198b35c06f7ddd1a718013b47",
+          "repeatSha256": "15f133e40afe82c0fb24e73c151c25eff366444198b35c06f7ddd1a718013b47",
+          "identical": true
+        },
+        "sunny_winter": {
+          "originalSha256": "98b31f5931f9dc62db4d049f1387719cec00f847c7bafd88f6c57827ce923fdd",
+          "repeatSha256": "98b31f5931f9dc62db4d049f1387719cec00f847c7bafd88f6c57827ce923fdd",
+          "identical": true
+        },
+        "hydraulic_imbalance": {
+          "originalSha256": "f1ffd3a5714c79aa8ee2670d1689f6d15a486fb03c20b7053586dfea631e2b05",
+          "repeatSha256": "f1ffd3a5714c79aa8ee2670d1689f6d15a486fb03c20b7053586dfea631e2b05",
+          "identical": true
+        }
+      },
+      "threshold": "byte-identical serialized frame/action/metric output",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.16",
+      "description": "Controller state serialization",
+      "inputs": {
+        "retainedFields": [
+          "controller_version",
+          "raw_supply_target_c",
+          "applied_supply_c",
+          "raw_pump_target_hz",
+          "applied_pump_hz",
+          "fixed_valves",
+          "last_boundary_s",
+          "next_boundary_s"
+        ]
+      },
+      "baseline": {
+        "controller_version": "traditional-v1.1",
+        "raw_supply_target_c": 53.4,
+        "applied_supply_c": 53.4,
+        "raw_pump_target_hz": 45.2,
+        "applied_pump_hz": 45.2,
+        "fixed_valves": [
+          0.5,
+          0.6,
+          0.85
+        ],
+        "last_boundary_s": -1800,
+        "next_boundary_s": 0
+      },
+      "changedInput": "JSON serialize/restore",
+      "measured": {
+        "controller_version": "traditional-v1.1",
+        "raw_supply_target_c": 53.4,
+        "applied_supply_c": 53.4,
+        "raw_pump_target_hz": 45.2,
+        "applied_pump_hz": 45.2,
+        "fixed_valves": [
+          0.5,
+          0.6,
+          0.85
+        ],
+        "last_boundary_s": -1800,
+        "next_boundary_s": 0
+      },
+      "threshold": "state and next action identical",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.17",
+      "description": "Common physical initial-state export",
+      "inputs": {
+        "includes": "temperature, controls, clock, hydraulic warm start, FIFO packets, energies, controller, config/parameter identity"
+      },
+      "baseline": "original first frames",
+      "changedInput": "restore all five initial states",
+      "measured": {
+        "normal_winter": {
+          "originalFirstFrameHash": "67013df8cc1fab216ae8929cac64f76e0456663025d17853c9dc8a570c86214e",
+          "restoredFirstFrameHash": "67013df8cc1fab216ae8929cac64f76e0456663025d17853c9dc8a570c86214e"
+        },
+        "cold_wave": {
+          "originalFirstFrameHash": "a23521c92dea3b18edaf70b4b3bb38eda3bd084850cc23199841b5b21a6c2a1b",
+          "restoredFirstFrameHash": "a23521c92dea3b18edaf70b4b3bb38eda3bd084850cc23199841b5b21a6c2a1b"
+        },
+        "rapid_warming": {
+          "originalFirstFrameHash": "67013df8cc1fab216ae8929cac64f76e0456663025d17853c9dc8a570c86214e",
+          "restoredFirstFrameHash": "67013df8cc1fab216ae8929cac64f76e0456663025d17853c9dc8a570c86214e"
+        },
+        "sunny_winter": {
+          "originalFirstFrameHash": "64e5b6ca2d5f0f05e94a0ad0126f04abc186a61a1d408a2da73b02c9027646cc",
+          "restoredFirstFrameHash": "64e5b6ca2d5f0f05e94a0ad0126f04abc186a61a1d408a2da73b02c9027646cc"
+        },
+        "hydraulic_imbalance": {
+          "originalFirstFrameHash": "30daef97c65c66f8df5fac90c2329f10f3c17814c8f352f33b6c163a73fd349e",
+          "restoredFirstFrameHash": "30daef97c65c66f8df5fac90c2329f10f3c17814c8f352f33b6c163a73fd349e"
+        }
+      },
+      "threshold": "first frames exactly identical",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.18",
+      "description": "Complete accepted P1A regression and immutable physics",
+      "inputs": {
+        "acceptedManifest": "p2_accepted_p1a_manifest.json"
+      },
+      "baseline": "84 tests, 32 Gates",
+      "changedInput": "add P2 modules only",
+      "measured": {
+        "testCommand": {
+          "label": "P1A tests",
+          "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p2_1_regression.py p1a",
+          "exitCode": 0,
+          "passed": 84,
+          "failed": 0,
+          "skipped": 0,
+          "output": "Fixture override: physical-fixture-v1.1; assertions/thresholds unchanged\n........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.35s\n"
+        },
+        "gatePassCount": 32,
+        "gateFailCount": 0,
+        "changedAcceptedFiles": []
+      },
+      "threshold": "all tests/Gates pass; no accepted file changes",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.19",
+      "description": "Frozen P0 regression",
+      "inputs": {
+        "commands": [
+          "npx tsc --noEmit",
+          "npm run test",
+          "npm run build"
+        ]
+      },
+      "baseline": "frozen React/domain/seam",
+      "changedInput": "run checks after P2",
+      "measured": {
+        "commands": [
+          {
+            "label": "P0 typecheck",
+            "command": "npx tsc --noEmit",
+            "exitCode": 0,
+            "passed": null,
+            "failed": 0,
+            "skipped": 0,
+            "output": ""
+          },
+          {
+            "label": "P0 tests",
+            "command": "npm run test",
+            "exitCode": 0,
+            "passed": 62,
+            "failed": 0,
+            "skipped": 0,
+            "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n"
+          },
+          {
+            "label": "P0 build",
+            "command": "npm run build",
+            "exitCode": 0,
+            "passed": null,
+            "failed": 0,
+            "skipped": 0,
+            "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-C2i2aTou.css   17.11 kB \u2502 gzip:  4.67 kB\ndist/assets/index-Dx143W9w.js   252.56 kB \u2502 gzip: 78.48 kB\n\n\u2713 built in 50ms\n"
+          }
+        ],
+        "frozenSourceDiffExit": 0
+      },
+      "threshold": "typecheck/tests/build exit zero; no source changes",
+      "status": "PASS",
+      "notes": ""
+    },
+    {
+      "gate": "G2.20",
+      "description": "No forbidden controller dependencies or scenario branches",
+      "inputs": {
+        "files": [
+          "__init__.py",
+          "commissioning.py",
+          "traditional.py"
+        ]
+      },
+      "baseline": "no AI dependency permitted",
+      "changedInput": "AST source audit",
+      "measured": {
+        "imports": [
+          "bisect",
+          "constants",
+          "contracts",
+          "dataclasses",
+          "hydraulics",
+          "math",
+          "parameters"
+        ],
+        "suspiciousReferences": []
+      },
+      "threshold": "no ML/prediction/optimisation/scenario/indoor/solar inputs",
+      "status": "PASS",
+      "notes": ""
+    }
+  ],
+  "commands": [
+    {
+      "label": "P2 tests",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p2_1_regression.py p2",
+      "exitCode": 0,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "output": "Fixture override: physical-fixture-v1.1; assertions/thresholds unchanged\n..................................                                       [100%]\n34 passed in 2.69s\n"
+    },
+    {
+      "label": "P1A tests",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p2_1_regression.py p1a",
+      "exitCode": 0,
+      "passed": 84,
+      "failed": 0,
+      "skipped": 0,
+      "output": "Fixture override: physical-fixture-v1.1; assertions/thresholds unchanged\n........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.35s\n"
+    },
+    {
+      "label": "P0 typecheck",
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "passed": null,
+      "failed": 0,
+      "skipped": 0,
+      "output": ""
+    },
+    {
+      "label": "P0 tests",
+      "command": "npm run test",
+      "exitCode": 0,
+      "passed": 62,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n"
+    },
+    {
+      "label": "P0 build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "passed": null,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-C2i2aTou.css   17.11 kB \u2502 gzip:  4.67 kB\ndist/assets/index-Dx143W9w.js   252.56 kB \u2502 gzip: 78.48 kB\n\n\u2713 built in 50ms\n"
+    }
+  ],
+  "passed": 20,
+  "failed": 0,
+  "skipped": 0
+}

@@ -1,0 +1,576 @@
+{
+  "failed": 0,
+  "gates": [
+    {
+      "description": "P0-P5 integrity",
+      "gate": "P6-A1",
+      "measured": {
+        "after": [],
+        "before": []
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "P4/P5/P1A roles separate",
+      "gate": "P6-A2",
+      "measured": {
+        "p1a": "physical-fixture-v1.2/P1A",
+        "p2Reference": "traditional-v1.2",
+        "p4": "selected-p4-predictor-v1",
+        "p5": "p5-thermal-model-v1",
+        "p6": "p6-mpc-v1"
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No future truth in decision inputs",
+      "gate": "P6-A3",
+      "measured": "executable assert_causal_forecast",
+      "status": "PASS"
+    },
+    {
+      "description": "P1A/P5 full nonlinear verification authority",
+      "gate": "P6-A4",
+      "measured": "every recommendation verified",
+      "status": "PASS"
+    },
+    {
+      "description": "Candidate rollouts do not mutate live state",
+      "gate": "P6-A5",
+      "measured": "serialize_engine equality enforced",
+      "status": "PASS"
+    },
+    {
+      "description": "Canonical excluded from tuning",
+      "gate": "P6-A6",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "Sensitivity deterministic",
+      "gate": "P6-L1",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "Sensitivity perturbations legal",
+      "gate": "P6-L2",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "Indoor surrogate MAE",
+      "gate": "P6-L3",
+      "measured": 0.0008784896981649723,
+      "status": "PASS"
+    },
+    {
+      "description": "Indoor surrogate maximum error",
+      "gate": "P6-L4",
+      "measured": 0.01031835322134711,
+      "status": "PASS"
+    },
+    {
+      "description": "Heat surrogate relative error",
+      "gate": "P6-L5",
+      "measured": 0.0007965173918923566,
+      "status": "PASS"
+    },
+    {
+      "description": "Flow surrogate relative error",
+      "gate": "P6-L6",
+      "measured": 0.001134831219790685,
+      "status": "PASS"
+    },
+    {
+      "description": "No local directional inversion",
+      "gate": "P6-L7",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "Problem DCP-valid",
+      "gate": "P6-O1",
+      "measured": "checked before every solve",
+      "status": "PASS"
+    },
+    {
+      "description": "OSQP primary",
+      "gate": "P6-O2",
+      "measured": "OSQP",
+      "status": "PASS"
+    },
+    {
+      "description": "Accepted actions within equipment bounds",
+      "gate": "P6-O3",
+      "measured": 0.05000461783090182,
+      "status": "PASS"
+    },
+    {
+      "description": "Accepted actions within rate limits",
+      "gate": "P6-O4",
+      "measured": 9.999470130139798e-06,
+      "status": "PASS"
+    },
+    {
+      "description": "Robust lower bound constrained",
+      "gate": "P6-O5",
+      "measured": 2.2034992536521116,
+      "status": "PASS"
+    },
+    {
+      "description": "Infeasible solve has explicit fallback",
+      "gate": "P6-O6",
+      "measured": "fallback_unverified",
+      "status": "PASS"
+    },
+    {
+      "description": "Nonlinear verification mandatory",
+      "gate": "P6-O7",
+      "measured": 160,
+      "status": "PASS"
+    },
+    {
+      "description": "At most one relinearisation",
+      "gate": "P6-O8",
+      "measured": 0,
+      "status": "PASS"
+    },
+    {
+      "description": "Recommendation deterministic",
+      "gate": "P6-O9",
+      "measured": [
+        "p6-3e73336dba4ff631f315",
+        "p6-3e73336dba4ff631f315"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Objective frozen before canonical",
+      "gate": "P6-O10",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "Safety state physically preconditioned",
+      "gate": "P6-S1",
+      "measured": [
+        {
+          "allControlsLegal": true,
+          "directTemperatureOverwrite": false,
+          "minimumIndoorC": 19.08585249629691,
+          "reducedHeatingPhysicalSteps": 54,
+          "targetC": 19.1
+        },
+        {
+          "allControlsLegal": true,
+          "directTemperatureOverwrite": false,
+          "minimumIndoorC": 18.418076083563328,
+          "reducedHeatingPhysicalSteps": 66,
+          "targetC": 18.5
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "No forecast-verified accepted safety violation",
+      "gate": "P6-S2",
+      "measured": [
+        {
+          "case": "feasible_active",
+          "demandReferenceMW": [
+            0.5332198827171862,
+            0.5307847654343724,
+            0.5287972822956353,
+            0.5268097991568981,
+            0.5168474192162535,
+            0.5068850392756091
+          ],
+          "energySavingClaim": false,
+          "forecastOutdoorC": -11,
+          "forecastVerifiedSafety": true,
+          "preconditioning": {
+            "allControlsLegal": true,
+            "directTemperatureOverwrite": false,
+            "minimumIndoorC": 19.08585249629691,
+            "reducedHeatingPhysicalSteps": 54,
+            "targetC": 19.1
+          },
+          "realisedSafety": {
+            "allControlsLegal": true,
+            "allHydraulicConverged": true,
+            "endpointMinimumIndoorC": [
+              18.8337916896846,
+              18.613542942644496,
+              18.44410876743324,
+              18.319979531503563,
+              18.238010239843202,
+              18.196266365310517
+            ],
+            "maximumMassResidual": 1.230836705552616e-16,
+            "minimumIndoorC": 18.196266365310517,
+            "outdoorC": -11,
+            "weatherAuthority": "realised P1A environment after action selection"
+          },
+          "recommendation": {
+            "constraint_margins": {
+              "maximumMassResidual": 1.230836705552616e-16,
+              "minimumEquipmentMargin": 0.025679415346755163,
+              "minimumRateMargin": 0.01666499546665537,
+              "minimumRobustTemperatureMarginC": 0.07824766732350952,
+              "solverTimeS": 0.02131629200448515
+            },
+            "control_step_minutes": 30,
+            "fallback_reason": null,
+            "fallback_status": "not_used",
+            "first_action": {
+              "frequency_hz": 31.666672891489586,
+              "pump_mode": "frequency",
+              "supply_c": 41.66666621107937,
+              "valves": [
+                0.22567941534675517,
+                0.26666995605014476,
+                0.2833350043966693
+              ]
+            },
+            "forecast_as_of": "p6-safety-19.1-4590",
+            "horizon_minutes": 180,
+            "model_versions": {
+              "p1a": "physical-fixture-v1.2/P1A",
+              "p2Reference": "traditional-v1.2",
+              "p4": "selected-p4-predictor-v1",
+              "p5": "p5-thermal-model-v1",
+              "p6": "p6-mpc-v1"
+            },
+            "nonlinear_verification_status": "passed",
+            "objective_components": {
+              "aboveComfort": 0.0,
+              "avoidableOversupply": 0.0,
+              "belowComfort": 0.6947123341080892,
+              "movement": 14.209464985324841,
+              "overheating": 0.0,
+              "pumpElectricity": 0.37782890468785774,
+              "severeOverheating": 0.0
+            },
+            "predicted_building_trajectories_c": {
+              "B01": [
+                19.873670397836776,
+                19.771260863253108,
+                19.682262889860244,
+                19.606696196255466,
+                19.545060250264743,
+                19.497208085048012
+              ],
+              "B02": [
+                19.920973295121822,
+                19.82322100532888,
+                19.738109668080348,
+                19.6656688395149,
+                19.606381858336807,
+                19.56012086474384
+              ],
+              "B03": [
+                18.948886602654643,
+                18.780813526574214,
+                18.6399951722679,
+                18.52610255828856,
+                18.439753463274727,
+                18.380291646658325
+              ],
+              "B04": [
+                19.99830304490092,
+                19.908772670374447,
+                19.830575760840965,
+                19.763755759578586,
+                19.70876563287714,
+                19.665507218275327
+              ],
+              "B05": [
+                19.4355658692673,
+                19.282028553468137,
+                19.16149198284893,
+                19.071321930859842,
+                19.002977219419535,
+                18.955871985435788
+              ],
+              "B06": [
+                19.51779686572812,
+                19.37049852560078,
+                19.25431437504996,
+                19.16679904924063,
+                19.099908663163014,
+                19.053114132942454
+              ],
+              "B07": [
+                19.591237918787662,
+                19.449739421611778,
+                19.337667634346232,
+                19.252742073621555,
+                19.1873617492634,
+                19.141046203099993
+              ],
+              "B08": [
+                19.657025184232342,
+                19.52092750387167,
+                19.412738787837835,
+                19.330323574888247,
+                19.2664777507527,
+                19.22076282180755
+              ],
+              "B09": [
+                18.80289455768608,
+                18.583595762089875,
+                18.41510058266241,
+                18.2918951326739,
+                18.21083139103424,
+                18.16996741736326
+              ],
+              "B10": [
+                19.529122574306587,
+                19.366726889965804,
+                19.23700366156477,
+                19.136694248255278,
+                19.064051487849273,
+                19.018120606932033
+              ],
+              "B11": [
+                19.601241376968737,
+                19.445448387096178,
+                19.320544001180068,
+                19.223473822109195,
+                19.152612941617726,
+                19.10708826104659
+              ],
+              "B12": [
+                19.665813681403034,
+                19.516143737831776,
+                19.395759279327315,
+                19.301786620938284,
+                19.23270809522302,
+                19.187721306553048
+              ]
+            },
+            "prediction_half_widths_c": [
+              0.024903654036247502,
+              0.04181596421468825,
+              0.06846479109554338,
+              0.06846479109554338,
+              0.09171975003975064,
+              0.09171975003975064
+            ],
+            "pump_trajectory_hz": [
+              31.666672891489586,
+              33.33334456814583,
+              35.00001413891866,
+              36.66668097466795,
+              38.33334607327886,
+              40.00000999752546
+            ],
+            "recommendation_id": "p6-233a6932b7b0349e3e4f",
+            "relinearisation_count": 0,
+            "solve_time_s": 0.19137679199775448,
+            "solver": "OSQP",
+            "solver_iterations": 1375,
+            "solver_status": "optimal",
+            "supply_trajectory_c": [
+              41.66666621107937,
+              43.3333329909361,
+              45.0000007559069,
+              46.66666965829449,
+              48.333339545522804,
+              50.00001000099386
+            ],
+            "valve_trajectories_fraction": {
+              "far": [
+                0.2833350043966693,
+                0.36667000880494705,
+                0.45000501323537007,
+                0.533340017696334,
+                0.6166750221930272,
+                0.7000100267263718
+              ],
+              "mid": [
+                0.26666995605014476,
+                0.3333399119874249,
+                0.400009867714318,
+                0.4500098247756002,
+                0.45044271473180564,
+                0.4506066642444396
+              ],
+              "near": [
+                0.22567941534675517,
+                0.25000977863013946,
+                0.2520317845382267,
+                0.25338345098883563,
+                0.25413142146549356,
+                0.2544126696241802
+              ]
+            }
+          }
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Cold Wave does not save through underheating",
+      "gate": "P6-S3",
+      "measured": {
+        "mpc": 0.0,
+        "traditional": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Fallback not presented as optimal",
+      "gate": "P6-S4",
+      "measured": "infeasible",
+      "status": "PASS"
+    },
+    {
+      "description": "Forecast and realised safety separate",
+      "gate": "P6-S5",
+      "measured": [
+        {
+          "allControlsLegal": true,
+          "allHydraulicConverged": true,
+          "endpointMinimumIndoorC": [
+            18.8337916896846,
+            18.613542942644496,
+            18.44410876743324,
+            18.319979531503563,
+            18.238010239843202,
+            18.196266365310517
+          ],
+          "maximumMassResidual": 1.230836705552616e-16,
+          "minimumIndoorC": 18.196266365310517,
+          "outdoorC": -11,
+          "weatherAuthority": "realised P1A environment after action selection"
+        },
+        {
+          "allControlsLegal": true,
+          "allHydraulicConverged": true,
+          "endpointMinimumIndoorC": [
+            18.134891294048327,
+            17.885401642314992,
+            17.690750492485094,
+            17.544346512901072,
+            17.441937523868692,
+            17.380542524267337
+          ],
+          "maximumMassResidual": 0.0,
+          "minimumIndoorC": 17.380542524267337,
+          "outdoorC": -14,
+          "weatherAuthority": "realised P1A environment after action selection"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Feasible near-boundary case accepted with active robust constraint",
+      "gate": "P6-S6",
+      "measured": {
+        "fallback": "not_used",
+        "forecastVerifiedSafety": true,
+        "robustMarginC": 0.07824766732350952
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Same initial state/weather/window",
+      "gate": "P6-B1",
+      "measured": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Rapid compliance not worse",
+      "gate": "P6-B2",
+      "measured": {
+        "mpc": 1.0,
+        "traditional": 1.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Rapid no new underheating",
+      "gate": "P6-B3",
+      "measured": {
+        "mpc": 0.0,
+        "traditional": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Rapid severe overheating not increased",
+      "gate": "P6-B4",
+      "measured": {
+        "mpc": 0.0,
+        "traditional": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Rapid overheating or oversupply improves",
+      "gate": "P6-B5",
+      "measured": {
+        "mpcOverheat": 0.30844907407407407,
+        "mpcOversupply": 1.184468923170793,
+        "traditionalOverheat": 0.6192129629629629,
+        "traditionalOversupply": 1.479514848463191
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Sunny compliant",
+      "gate": "P6-B6",
+      "measured": 1.0,
+      "status": "PASS"
+    },
+    {
+      "description": "Cold safe",
+      "gate": "P6-B7",
+      "measured": 20.408656794809815,
+      "status": "PASS"
+    },
+    {
+      "description": "Hydraulic imbalance feasible",
+      "gate": "P6-B8",
+      "measured": 0,
+      "status": "PASS"
+    },
+    {
+      "description": "Three actuator ablations complete",
+      "gate": "P6-B9",
+      "measured": [
+        "supply_only",
+        "supply_pump",
+        "full"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Traditional/Preview/MPC comparison complete",
+      "gate": "P6-B10",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "MPC objective no more than 5% worse than Preview",
+      "gate": "P6-B11",
+      "measured": {
+        "mpc": 0.9236478015132947,
+        "preview": 1.0730862219450215,
+        "ratio": 0.8607395963384357
+      },
+      "status": "PASS"
+    }
+  ],
+  "passed": 40,
+  "phase": "P6",
+  "skipped": 0
+}

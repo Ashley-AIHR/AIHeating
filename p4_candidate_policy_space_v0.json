@@ -1,0 +1,19 @@
+{
+  "version": "p4-preview-policy-space-v0",
+  "frozenBeforeCanonicalEvaluation": true,
+  "decisionIntervalMinutes": 30,
+  "previewHorizonMinutes": 180,
+  "supplyOffsetsC": [-2, -1, 0, 1, 2],
+  "pumpOffsetsHz": [-2, 0, 2],
+  "zoneOffsetPatternsPercentagePoints": {
+    "Z0": [0, 0, 0],
+    "Z1": [-5, 0, 5],
+    "Z2": [-10, 0, 10],
+    "Z3": [5, 0, -5],
+    "Z4": [10, 0, -10]
+  },
+  "candidateCount": 75,
+  "bounds": {"supplyC": [40, 60], "pumpHz": [30, 50], "valveFraction": [0.2, 1.0]},
+  "maximumMovementPerDecision": {"supplyC": 2, "pumpHz": 2, "valveFraction": 0.1},
+  "fallback": "Traditional forecast continuation when no candidate is safe"
+}

@@ -1,0 +1,91 @@
+{
+  "commands": [
+    {
+      "label": "New fixture tests",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python -m pytest physical_core/tests/test_physical_fixture_v1_1.py -q",
+      "exitCode": 0,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "output": ".........                                                                [100%]\n9 passed in 0.15s\n"
+    },
+    {
+      "label": "Historical/default full Python regression",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python -m pytest physical_core/tests -q",
+      "exitCode": 0,
+      "passed": 127,
+      "failed": 0,
+      "skipped": 0,
+      "output": "........................................................................ [ 56%]\n.......................................................                  [100%]\n127 passed in 3.12s\n"
+    },
+    {
+      "label": "P1A Gates with v1.1 fixture",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python physical_core/scripts/run_p2_1_regression.py gates-p1a",
+      "exitCode": 0,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "output": "P1A Gates under v1.1: 32 passed, 0 failed, 0 skipped\n"
+    },
+    {
+      "label": "P2 Gates with v1.1 fixture and nested regressions",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python physical_core/scripts/run_p2_1_regression.py gates-p2",
+      "exitCode": 0,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "output": "P2 tests: exit 0; {'passed': 34, 'failed': 0, 'skipped': 0}\nP1A tests: exit 0; {'passed': 84, 'failed': 0, 'skipped': 0}\nP0 typecheck: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP0 tests: exit 0; {'passed': 62, 'failed': 0, 'skipped': 0}\nP0 build: exit 0; {'passed': 0, 'failed': 0, 'skipped': 0}\nP2 Gates under v1.1: 20 passed, 0 failed, 0 skipped\n"
+    }
+  ],
+  "nestedActualCommands": [
+    {
+      "label": "P2 tests",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p2_1_regression.py p2",
+      "exitCode": 0,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "output": "Fixture override: physical-fixture-v1.1; assertions/thresholds unchanged\n..................................                                       [100%]\n34 passed in 2.69s\n"
+    },
+    {
+      "label": "P1A tests",
+      "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python /Users/yl/Documents/Codex/Heat/physical_core/scripts/run_p2_1_regression.py p1a",
+      "exitCode": 0,
+      "passed": 84,
+      "failed": 0,
+      "skipped": 0,
+      "output": "Fixture override: physical-fixture-v1.1; assertions/thresholds unchanged\n........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.35s\n"
+    },
+    {
+      "label": "P0 typecheck",
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "passed": null,
+      "failed": 0,
+      "skipped": 0,
+      "output": ""
+    },
+    {
+      "label": "P0 tests",
+      "command": "npm run test",
+      "exitCode": 0,
+      "passed": 62,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n"
+    },
+    {
+      "label": "P0 build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "passed": null,
+      "failed": 0,
+      "skipped": 0,
+      "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-C2i2aTou.css   17.11 kB \u2502 gzip:  4.67 kB\ndist/assets/index-Dx143W9w.js   252.56 kB \u2502 gzip: 78.48 kB\n\n\u2713 built in 50ms\n"
+    }
+  ],
+  "historicalFileCount": 99,
+  "changedHistoricalFiles": [],
+  "historicalFreezeErrors": [],
+  "status": "PASS"
+}

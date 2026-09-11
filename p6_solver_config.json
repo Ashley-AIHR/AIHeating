@@ -1,0 +1,18 @@
+{
+  "version": "p6-osqp-config-v1",
+  "frozenBeforeCanonicalEvaluation": true,
+  "modelingLayer": "cvxpy",
+  "primarySolver": "OSQP",
+  "warmStart": false,
+  "constraintInteriorMargin": 0.00001,
+  "settings": {
+    "adaptive_rho": false,
+    "polishing": true,
+    "eps_abs": 1e-6,
+    "eps_rel": 1e-6,
+    "max_iter": 50000,
+    "verbose": false
+  },
+  "acceptedStatuses": ["optimal", "optimal_inaccurate"],
+  "infeasibleIsExplicitFallback": true
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "label": "P2 tests",
+    "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python -m pytest physical_core/tests/test_p2_control.py physical_core/tests/test_p2_benchmark.py physical_core/tests/test_p2_freeze.py -q",
+    "exitCode": 0,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "output": "..................................                                       [100%]\n34 passed in 2.75s\n"
+  },
+  {
+    "label": "P1A tests",
+    "command": "/Users/yl/Documents/Codex/Heat/physical_core/.venv/bin/python -m pytest physical_core/tests/test_hydraulics.py physical_core/tests/test_transport.py physical_core/tests/test_thermal.py physical_core/tests/test_validation.py physical_core/tests/test_simulation.py -q",
+    "exitCode": 0,
+    "passed": 84,
+    "failed": 0,
+    "skipped": 0,
+    "output": "........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 0.47s\n"
+  },
+  {
+    "label": "P0 typecheck",
+    "command": "npx tsc --noEmit",
+    "exitCode": 0,
+    "passed": null,
+    "failed": 0,
+    "skipped": 0,
+    "output": ""
+  },
+  {
+    "label": "P0 tests",
+    "command": "npm run test",
+    "exitCode": 0,
+    "passed": 62,
+    "failed": 0,
+    "skipped": 0,
+    "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 test\n> tsx scripts/p0-invariants.ts\n\nP0 invariant tests: 62 passed, 0 failed, 0 skipped\n"
+  },
+  {
+    "label": "P0 build",
+    "command": "npm run build",
+    "exitCode": 0,
+    "passed": null,
+    "failed": 0,
+    "skipped": 0,
+    "output": "\n> ai-heating-optimisation-digital-twin@0.1.0 build\n> tsc -b && vite build\n\nvite v8.2.2 building client environment for production...\ntransforming...\n\u2713 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.47 kB \u2502 gzip:  0.30 kB\ndist/assets/index-C2i2aTou.css   17.11 kB \u2502 gzip:  4.67 kB\ndist/assets/index-Dx143W9w.js   252.56 kB \u2502 gzip: 78.48 kB\n\n\u2713 built in 51ms\n"
+  }
+]

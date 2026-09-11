@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "evaluation-initial-state-v1",
+  "physicalParameterHash": "bd4b142e38b7c85a2749c34d129efdfe6f44d4c1f9bd9943cac7b4c7357c0260",
+  "controllerConfigHash": "64458d7e8800f48f71227b08c3b0b4acd31dc48bbba0115db1373335794baf0b",
+  "elapsedSeconds": 0,
+  "physicalTimestepSeconds": 300,
+  "controls": {
+    "supply_c": 51.0,
+    "frequency_hz": 44.0,
+    "valves": [
+      0.35,
+      0.55,
+      0.85
+    ],
+    "pump_mode": "frequency"
+  },
+  "buildingIndoorC": {
+    "B01": 26.8860379318489,
+    "B02": 27.001754382647167,
+    "B03": 19.082022657267512,
+    "B04": 26.724332656464508,
+    "B05": 23.030723204986977,
+    "B06": 23.14102898004689,
+    "B07": 23.073643917673728,
+    "B08": 22.980321216232973,
+    "B09": 19.100516539213586,
+    "B10": 23.11099625504508,
+    "B11": 23.04362648095904,
+    "B12": 22.950295525697527
+  },
+  "previousHydraulicFlowsM3s": [
+    0.0029060892582087393,
+    0.00365583950113959,
+    0.004055817894447349
+  ],
+  "heatEnergyJ": 138708303314.87857,
+  "pumpEnergyJ": 360770080.1847779,
+  "transport": {
+    "near": {
+      "equivalentVolumeM3": 2.966666666666667,
+      "packets": [
+        [
+          2.966666666666667,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.0029060892582087393
+    },
+    "mid": {
+      "equivalentVolumeM3": 4.7333333333333325,
+      "packets": [
+        [
+          4.7333333333333325,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.00365583950113959
+    },
+    "far": {
+      "equivalentVolumeM3": 6.183333333333334,
+      "packets": [
+        [
+          6.183333333333334,
+          51.0
+        ]
+      ],
+      "deliveredSupplyC": 51.0,
+      "currentFlowM3s": 0.004055817894447349
+    }
+  },
+  "controllerState": {
+    "controller_version": "traditional-p2.2-shadow",
+    "raw_supply_target_c": 51.0,
+    "applied_supply_c": 51.0,
+    "raw_pump_target_hz": 44.0,
+    "applied_pump_hz": 44.0,
+    "fixed_valves": [
+      0.35,
+      0.55,
+      0.85
+    ],
+    "last_boundary_s": -1800,
+    "next_boundary_s": 0
+  }
+}

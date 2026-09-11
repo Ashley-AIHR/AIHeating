@@ -1,0 +1,23 @@
+{
+  "version": "p6-objective-v1",
+  "frozenBeforeCanonicalEvaluation": true,
+  "configuredFrom": "non-canonical p6-development-scenarios-v1 only",
+  "weights": {
+    "normalizedAvoidableOversupply": 1.0,
+    "normalizedPumpElectricity": 0.12,
+    "belowComfortDegreeHoursBelow20": 0.4,
+    "aboveComfortDegreeHoursAbove22": 0.15,
+    "overheatingDegreeHoursAbove23": 2.0,
+    "severeOverheatingDegreeHoursAbove25": 8.0,
+    "normalizedControlMovement": 0.04
+  },
+  "normalization": {
+    "heatMW": 0.4,
+    "pumpKW": 10.0,
+    "temperatureC": 1.0,
+    "movement": [2.0, 2.0, 0.1, 0.1, 0.1]
+  },
+  "hardSafetyExcludedFromTradeoff": true,
+  "canonicalComparisonFormula": "excessDeliveredHeatMWh/TraditionalRequiredHeatMWh + 0.15*pumpElectricityKWh/TraditionalPumpElectricityKWh + 2*overheatingRate + 8*severeOverheatingRate; infeasible underheat is disqualifying",
+  "canonicalMetricsUsedForTuning": false
+}

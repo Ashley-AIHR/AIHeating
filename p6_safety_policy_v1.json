@@ -1,0 +1,21 @@
+{
+  "version": "p6-safety-policy-v1",
+  "frozenBeforeCanonicalEvaluation": true,
+  "hardComplianceFloorC": 18.0,
+  "preferredComfortC": [20.0, 22.0],
+  "warmThresholdC": 22.0,
+  "overheatingThresholdC": 23.0,
+  "severeOverheatingThresholdC": 25.0,
+  "uncertaintySource": "p5_model_registry.json forecast_driven half-widths",
+  "mpcGridHalfWidthRule": {
+    "30": "P5 30-minute half-width",
+    "60": "P5 60-minute half-width",
+    "90": "max(P5 60-minute, P5 120-minute)",
+    "120": "P5 120-minute half-width",
+    "150": "max(P5 120-minute, P5 180-minute)",
+    "180": "P5 180-minute half-width"
+  },
+  "primaryFallback": "legal Traditional v1.2 issued-forecast continuation",
+  "nearComplianceFallback": "maximum-heating legal rate-limited continuation",
+  "fallbackIsNeverOptimal": true
+}

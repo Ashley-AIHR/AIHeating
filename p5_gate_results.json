@@ -1,0 +1,542 @@
+{
+  "failed": 0,
+  "gates": [
+    {
+      "description": "Hidden truth inaccessible to calibration",
+      "gate": "P5-I1",
+      "measured": "calibrate rejects class-F keys; truthUsedDuringFit=false",
+      "status": "PASS"
+    },
+    {
+      "description": "Same-asset depth assessed",
+      "gate": "P5-I2",
+      "measured": {
+        "bySplit": {
+          "benchmark_holdout": {
+            "episodes": 5,
+            "maximumEpisodesPerParameterSet": 5,
+            "uniqueParameterSets": 1
+          },
+          "test": {
+            "episodes": 75,
+            "maximumEpisodesPerParameterSet": 1,
+            "uniqueParameterSets": 75
+          },
+          "train": {
+            "episodes": 350,
+            "maximumEpisodesPerParameterSet": 1,
+            "uniqueParameterSets": 350
+          },
+          "validation": {
+            "episodes": 75,
+            "maximumEpisodesPerParameterSet": 1,
+            "uniqueParameterSets": 75
+          }
+        },
+        "canonicalBaseFixtureEpisodes": 5,
+        "decision": "C \u2014 P3 excitation / same-asset history insufficient",
+        "episodes": 505,
+        "nonCanonicalRepeatedParameterSets": 0,
+        "uniqueParameterSets": 501
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Jacobian rank reported",
+      "gate": "P5-I3",
+      "measured": 4,
+      "status": "PASS"
+    },
+    {
+      "description": "Conditioning and singular values reported",
+      "gate": "P5-I4",
+      "measured": 424.3984574879752,
+      "status": "PASS"
+    },
+    {
+      "description": "Parameter confounding reported",
+      "gate": "P5-I5",
+      "measured": 0.9999314232258438,
+      "status": "PASS"
+    },
+    {
+      "description": "Confounded full parameterisation reduced",
+      "gate": "P5-I6",
+      "measured": [
+        "h_scale",
+        "c_scale"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Dedicated persistent-site dataset used",
+      "gate": "P5-I7",
+      "measured": {
+        "base_fixture": 1,
+        "development": 20,
+        "test": 5,
+        "validation": 5
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Identification excitation obeys bounds",
+      "gate": "P5-I8",
+      "measured": {
+        "passed": true,
+        "pumpDeltaHz": 2.0,
+        "supplyDeltaC": 2.0,
+        "valveDeltaFraction": 0.050000000000000044,
+        "withinEquipmentBounds": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No canonical holdout used for calibration",
+      "gate": "P5-I9",
+      "measured": [],
+      "status": "PASS"
+    },
+    {
+      "description": "Calibration deterministic",
+      "gate": "P5-I10",
+      "measured": {
+        "buildingId": "B01",
+        "deterministicStarts": 3,
+        "maximumRepeatedParameterDelta": 0.0,
+        "siteId": "P5-S01"
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Fitted parameters finite and positive",
+      "gate": "P5-C1",
+      "measured": "all site/building scales",
+      "status": "PASS"
+    },
+    {
+      "description": "Selected parameterisation identifiable for claimed interpretation",
+      "gate": "P5-C2",
+      "measured": {
+        "maximumAbsoluteCorrelation": 0.402153239169602,
+        "maximumConditionNumber": 8.58080300990193,
+        "medianTrajectoryFitMaeC": 0.024152352127938054,
+        "minimumRank": 2
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Calibrated beats persistence on TEST",
+      "gate": "P5-C3",
+      "measured": {
+        "calibrated": {
+          "30": 0.002210797963695856,
+          "60": 0.0041807913436585865,
+          "120": 0.007130302770107302,
+          "180": 0.009027683823241095,
+          "360": 0.014376788949166363
+        },
+        "persistence": {
+          "30": 0.06316636471168778,
+          "60": 0.12559240559198048,
+          "120": 0.24593812749447855,
+          "180": 0.35742798488250904,
+          "360": 0.632590651639677
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Calibrated materially improves over nominal",
+      "gate": "P5-C4",
+      "measured": {
+        "calibrated": {
+          "30": 0.002210797963695856,
+          "60": 0.0041807913436585865,
+          "120": 0.007130302770107302,
+          "180": 0.009027683823241095,
+          "360": 0.014376788949166363
+        },
+        "nominal": {
+          "30": 0.016206559183067046,
+          "60": 0.03195287308883642,
+          "120": 0.06190390201635911,
+          "180": 0.0898236530842956,
+          "360": 0.16143083369371747
+        },
+        "relativeImprovement": {
+          "30": 0.8635862221756643,
+          "60": 0.8691575767839401,
+          "120": 0.8848165860655601,
+          "180": 0.8994954723699669,
+          "360": 0.9109414935163909
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Oracle Exogenous MAE thresholds",
+      "gate": "P5-C5",
+      "measured": {
+        "30": 0.002210797963695856,
+        "60": 0.0041807913436585865,
+        "120": 0.007130302770107302,
+        "180": 0.009027683823241095,
+        "360": 0.014376788949166363
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Forecast-driven MAE thresholds",
+      "gate": "P5-C6",
+      "measured": {
+        "30": 0.008477820952584158,
+        "60": 0.014986455572840361,
+        "120": 0.027023413304082068,
+        "180": 0.0378666943106523,
+        "360": 0.06459446306513711
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Worst-building thresholds",
+      "gate": "P5-C7",
+      "measured": {
+        "180": 0.014195999479281341,
+        "360": 0.023501583861840102
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Physical causality",
+      "gate": "P5-C8",
+      "measured": {
+        "passed": true,
+        "tests": {
+          "C1HigherSupply": true,
+          "C2LowerOutdoorGreaterLoss": true,
+          "C3HigherSolarWarms": true,
+          "C4LowerFlowNonIncreasingHeat": true,
+          "C5HigherCSlowerResponse": true,
+          "C6HigherHStrongerOutdoorCoupling": true,
+          "C7NoPreTransportJump": true
+        },
+        "values": {
+          "baseEndC": 21.003836374482322,
+          "firstTransportOutletC": 45,
+          "higherCEndC": 21.00295198200538,
+          "higherHEndC": 20.944604028625687,
+          "higherSolarEndC": 21.023809235510054,
+          "higherSupplyEndC": 21.008695192700475,
+          "lowerFlowEndC": 20.998928068746864,
+          "lowerOutdoorEndC": 20.996346551596925
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No transport compensation",
+      "gate": "P5-C9",
+      "measured": {
+        "aligned3hOracleMaeC": 0.009027683823241095,
+        "errorWorsened": true,
+        "selectedInput": "P1A FIFO delivered zone supply",
+        "stationSupplySameTime3hOracleMaeC": 0.02040902869274272
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Stable 6h rollout",
+      "gate": "P5-C10",
+      "measured": {
+        "maximumAbsolutePredictionC": 26.639919188063374
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Intervals calibrated on validation only",
+      "gate": "P5-C11",
+      "measured": "validation sites only",
+      "status": "PASS"
+    },
+    {
+      "description": "Canonical holdout untouched until final evaluation",
+      "gate": "P5-C12",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "One persistent parameter set per site",
+      "gate": "P5-D1",
+      "measured": 31,
+      "status": "PASS"
+    },
+    {
+      "description": "Site split disjoint",
+      "gate": "P5-D2",
+      "measured": {
+        "development": 20,
+        "test": 5,
+        "validation": 5
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Calibration/evaluation windows separated",
+      "gate": "P5-D3",
+      "measured": "days1-4 / days5-6",
+      "status": "PASS"
+    },
+    {
+      "description": "Truth and observable views separated",
+      "gate": "P5-D4",
+      "measured": {
+        "selectedCalibrationView": "site_observable",
+        "truthView": "simulation_truth; post-fit recovery only"
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No truth columns in calibration",
+      "gate": "P5-D5",
+      "measured": [
+        "future_actual_weather",
+        "future_indoor_temperature_c",
+        "simulated_building_water_flow_kg_s",
+        "simulated_radiator_heat_w",
+        "true_parameter_multipliers",
+        "true_radiator_ua_w_k",
+        "true_solar_scale",
+        "true_thermal_capacitance_j_k",
+        "true_thermal_resistance_k_w"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "All accepted episodes pass P1A QA",
+      "gate": "P5-D6",
+      "measured": 1.5637299039027342e-13,
+      "status": "PASS"
+    },
+    {
+      "description": "No failed episode silently discarded",
+      "gate": "P5-D7",
+      "measured": [
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.775,
+          "siteId": "P5-S01"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.89972915107982,
+          "siteId": "P5-S02"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.992285098077552,
+          "siteId": "P5-S03"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.130100047194887,
+          "siteId": "P5-S04"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.21891742227505,
+          "siteId": "P5-S05"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.089854272897714,
+          "siteId": "P5-S06"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.652704671501017,
+          "siteId": "P5-S07"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.726407789242195,
+          "siteId": "P5-S08"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.249496528443785,
+          "siteId": "P5-S09"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.65647714594042,
+          "siteId": "P5-S10"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.33882782854018,
+          "siteId": "P5-S11"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.528303264330013,
+          "siteId": "P5-S12"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.790413553849696,
+          "siteId": "P5-S13"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.4268745065427,
+          "siteId": "P5-S14"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.021970182452307,
+          "siteId": "P5-S15"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.202388546816298,
+          "siteId": "P5-S16"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.899105759824344,
+          "siteId": "P5-S17"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.856693700445145,
+          "siteId": "P5-S18"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.31832818476656,
+          "siteId": "P5-S19"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.81715723229171,
+          "siteId": "P5-S20"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.151080323857542,
+          "siteId": "P5-S21"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.480626156812527,
+          "siteId": "P5-S22"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.67762813190102,
+          "siteId": "P5-S23"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.54419895039464,
+          "siteId": "P5-S24"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.591989073796928,
+          "siteId": "P5-S25"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.38127200874776,
+          "siteId": "P5-S26"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.248036564889556,
+          "siteId": "P5-S27"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 19.64605497258943,
+          "siteId": "P5-S28"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.754629999378597,
+          "siteId": "P5-S29"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.087019850580294,
+          "siteId": "P5-S30"
+        },
+        {
+          "accepted": true,
+          "amplitude": 1.0,
+          "minimumIndoorC": 20.50183409156805,
+          "siteId": "P5-BASE-FIXTURE"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Every history reproducible from manifest",
+      "gate": "P5-D8",
+      "measured": 93,
+      "status": "PASS"
+    },
+    {
+      "description": "Actions obey bounds/rate limits",
+      "gate": "P5-D9",
+      "measured": {
+        "passed": true,
+        "pumpDeltaHz": 2.0,
+        "supplyDeltaC": 2.0,
+        "valveDeltaFraction": 0.050000000000000044,
+        "withinEquipmentBounds": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "P3 hashes unchanged",
+      "gate": "P5-D10",
+      "measured": [],
+      "status": "PASS"
+    }
+  ],
+  "passed": 32,
+  "phase": "P5",
+  "skipped": 0
+}

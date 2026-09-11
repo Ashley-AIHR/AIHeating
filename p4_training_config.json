@@ -1,0 +1,30 @@
+{
+  "configVersion": "p4-training-config-v1",
+  "datasetVersion": "p3-dataset-v1.0",
+  "featureSchemaVersion": "p4-feature-schema-v1",
+  "horizonsMinutes": [60, 120, 180, 360],
+  "minimumAnchorMinutes": 150,
+  "selectionMetric": "equal-horizon weighted MAE",
+  "testSkillThresholdVsPersistence": 0.1,
+  "tieToleranceFraction": 0.01,
+  "seed": 20260910,
+  "validationPartition": {
+    "method": "episode manifest SHA-256 ascending within scenario family",
+    "validationSelectPerFamily": 10,
+    "validationCalibrationPerFamily": 5
+  },
+  "linearRegression": {
+    "models": "one per horizon",
+    "preprocessing": "StandardScaler fitted on train only"
+  },
+  "lightgbmGrid": [
+    {"num_leaves": 15, "learning_rate": 0.05, "n_estimators": 160, "min_child_samples": 20, "feature_fraction": 0.9},
+    {"num_leaves": 31, "learning_rate": 0.05, "n_estimators": 240, "min_child_samples": 30, "feature_fraction": 0.9}
+  ],
+  "uncertainty": {
+    "method": "split conformal absolute residual",
+    "nominalCoverage": 0.95,
+    "calibrationSplit": "validation_calibration",
+    "scope": "simulation-calibrated only"
+  }
+}

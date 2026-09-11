@@ -1,0 +1,425 @@
+{
+  "failed": 0,
+  "gates": [
+    {
+      "description": "P2/P3 freeze verification",
+      "gate": "P4-P1",
+      "measured": {
+        "episodeManifests": 505,
+        "p2Errors": [],
+        "p3Errors": []
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Zero future-truth feature leakage",
+      "gate": "P4-P2",
+      "measured": {
+        "availabilityClasses": [
+          "A",
+          "B",
+          "B+D",
+          "C",
+          "D"
+        ],
+        "labelUsedByModel": false
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "P3 split isolation",
+      "gate": "P4-P3",
+      "measured": {
+        "benchmark_holdout": 640,
+        "test": 9600,
+        "train": 44800,
+        "validation_calibration": 3200,
+        "validation_select": 6400
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Exact Required Heat Load target semantics",
+      "gate": "P4-P4",
+      "measured": {
+        "availabilityClass": "F",
+        "field": "required_heat_load_mw",
+        "source": "separate P3 load_target table",
+        "unit": "MW",
+        "usedByModel": false
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "All four model families evaluated",
+      "gate": "P4-P5",
+      "measured": [
+        "LightGBM",
+        "Linear Regression",
+        "Persistence",
+        "Physics Predictor v0"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Metrics by 1/2/3/6h",
+      "gate": "P4-P6",
+      "measured": [
+        60,
+        120,
+        180,
+        360
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Scenario-family metrics",
+      "gate": "P4-P7",
+      "measured": [
+        "cold_wave",
+        "hydraulic_imbalance",
+        "normal_winter",
+        "rapid_warming",
+        "sunny_winter"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Selected-model test skill",
+      "gate": "P4-P8",
+      "measured": 0.9039962431858917,
+      "status": "PASS"
+    },
+    {
+      "description": "Selection has no LightGBM requirement",
+      "gate": "P4-P9",
+      "measured": "minimum equal-horizon weighted MAE; simpler model within 1%",
+      "status": "PASS"
+    },
+    {
+      "description": "Feature ablation complete",
+      "gate": "P4-P10",
+      "measured": [
+        "full",
+        "minus_forecast",
+        "minus_indoor",
+        "minus_lagged_load",
+        "minus_solar"
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "95% simulation-calibrated interval",
+      "gate": "P4-P11",
+      "measured": {
+        "byHorizon": {
+          "120": {
+            "count": 2400,
+            "coverage": 0.9495833333333333,
+            "halfWidthMw": 0.013001005017899553,
+            "meanWidthMw": 0.026002010035799106
+          },
+          "180": {
+            "count": 2400,
+            "coverage": 0.9579166666666666,
+            "halfWidthMw": 0.016367975042096194,
+            "meanWidthMw": 0.03273595008419239
+          },
+          "360": {
+            "count": 2400,
+            "coverage": 0.9483333333333334,
+            "halfWidthMw": 0.013757828819876916,
+            "meanWidthMw": 0.027515657639753832
+          },
+          "60": {
+            "count": 2400,
+            "coverage": 0.94625,
+            "halfWidthMw": 0.0088220360651306,
+            "meanWidthMw": 0.0176440721302612
+          }
+        },
+        "calibrationSplit": "validation_calibration",
+        "label": "95% simulation-calibrated prediction interval",
+        "method": "split-conformal absolute residual",
+        "nominalCoverage": 0.95,
+        "testCoverage": 0.9505208333333334,
+        "testMeanWidthMw": 0.025974422472502028
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Fixed-seed artifact integrity",
+      "gate": "P4-P12",
+      "measured": {
+        "artifactHashErrors": [],
+        "seed": 20260910
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Identical cloned initial state",
+      "gate": "P4-V1",
+      "measured": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "No future actual truth in candidate decisions",
+      "gate": "P4-V2",
+      "measured": "forecast fields guarded; environment actuals excluded",
+      "status": "PASS"
+    },
+    {
+      "description": "Legal equipment bounds",
+      "gate": "P4-V3",
+      "measured": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Legal rate limits",
+      "gate": "P4-V4",
+      "measured": {
+        "maxPumpDeltaHz": 2.0,
+        "maxSupplyDeltaC": 2.0,
+        "maxValveDeltaPp": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "No accepted candidate below 18C",
+      "gate": "P4-V5",
+      "measured": 20.396959218916294,
+      "status": "PASS"
+    },
+    {
+      "description": "Explicit safe fallback",
+      "gate": "P4-V6",
+      "measured": "Traditional forecast continuation when no candidate is safe",
+      "status": "PASS"
+    },
+    {
+      "description": "Deterministic selection",
+      "gate": "P4-V7",
+      "measured": [
+        {
+          "allFeasible": true,
+          "decisionCount": 6,
+          "deterministicFirstDecision": true,
+          "episodeId": "validation-normal_winter-000",
+          "fallbackCount": 0,
+          "scenarioFamily": "normal_winter"
+        },
+        {
+          "allFeasible": true,
+          "decisionCount": 6,
+          "deterministicFirstDecision": true,
+          "episodeId": "validation-cold_wave-000",
+          "fallbackCount": 0,
+          "scenarioFamily": "cold_wave"
+        },
+        {
+          "allFeasible": true,
+          "decisionCount": 6,
+          "deterministicFirstDecision": true,
+          "episodeId": "validation-rapid_warming-000",
+          "fallbackCount": 0,
+          "scenarioFamily": "rapid_warming"
+        },
+        {
+          "allFeasible": true,
+          "decisionCount": 6,
+          "deterministicFirstDecision": true,
+          "episodeId": "validation-sunny_winter-000",
+          "fallbackCount": 0,
+          "scenarioFamily": "sunny_winter"
+        },
+        {
+          "allFeasible": true,
+          "decisionCount": 6,
+          "deterministicFirstDecision": true,
+          "episodeId": "validation-hydraulic_imbalance-000",
+          "fallbackCount": 0,
+          "scenarioFamily": "hydraulic_imbalance"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "description": "Full P1A engine rollout",
+      "gate": "P4-V8",
+      "measured": "SimulationEngine clone/step used",
+      "status": "PASS"
+    },
+    {
+      "description": "Config frozen before canonical",
+      "gate": "P4-V9",
+      "measured": {
+        "objective": true,
+        "policy": true
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Rapid Warming direction",
+      "gate": "P4-V10",
+      "measured": {
+        "gate": true,
+        "preview": {
+          "P10C": 22.13112791281203,
+          "P50C": 22.829081170172522,
+          "P90C": 23.530342351279682,
+          "actualHeatSupplyMeanMW": 0.33313486975223616,
+          "allControlsLegal": true,
+          "comfortRate": 0.041666666666666664,
+          "complianceRate": 1.0,
+          "controllerVersion": "traditional-v1.2",
+          "evaluationHours": 24,
+          "excessDeliveredHeatMWh": 1.2512585197716486,
+          "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+          "frameCount": 288,
+          "heatEnergyMWh": 7.995236874053668,
+          "hydraulicBalanceIndex": 0.9437243678953864,
+          "maximumIndoorC": 24.146812913215744,
+          "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+          "minimumIndoorC": 21.71645497968269,
+          "overheatingRate": 0.37818287037037035,
+          "pumpElectricityKWh": 21.57251263029436,
+          "requiredHeatEnergyMWh": 7.0107006541666665,
+          "requiredHeatLoadMeanMW": 0.2921125272569445,
+          "scenarioId": "rapid_warming",
+          "severeOverheatingRate": 0.0,
+          "solverFailureCount": 0,
+          "temperatureSpreadC": 1.3992144384676521,
+          "underheatingRate": 0.0,
+          "zoneMeanIndoorC": {
+            "far": 22.743701411041265,
+            "mid": 22.84338526518644,
+            "near": 22.927731487513945
+          }
+        },
+        "traditional": {
+          "P10C": 22.241745380921056,
+          "P50C": 23.16591502748843,
+          "P90C": 23.792137034838053,
+          "actualHeatSupplyMeanMW": 0.3488709591256434,
+          "allControlsLegal": true,
+          "comfortRate": 0.027777777777777776,
+          "complianceRate": 1.0,
+          "controllerVersion": "traditional-v1.2",
+          "evaluationHours": 24,
+          "excessDeliveredHeatMWh": 1.479514848463191,
+          "excessHeatLabel": "Excess Delivered Heat Above Instantaneous Required Load",
+          "frameCount": 288,
+          "heatEnergyMWh": 8.372903019015443,
+          "hydraulicBalanceIndex": 0.9437243678953864,
+          "maximumIndoorC": 24.32983599785113,
+          "metricDefinitionVersion": "building-time-endpoints-lower-percentiles-v1",
+          "minimumIndoorC": 21.71645497968269,
+          "overheatingRate": 0.6192129629629629,
+          "pumpElectricityKWh": 23.407319099307674,
+          "requiredHeatEnergyMWh": 7.0107006541666665,
+          "requiredHeatLoadMeanMW": 0.2921125272569445,
+          "scenarioId": "rapid_warming",
+          "severeOverheatingRate": 0.0,
+          "solverFailureCount": 0,
+          "temperatureSpreadC": 1.5503916539169964,
+          "underheatingRate": 0.0,
+          "zoneMeanIndoorC": {
+            "far": 23.03835804755363,
+            "mid": 23.12006359929832,
+            "near": 23.166831039957074
+          }
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Cold Wave safety",
+      "gate": "P4-V11",
+      "measured": {
+        "gate": true,
+        "underheating": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Frozen baselines unchanged",
+      "gate": "P4-V12",
+      "measured": {
+        "p2Errors": [],
+        "p3Errors": []
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Five-step Overview journey",
+      "gate": "P4-U1",
+      "measured": "NOW/FORECAST/PREDICT/OPTIMISE/VERIFY",
+      "status": "PASS"
+    },
+    {
+      "description": "One-click guided entry",
+      "gate": "P4-U2",
+      "measured": "Start Predictive Preview",
+      "status": "PASS"
+    },
+    {
+      "description": "Load and supply remain distinct",
+      "gate": "P4-U3",
+      "measured": {
+        "heatSupplyMw": 0.3830247338227471,
+        "requiredLoadMw": 0.2530814625
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Visible prediction source/version",
+      "gate": "P4-U4",
+      "measured": {
+        "displayName": "Selected P4 Predictor v1",
+        "interval": "95% simulation-calibrated",
+        "type": "LightGBM",
+        "version": "selected-p4-predictor-v1"
+      },
+      "status": "PASS"
+    },
+    {
+      "description": "Preview is not final MPC",
+      "gate": "P4-U5",
+      "measured": "Preview Optimiser v0 \u2014 not final MPC",
+      "status": "PASS"
+    },
+    {
+      "description": "Comparison values provider-backed",
+      "gate": "P4-U6",
+      "measured": "p4-guided-preview-provider-v1",
+      "status": "PASS"
+    },
+    {
+      "description": "EN/ZH complete",
+      "gate": "P4-U7",
+      "measured": true,
+      "status": "PASS"
+    },
+    {
+      "description": "P0 control-mode semantics retained",
+      "gate": "P4-U8",
+      "measured": "traditional|advisory|optimised",
+      "status": "PASS"
+    }
+  ],
+  "passed": 32,
+  "phase": "P4",
+  "skipped": 0
+}

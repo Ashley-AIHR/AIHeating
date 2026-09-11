@@ -1,0 +1,29 @@
+{
+  "version": "p6-mpc-v1",
+  "frozenBeforeCanonicalEvaluation": true,
+  "horizonMinutes": 180,
+  "controlStepMinutes": 30,
+  "controlIntervals": 6,
+  "actuators": ["supplyC", "pumpHz", "nearValve", "midValve", "farValve"],
+  "equipmentBounds": {
+    "supplyC": [40.0, 60.0],
+    "pumpHz": [30.0, 50.0],
+    "valveFraction": [0.2, 1.0]
+  },
+  "rateLimitsPerStep": {
+    "supplyC": 2.0,
+    "pumpHz": 2.0,
+    "valveFraction": 0.1
+  },
+  "trustRegion": {
+    "supplyC": 2.0,
+    "pumpHz": 2.0,
+    "valveFraction": 0.1
+  },
+  "relinearisation": {
+    "maximumAttempts": 1,
+    "trustRegionScale": 0.5
+  },
+  "reference": "Traditional v1.2 continuation using forecast weather",
+  "defaultActuatorMode": "full"
+}

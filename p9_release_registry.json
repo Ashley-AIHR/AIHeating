@@ -1,0 +1,80 @@
+{
+  "registryVersion": "p9-release-registry-rc1",
+  "releaseIdentity": "AI-Heating-PoC-RC1",
+  "hashAlgorithm": "SHA-256 raw bytes",
+  "physicalFixture": {
+    "version": "physical-fixture-v1.2",
+    "freezeManifest": "P2_BASELINE_FREEZE_MANIFEST_v1.2.json",
+    "sha256": "cce475c849082754c36797216e458b337988ec8a20ad35745658b975815bce9a"
+  },
+  "traditionalController": {
+    "version": "traditional-v1.2",
+    "artifact": "p2_controller_config_v1.2.json",
+    "sha256": "04715276a6272bae599c748e9008b446d4d995fcabc7670c5899262b93e3db4e"
+  },
+  "dataset": {
+    "version": "p3-dataset-v1.0",
+    "manifest": "p3_generation_manifest.json",
+    "sha256": "3e41d65cd054754824095ea3babc7f8f0721e9d3d756755900d4d8a359234f4f"
+  },
+  "p4": {
+    "version": "selected-p4-predictor-v1",
+    "type": "LightGBM",
+    "registry": "p4_model_registry.json",
+    "registrySha256": "a069bbf1469ade3b3f8e878d6e6adbce74221a6e3b7daaa6a8babb9ed46b7882",
+    "selectedArtifacts": {
+      "artifacts/p4_models_v1/selected_p4_predictor_v1/horizon_60m.pkl": "bb8651e253351afa04eece642c5014d7ee70d62c1d8fc7a911995e739d2aadb4",
+      "artifacts/p4_models_v1/selected_p4_predictor_v1/horizon_120m.pkl": "a08b3a246ca8d57a63c9ae153b737e49aa9b55755e43fdda7f3c785a09276fb0",
+      "artifacts/p4_models_v1/selected_p4_predictor_v1/horizon_180m.pkl": "eadb6e02a381ba89b579f573ab372fe23c8bdb08039d61e8235c643c01d04a95",
+      "artifacts/p4_models_v1/selected_p4_predictor_v1/horizon_360m.pkl": "c46df3aaab78f54df3933dfed2247f483d84361f95bb87b42bf0503ec8d71a7c"
+    }
+  },
+  "p5": {
+    "version": "p5-thermal-model-v1",
+    "registry": "p5_model_registry.json",
+    "registrySha256": "9464ec38f53a4e8f72f0c2bbab0a177b620f17cae9e2c01a2f35003295100751",
+    "calibrationVersion": "p5-calibration-method-v1",
+    "calibrationArtifact": "p5_calibrated_parameters.json",
+    "calibrationSha256": "e5d4333da6a679a0f018c11dc74c2d0dbf842a7e68df417fd705f986e34b80e1",
+    "identificationDatasetVersion": "p5-identification-dataset-v1.0",
+    "identificationManifest": "p5_identification_manifest.json",
+    "identificationManifestSha256": "5a989d62e8daaffb1631db8fdef9ee2ee6aad2d8c0f528c73f080d846b4394a4"
+  },
+  "p6": {
+    "version": "p6-mpc-v1",
+    "registry": "p6_model_registry.json",
+    "registrySha256": "1309c1c4c61749c91875b4e0fcd3da34ec0cd469a848d570cb5f85dd1c35e97d",
+    "objective": { "version": "p6-objective-v1", "artifact": "p6_mpc_objective_v1.json", "sha256": "7492de550275aed1262d4fe64a5fa1a27bb3f414d7599639fa586c82670a2160" },
+    "mpcConfig": { "artifact": "p6_mpc_config.json", "sha256": "67e203eedf6e7b0d0a95371603e928c7fec4404659f56612802a8bb6f82a2bce" },
+    "sensitivity": { "version": "p6-linearisation-v1", "artifact": "p6_sensitivity_config.json", "sha256": "4d2b8b9e6e19aa37ab58ac2cc88c9149aeb0f2323b80a6e17885a626bc71b71a" },
+    "safetyPolicy": { "version": "p6-safety-policy-v1", "artifact": "p6_safety_policy_v1.json", "sha256": "c9aeb522b07436c9f3507e807adead8c0c8e9019bb271eacc2d81b61297281c3" },
+    "solver": { "artifact": "p6_solver_config.json", "sha256": "e458e24b20e6d61a45466800c3dc10af0b90de32536f369cc81e4deedcd2bf8a" }
+  },
+  "p7": {
+    "version": "p7-final-provider-v1",
+    "provider": { "artifact": "src/p7-provider.ts", "sha256": "673f5e2a893302681acef3ce38408748130156979ce732d5f8cc7239977972c1" },
+    "snapshot": { "artifact": "src/p7-runtime-data.json", "sha256": "47cf9dd40ab3641b71bd8badc7f217090ad491c8fdad3de6afe56cf3905d0bb8" },
+    "apiContract": { "artifact": "P7_API_CONTRACTS.md", "sha256": "8881b76112d7751790420cf30c88c1800beba9bf9c26c8d3320c7ca3473a724b" },
+    "stateSemantics": { "artifact": "P7_STATE_SEMANTICS_SPEC.md", "sha256": "6a4173b101f4edaaa3d2b95c39f7423d2c1e627f1bd77e091ba925b7c32e84bb" }
+  },
+  "p8": {
+    "version": "deterministic-grounded-v1",
+    "contextSchema": { "artifact": "p8_tutor_context_schema.json", "sha256": "553254e6da3f142cb479265c46a15f7921e27e9a1f3b03fc96aef65b7d4f6555" },
+    "knowledge": { "version": "p8-domain-knowledge-v1", "artifact": "p8_domain_knowledge_v1.json", "sha256": "de72183515fb173567724573071f117436a2dfc96607ac009ca1e70c2371e10b" },
+    "provider": { "artifact": "src/p8-tutor.ts", "sha256": "f6ef90ac993d5321d56705adaf06a93dbc24a341addebb58b2e3bea5ba26887a" },
+    "evaluation": { "version": "p8-tutor-eval-v1", "artifact": "p8_tutor_eval_v1.json", "sha256": "d72cc5eae849c17febd46e57b7dd92be3788319ef2f92c76444d96328cfa92a8" },
+    "liveLlmConnected": false
+  },
+  "frontend": {
+    "packageVersion": "0.1.0",
+    "buildIdentity": "AI-Heating-PoC-RC1-dc501c5d9974",
+    "sourceSetSha256": "dc501c5d99747b1c0345597d5fc0b82a8c245b20fd3e4b7043b93760565ca043",
+    "packageLockSha256": "d3159e86a722acc8f03062218d44ab7693a7ae858373248bef672dbbf7983521"
+  },
+  "git": {
+    "commitAtFreezeInspection": "7c3b89d087b9eea7b0e003819263477b506f4a19",
+    "workingTreeClean": false,
+    "note": "RC1 is identified by this registry and hashes; the repository contains the accepted uncommitted phase artifacts."
+  },
+  "loadingPolicy": "Exact identities and hashes only; no latest aliases"
+}

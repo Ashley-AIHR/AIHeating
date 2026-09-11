@@ -1,0 +1,46 @@
+{
+  "version": "p5-calibration-config-v1",
+  "modelVersion": "p5-thermal-model-v1",
+  "calibrationMethodVersion": "p5-calibration-method-v1",
+  "inputSchemaVersion": "p5-observability-schema-v1",
+  "identificationDatasetVersion": "p5-identification-dataset-v1.0",
+  "seed": 20260910,
+  "physicalTimestepSeconds": 300,
+  "controlIntervalMinutes": 30,
+  "predictionHorizonsMinutes": [30, 60, 120, 180, 360],
+  "initialCandidateParameters": ["h_scale", "c_scale", "ua_scale", "solar_scale"],
+  "optionalParametersRejectedBeforeTest": ["internal_gain_bias"],
+  "positiveScaleBounds": [0.5, 1.5],
+  "optimizer": {
+    "name": "scipy.optimize.least_squares",
+    "parameterization": "log positive scales",
+    "loss": "Huber",
+    "fScaleC": 0.1,
+    "deterministicStarts": 3,
+    "maxFunctionEvaluations": 120
+  },
+  "objective": {
+    "trajectoryResidualSamplingMinutes": 30,
+    "dailyObservedStateReset": true,
+    "temperatureResidualScaleC": 0.1,
+    "logPriorRegularization": 0.02
+  },
+  "identifiabilityAcceptance": {
+    "requiredNumericalRank": 4,
+    "maximumConditionNumber": 10000,
+    "maximumAbsoluteParameterCorrelation": 0.98
+  },
+  "reductionRule": "If the four-parameter candidate fails, fix weak UA/solar terms to configured priors and fit H/C only; do not fit internal-gain bias.",
+  "uncertainty": {
+    "method": "validation-only split conformal absolute residual",
+    "nominalCoverage": 0.95,
+    "pooledBy": "horizon and evaluation mode"
+  },
+  "testThresholds": {
+    "oracleMaeC": {"30": 0.15, "60": 0.2, "120": 0.3, "180": 0.4, "360": 0.6},
+    "forecastDrivenMaeC": {"60": 0.3, "180": 0.55, "360": 0.85},
+    "worstBuildingOracleMaeC": {"180": 0.75, "360": 1.0}
+  },
+  "frozenBeforeTest": true,
+  "canonicalHoldoutCalibrationAllowed": false
+}
