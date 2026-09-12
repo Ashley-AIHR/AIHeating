@@ -1,0 +1,9 @@
+services:
+  - type: web
+    runtime: node
+    name: ai-heating-optimisation-digital-twin
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    pullRequestPreviewsEnabled: true
