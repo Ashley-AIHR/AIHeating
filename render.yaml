@@ -1,9 +1,14 @@
 services:
   - type: web
-    runtime: node
-    name: ai-heating-optimisation-digital-twin
+    runtime: docker
+    name: aiheating
     plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
-    healthCheckPath: /
-    pullRequestPreviewsEnabled: true
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.5-flash
+      - key: AI_ACCESS_TOKEN
+        generateValue: true

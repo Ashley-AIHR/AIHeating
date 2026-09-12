@@ -1,0 +1,83 @@
+[
+  {
+    "id": "agentic-twins-2026",
+    "title": "A Conversational Agentic Interface to Physics-Based Household Digital Twins for Residential Energy Decision Support",
+    "publisher": "Costas Mylonas, Titos Georgoulakis and Magda Foti / arXiv preprint",
+    "date": "2026-06-30",
+    "url": "https://arxiv.org/abs/2606.31744",
+    "finding": "A residential-energy prototype connects an LLM interface to GridLAB-D through structured simulation payloads and tool-governed execution. Its evaluation covers 45 curated prompts; this is not a Chinese district-heating field trial.",
+    "design": "Use the language model to operate numerical tools, with application-generated result cards and separate operator approval."
+  },
+  {
+    "id": "iea-ts9",
+    "title": "Annex TS9: Digitalisation of District Heating and Cooling",
+    "publisher": "IEA DHC Technology Collaboration Programme",
+    "date": "2024–2028 programme; accessed 2026-09-12",
+    "url": "https://www.iea-dhc.org/the-research/annexes/2024-2028-annex-ts9",
+    "finding": "The programme addresses digital infrastructure, data integration standards and communication barriers across the heat chain, including the secondary side.",
+    "design": "Prioritise asset identity, timestamps and sensor quality before adding autonomous optimisation."
+  },
+  {
+    "id": "boptest",
+    "title": "The Building Optimization Testing Framework (BOPTEST)",
+    "publisher": "IBPSA Project 2",
+    "date": "Accessed 2026-09-12",
+    "url": "https://ibpsa.github.io/project1-boptest/index.html",
+    "finding": "BOPTEST provides building emulators, a control-testing API and KPI reporting for repeatable benchmarking.",
+    "design": "Benchmark comfort and energy against repeatable baselines. This project reuses its own P1A engine, not BOPTEST."
+  },
+  {
+    "id": "beijing-2025",
+    "title": "Beijing: intelligent heating upgrades for 431 residential communities",
+    "publisher": "Beijing Municipal Government / Beijing Daily",
+    "date": "2025-04-07",
+    "url": "https://www.beijing.gov.cn/ywdt/gzdt/202504/t20250407_4056614.html",
+    "finding": "Approved upgrades include sensing, metering and regulation at heat sources, networks, substations and building entrances. The article describes intended outcomes, not independently measured savings.",
+    "design": "Model station-to-building decisions and show the provenance of every reading."
+  },
+  {
+    "id": "shandong-2025",
+    "title": "Guangrao smart heating: operational monitoring and service coordination",
+    "publisher": "Shandong Big Data Bureau",
+    "date": "2025-02-18",
+    "url": "https://bdb.shandong.gov.cn/art/2025/2/18/art_79183_10332859.html",
+    "finding": "A municipal example connects heat-source, substation and community monitoring with warnings and maintenance dispatch.",
+    "design": "Link alarms to assets, checks and an operator action record, rather than only plotting temperatures."
+  },
+  {
+    "id": "balance-2022",
+    "title": "Application of secondary network intelligent balance system based on big data analysis",
+    "publisher": "Integrated Intelligent Energy",
+    "date": "2022",
+    "url": "https://www.hdpower.net/EN/10.3969/j.issn.2097-0706.2022.03.007",
+    "finding": "A Chinese secondary-network case study links balancing and indoor-temperature objectives. This is established practice, not a novel 2026 invention; case-study savings are not transferable guarantees.",
+    "design": "Compare branch redistribution with a station-wide temperature increase."
+  },
+  {
+    "id": "virtual-sensing-2026",
+    "title": "Sensor Fault Detection via Virtual Smart Heat Metering with Spatial-Temporal Graph Neural Networks",
+    "publisher": "Keivan Faghih Niresi and Olga Fink / PHM Society",
+    "date": "2026-07-03",
+    "url": "https://papers.phmsociety.org/index.php/phme/article/view/4944",
+    "finding": "A heterogeneous spatial–temporal graph model compares physical measurements with virtual sensing estimates. Evaluation uses a controlled Aalborg laboratory dataset, not this Chinese estate.",
+    "design": "Keep measured and modelled values separate. This demo injects sensor bias and does not claim to implement the paper's trained model."
+  },
+  {
+    "id": "ot-security",
+    "title": "Guide to Operational Technology (OT) Security",
+    "publisher": "NIST SP 800-82 Rev. 3",
+    "date": "2023-09",
+    "url": "https://www.nist.gov/publications/guide-operational-technology-ot-security",
+    "finding": "OT security must account for performance, reliability and safety requirements.",
+    "design": "No language-model path to physical actuation. Production deployment needs segregated OT integration, permissions and independent controls."
+  },
+  {
+    "id": "openrouter-tools",
+    "title": "Tool and function calling",
+    "publisher": "OpenRouter documentation",
+    "date": "Accessed 2026-09-12",
+    "url": "https://openrouter.ai/docs/guides/features/tool-calling",
+    "finding": "Models request tools; application code executes them and returns tool results for a subsequent model response.",
+    "design": "Use an allowlisted server-side tool loop with bounded rounds, visible results and no actuator tool."
+  }
+]
