@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { cities, cityProfile } from "./cities.mjs";
 const geometry = JSON.parse(
   readFileSync(
     new URL("../public/site-assets/vision-district.json", import.meta.url),
@@ -26,8 +27,8 @@ export const site = {
     {
       id: "shanghai",
       name: "Shanghai",
-      system: "Heat pumps / district heating and cooling",
-      enabled: false,
+      system: cities.shanghai.system,
+      enabled: true,
     },
     {
       id: "shenzhen",
@@ -72,6 +73,17 @@ for (const asset of registry) {
     };
 }
 export function worldContext(snapshot, selected = "ST01") {
+  const city = cityProfile(snapshot.cityId);
+  const activeSite = {
+    ...site,
+    id: `${city.id}-reference`,
+    name: `${city.name} · ${city.district}`,
+    candidate: city.scope,
+    scope: city.scope,
+    source: city.source,
+    geometryRevision: city.geometryRevision,
+    city,
+  };
   const asset = registry.find((x) => x.id === selected);
   if (!asset) throw new Error("Unknown world asset");
   const branch =
@@ -89,14 +101,14 @@ export function worldContext(snapshot, selected = "ST01") {
       x.parent === branch,
   );
   return {
-    site,
+    site: activeSite,
     selected: asset,
     relatedAssets: related,
     revision: snapshot.revision,
     time: snapshot.time,
     modelVersion: site.modelVersion,
     dataMode: "simulation",
-    geometryRevision: site.geometryRevision,
+    geometryRevision: activeSite.geometryRevision,
     mechanicalAssembly:
       selected === "ST01"
         ? {

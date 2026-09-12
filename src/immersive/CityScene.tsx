@@ -91,7 +91,7 @@ export default function CityScene(props: Props) {
     renderer.domElement.tabIndex = 0;
     renderer.domElement.setAttribute(
       "aria-label",
-      "Orbitable winter-city twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.",
+      `Orbitable ${props.frame.city?.name || "Yinchuan"} fictional district twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.`,
     );
     el.appendChild(renderer.domElement);
     const scene = new T.Scene();
@@ -120,7 +120,8 @@ export default function CityScene(props: Props) {
     orbit.maxPolarAngle = Math.PI * 0.482;
     orbit.minDistance = 8;
     orbit.maxDistance = 1000;
-    const model = createVisionDistrict();
+    const model = createVisionDistrict(props.frame.cityId);
+    el.dataset.city = props.frame.cityId || "yinchuan";
     scene.add(model.root);
     el.dataset.instances = String(model.stats.instances);
     const plantLights = [-10, 9].map((x) => {
@@ -746,7 +747,7 @@ export default function CityScene(props: Props) {
       labels.remove();
       runtime.current = null;
     };
-  }, [props.imported]);
+  }, [props.imported, props.frame.cityId]);
   useEffect(
     () => runtime.current?.update(),
     [

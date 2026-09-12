@@ -748,6 +748,16 @@ button:focus-visible {
   border-left: 1px solid #2b3b49;
   padding-left: 30px;
 }
+.site-title select {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid #355260;
+  border-radius: 5px;
+  background: #0e202b;
+  color: #d9f5f1;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+}
 .site-title strong {
   font-size: 12px;
   letter-spacing: 2px;
@@ -1596,7 +1606,14 @@ pre {
 }
 @media (max-width: 1100px) {
   .site-title {
+    padding-left: 10px;
+  }
+  .site-title small {
     display: none;
+  }
+  .site-title select {
+    max-width: 155px;
+    font-size: 10px;
   }
   .offline {
     display: none;

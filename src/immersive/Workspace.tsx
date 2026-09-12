@@ -349,6 +349,30 @@ export default function Workspace() {
     setTimeMode("current");
     setTimeIndex(0);
   }
+  async function resetWorld(cityId: string, scenario: string) {
+    setPlaying(false);
+    setCyclesRemaining(0);
+    setPreviewPlaying(false);
+    await work("Loading district simulation", async () => {
+      await api("reset", { cityId, scenario });
+      setOptimisation(null);
+      setRun(null);
+      setMission(null);
+      setConfirm(false);
+      setControlsOpen(false);
+      setOperationEvents([]);
+      previousFindings.current = new Set();
+      setFeed(null);
+      setImported(null);
+      setImportName("");
+      setBimOpen(false);
+      setSceneView("district");
+      setSelected("B10");
+      setForecastSide("intervention");
+      current();
+      await refresh();
+    });
+  }
   async function optimise() {
     setCyclesRemaining(0);
     await work("Optimising + verifying nonlinear trajectories", async () => {
@@ -700,10 +724,18 @@ export default function Workspace() {
           </div>
         </div>
         <div className="site-title">
-          <strong>
-            YINCHUAN <span>银川</span>
-          </strong>
-          <small>Winter-city energy intelligence · vision demonstrator</small>
+          <select
+            aria-label="City district"
+            value={twin.cityId || "yinchuan"}
+            disabled={!!busy}
+            onChange={(e) => void resetWorld(e.target.value, twin.scenario)}
+          >
+            <option value="yinchuan">YINCHUAN · 银川</option>
+            <option value="shanghai">SHANGHAI · 上海</option>
+          </select>
+          <small>
+            {twin.city?.district || "Winter-city energy district"} · fictional
+          </small>
         </div>
         <div className="header-state">
           <span className="mode-badge">
@@ -811,7 +843,10 @@ export default function Workspace() {
         <b>↗</b>
       </button>
       <section className="world-title">
-        <div className="eyebrow">YINCHUAN / CONNECTED ENERGY DISTRICT</div>
+        <div className="eyebrow">
+          {(twin.city?.name || "Yinchuan").toUpperCase()} / CONNECTED ENERGY
+          DISTRICT
+        </div>
         <h1>
           {sceneView === "plant"
             ? "Inside the energy centre."
@@ -884,7 +919,7 @@ export default function Workspace() {
           <span>Delivered heat</span>
           <strong>
             <AnimatedValue
-              key={`${timeMode}/${forecastSide}`}
+              key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.heatKw / 1000}
               digits={3}
             />
@@ -895,7 +930,7 @@ export default function Workspace() {
           <span>Outdoor temperature</span>
           <strong>
             <AnimatedValue
-              key={`${timeMode}/${forecastSide}`}
+              key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.outdoorC}
             />
             <small> °C</small>
@@ -905,7 +940,7 @@ export default function Workspace() {
           <span>Pump electricity</span>
           <strong>
             <AnimatedValue
-              key={`${timeMode}/${forecastSide}`}
+              key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.pumpKw}
             />
             <small> kW</small>
@@ -915,7 +950,7 @@ export default function Workspace() {
           <span>Selected / {selected}</span>
           <strong>
             <AnimatedValue
-              key={`${selected}/${timeMode}/${forecastSide}`}
+              key={`${twin.cityId}/${selected}/${timeMode}/${forecastSide}`}
               value={
                 building ? building.indoorC : (zone?.flowM3h ?? frame.flowM3h)
               }
@@ -936,7 +971,7 @@ export default function Workspace() {
         <span>
           {imported
             ? "Local visual model · no georeferencing or asset mapping"
-            : "Authored Yinchuan-inspired district · physically simulated operation"}
+            : `Fictional ${twin.city?.name || "Yinchuan"} district · physically simulated operation`}
         </span>
       </div>
       <aside className="ops-dock" aria-label="Contextual operations panel">
@@ -1006,7 +1041,7 @@ export default function Workspace() {
               </small>
               <strong>
                 <AnimatedValue
-                  key={`${selected}/${timeMode}/${forecastSide}`}
+                  key={`${twin.cityId}/${selected}/${timeMode}/${forecastSide}`}
                   value={building?.indoorC ?? zone?.flowM3h ?? frame.supplyC}
                 />
                 <span>{building ? "°C" : zone ? "m³/h" : "°C"}</span>
@@ -1465,6 +1500,8 @@ export default function Workspace() {
             <p>
               Measurements remain separate from the uncalibrated simulator. A
               received value is not proof of a commissioned site connection.
+              {twin.cityId === "shanghai" &&
+                " The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional Shanghai district."}
             </p>
             <label>
               Operator access code
@@ -1476,7 +1513,7 @@ export default function Workspace() {
               />
             </label>
             <button
-              disabled={!!busy || !code}
+              disabled={!!busy || !code || twin.cityId === "shanghai"}
               onClick={() =>
                 void work("Reading observations", async () =>
                   setFeed(await api<Feed>("telemetry", {}, code)),
@@ -1564,9 +1601,10 @@ export default function Workspace() {
             </p>
             <h3>Vision, geometry and identity</h3>
             <p>
-              {visionGeometry.name}. Original architectural and mechanical
-              design, inspired by the supplied winter-city renders. Local design
-              coordinates, not a surveyed reconstruction.
+              {twin.city?.district || visionGeometry.name}. Original
+              architectural and mechanical design, with a city-specific
+              landscape treatment. Local design coordinates, not a surveyed
+              reconstruction.
             </p>
             <p className="muted">
               The twelve connected buildings are aggregate thermal archetypes.
@@ -1593,17 +1631,45 @@ export default function Workspace() {
               Material sources and checksums ↗
             </a>
             <h3>Geographic research context</h3>
-            <p className="muted">
-              The retained OSM extract informed the earlier geographic study; it
-              is not the current scene geometry.
+            <p>
+              {twin.city?.climate}. {twin.city?.scope}
             </p>
-            <a href={geo.url} target="_blank" rel="noreferrer">
-              © OpenStreetMap contributors · ODbL
+            {twin.cityId !== "shanghai" && (
+              <>
+                <p className="muted">
+                  The retained OSM extract informed the earlier geographic
+                  study; it is not the current scene geometry.
+                </p>
+                <a href={geo.url} target="_blank" rel="noreferrer">
+                  © OpenStreetMap contributors · ODbL
+                </a>
+                <p className="muted">
+                  Research extract: {geo.extractTimestamp}.
+                </p>
+              </>
+            )}
+            <a
+              href={twin.city?.source || config.site.source}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {twin.city?.name || "Yinchuan"} published context ↗
             </a>
-            <p className="muted">Research extract: {geo.extractTimestamp}.</p>
-            <a href={config.site.source} target="_blank" rel="noreferrer">
-              Yinchuan operational reference ↗
-            </a>
+            {twin.city?.technologySource && (
+              <p>
+                <a
+                  href={twin.city.technologySource}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Shanghai heat-pump field study ↗
+                </a>
+              </p>
+            )}
+            <p className="muted">
+              All scenario temperatures, solar inputs, building loads and
+              equipment settings are simulation assumptions—not live city data.
+            </p>
             <h3>Model scope</h3>
             {twin.assumptions.map((a) => (
               <p className="scope-item" key={a}>
@@ -1617,7 +1683,9 @@ export default function Workspace() {
                 <span>{p.system}</span>
                 <small>
                   {p.enabled
-                    ? "CURRENT DEMONSTRATOR"
+                    ? p.id === (twin.cityId || "yinchuan")
+                      ? "CURRENT DEMONSTRATOR"
+                      : "AVAILABLE IN CITY SELECTOR"
                     : "REQUIRES DIFFERENT EQUIPMENT MODELS"}
                 </small>
               </div>
@@ -1626,19 +1694,36 @@ export default function Workspace() {
               className="full"
               onClick={() =>
                 download("heatpilot-world-evidence.json", {
-                  site: config.site,
+                  site: {
+                    ...config.site,
+                    ...twin.city,
+                    id: `${twin.cityId || "yinchuan"}-reference`,
+                  },
                   registry: config.registry,
                   state: twin,
                   selected,
                   equipment: sceneView === "plant" ? equipment : null,
-                  visionGeometry,
+                  visionGeometry: {
+                    ...visionGeometry,
+                    name: twin.city?.district,
+                    scope: twin.city?.scope,
+                    geometryRevision: twin.city?.geometryRevision,
+                  },
                   timeMode,
                   displayTime: frame.time,
-                  geographicResearch: {
-                    scope: geo.scope,
-                    origin: geo.origin,
-                    extractTimestamp: geo.extractTimestamp,
-                  },
+                  geographicResearch:
+                    twin.cityId === "shanghai"
+                      ? {
+                          source: twin.city?.source,
+                          technologySource: twin.city?.technologySource,
+                          scope:
+                            "Published context only; no Shanghai geographic survey data",
+                        }
+                      : {
+                          scope: geo.scope,
+                          origin: geo.origin,
+                          extractTimestamp: geo.extractTimestamp,
+                        },
                   optimisation,
                   run,
                   limitations: twin.assumptions,
@@ -1695,20 +1780,7 @@ export default function Workspace() {
             value={twin.scenario}
             disabled={!!busy}
             onChange={(e) => {
-              const scenario = e.target.value;
-              setPlaying(false);
-              setCyclesRemaining(0);
-              void work("Resetting scenario", async () => {
-                await api("reset", { scenario });
-                await refresh();
-                setOptimisation(null);
-                setRun(null);
-                setMission(null);
-                setControlsOpen(false);
-                setOperationEvents([]);
-                previousFindings.current = new Set();
-                current();
-              });
+              void resetWorld(twin.cityId || "yinchuan", e.target.value);
             }}
           >
             {Object.entries(scenarioNames).map(([id, name]) => (
@@ -1847,8 +1919,8 @@ export default function Workspace() {
           </header>
           <p className="warning">
             Public buildingSMART Duplex MEP reference. NOT the selected building
-            or a Yinchuan heating-station as-built model. No telemetry is mapped
-            to these components.
+            or an as-built model of the selected city's heating station. No
+            telemetry is mapped to these components.
           </p>
           <div className="bim-tools">
             <button

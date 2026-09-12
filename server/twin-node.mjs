@@ -1,5 +1,6 @@
 import { randomUUID, createHash } from "node:crypto";
 import { p, createEngine, step, validate } from "./physics-node.mjs";
+import { cityProfile } from "./cities.mjs";
 export const SCENARIOS = {
   imbalance: {
     name: "Cold at the end of the network",
@@ -40,19 +41,25 @@ export const SCENARIOS = {
 const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length,
   sessions = new Map();
 function weather(s, offset = 0) {
-  const w = SCENARIOS[s.scenario];
+  const city = cityProfile(s.cityId);
+  const [outdoor, solar] = city.weather[s.scenario];
   return {
     outdoor:
-      w.outdoor +
+      outdoor +
       (s.scenario === "warming"
         ? Math.min((s.engine.elapsed + offset) / 3600, 6) * 1.2
         : 0),
-    solar: w.solar,
-    wind: 3.4,
+    solar,
+    wind: city.windMs,
   };
 }
-export function newSession(scenario = "imbalance") {
+export function newSession(
+  scenario = "imbalance",
+  cityId = "yinchuan",
+  revision = 0,
+) {
   if (!Object.hasOwn(SCENARIOS, scenario)) throw Error("Unknown scenario");
+  const city = cityProfile(cityId);
   const initial = [
     23.5, 23.1, 22.5, 23.6, 21.3, 21.6, 21.1, 21.4, 19, 18.6, 18.9, 19.1,
   ];
@@ -63,18 +70,19 @@ export function newSession(scenario = "imbalance") {
     ]),
   );
   const s = {
+    cityId,
     scenario,
     engine: createEngine(
       {
-        supplyC: 52,
-        pumpHz: 45,
+        supplyC: city.initialSupplyC,
+        pumpHz: city.initialPumpHz,
         valvesPct: scenario === "imbalance" ? [78, 58, 35] : [60, 65, 85],
       },
       temperatures,
     ),
     history: [],
     events: [],
-    revision: 0,
+    revision,
     candidates: {},
     frames: [],
     touched: Date.now(),
@@ -84,7 +92,7 @@ export function newSession(scenario = "imbalance") {
   s.events.push({
     time: snapshot(s).time,
     title: "Session initialised",
-    detail: "Winter-city vision · Node.js physical model · 5-minute substeps",
+    detail: `${city.name} fictional district · Node.js physical model · 5-minute substeps`,
   });
   return s;
 }
@@ -118,13 +126,15 @@ export function snapshot(s, history = true) {
     .toISOString()
     .replace(".000Z", "+08:00");
   return {
+    cityId: s.cityId || "yinchuan",
+    city: cityProfile(s.cityId),
     scenario: s.scenario,
     scenarioName: SCENARIOS[s.scenario].name,
     scenarioDescription: SCENARIOS[s.scenario].description,
     revision: s.revision,
     time,
     elapsedMinutes: e.elapsed / 60,
-    source: "Yinchuan-inspired vision · simulated P1A · native Node.js",
+    source: `${cityProfile(s.cityId).name}-inspired vision · simulated P1A · native Node.js`,
     outdoorC: f.w.outdoor,
     solarWm2: f.w.solar,
     windMs: f.w.wind,
@@ -157,7 +167,14 @@ export function snapshot(s, history = true) {
       stepValvePct: 10,
     },
     assumptions: [
-      "Authored winter-city district; 12 aggregate thermal loads, not surveyed buildings",
+      cityProfile(s.cityId).scope,
+      "12 shared aggregate building archetypes; not locally calibrated building-stock data",
+      "Weather values are synthetic scenario inputs, not measured weather or climate normals",
+      ...(s.cityId === "shanghai"
+        ? [
+            "Heating-water network only: heat-pump COP, refrigerant cycle, cooling, humidity and defrost are not modelled",
+          ]
+        : []),
       "Adiabatic supply transport; return delay and pipe heat loss are not modelled",
       "18°C is a demonstration floor, not a nationwide compliance certification",
       "Simulated operation; no real SCADA, weather feed or field controls connected",
@@ -462,6 +479,7 @@ export function optimise(s, args = {}) {
         JSON.stringify({
           revision: s.revision,
           scenario: s.scenario,
+          cityId: s.cityId,
           schedule,
           model: "P1A-coherent-v1.2-node",
         }),
@@ -520,7 +538,11 @@ export function dispatch(id, method, args = {}) {
   const s = sessions.get(id);
   s.touched = Date.now();
   if (method === "reset") {
-    const next = newSession(args.scenario || "imbalance");
+    const next = newSession(
+      args.scenario || "imbalance",
+      args.cityId || s.cityId,
+      s.revision,
+    );
     sessions.set(id, next);
     return snapshot(next);
   }

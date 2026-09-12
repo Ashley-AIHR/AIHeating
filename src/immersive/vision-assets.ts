@@ -193,7 +193,8 @@ function pineCard() {
   texture.anisotropy = 8;
   return texture;
 }
-export function createVisionDistrict() {
+export function createVisionDistrict(cityId = "yinchuan") {
+  const shanghai = cityId === "shanghai";
   const b = new Builder(),
     plant = new Builder();
   plant.root.position.copy(stationPosition);
@@ -202,6 +203,7 @@ export function createVisionDistrict() {
     trim: material("#d4d1c7"),
     dark: material("#42494a"),
     snow: material("#edf3f3", 0.92),
+    ground: material(shanghai ? "#45594b" : "#edf3f3", 0.92),
     road: material("#515b60", 0.95),
     pave: material("#b7b9b4"),
     glass: material("#425967", 0.18, 0.52),
@@ -231,6 +233,14 @@ export function createVisionDistrict() {
     tyre: material("#20272a"),
     copper: material("#f9a251", 0.3, 0.55),
   };
+  // Snow coatings remain separate from roofing, structure and instrumentation.
+  // Shanghai is an authored snow-free winter landscape, not surveyed geography.
+  mats.snow.visible = !shanghai;
+  if (shanghai) {
+    mats.trim.color.set("#a9b9b8");
+    mats.glass.color.set("#365e6b");
+    mats.water.color.set("#386a72");
+  }
   mats.stone.map = noiseTexture("#bcb8ac", "stone");
   worldMapped(mats.stone, 4);
   const textures = Object.values(mats)
@@ -243,6 +253,7 @@ export function createVisionDistrict() {
     ["concrete", "concrete_wall_007", 3],
     ["pave", "concrete_pavement", 3],
   ] as const) {
+    if (shanghai && name === "snow") continue;
     const m = mats[name];
     m.color.set("#ffffff");
     const load = (suffix: string, colour = false) => {
@@ -259,6 +270,7 @@ export function createVisionDistrict() {
     m.roughnessMap = load("arm");
     worldMapped(m, metres);
   }
+  if (shanghai) mats.road.roughness = 0.48;
   const foliageTexture = pineCard();
   textures.push(foliageTexture);
   const foliage = new T.MeshStandardMaterial({
@@ -269,7 +281,7 @@ export function createVisionDistrict() {
       color: "#b4c6ad",
     }),
     cardGeometry = new T.PlaneGeometry(1, 1);
-  b.box(mats.snow, 0, -0.5, 0, 1900, 1, 1900);
+  b.box(shanghai ? mats.ground : mats.snow, 0, -0.5, 0, 1900, 1, 1900);
   b.box(mats.pave, 0, -0.04, 9, 257, 0.12, 234);
   // A legible hierarchy of avenues, local streets and pedestrian courtyards.
   for (const x of [-124, 0, 124]) {
@@ -535,6 +547,25 @@ export function createVisionDistrict() {
     ((seed = (Math.imul(1664525, seed) + 1013904223) | 0) >>> 0) / 4294967296;
   function tree(x: number, z: number, size = 1, evergreen = true) {
     b.cyl(mats.bark, [x, 0.3, z], [x, 5.8 * size, z], 0.16 * size);
+    if (shanghai && evergreen) {
+      // Layered evergreen broadleaf crowns with visible branching, not snowy conifers.
+      for (let j = 0; j < 9; j++) {
+        const angle = j * 2.399,
+          r = (j % 3) * 0.9 * size;
+        const tip = [
+          x + Math.cos(angle) * r,
+          (5 + (j % 3) * 0.6) * size,
+          z + Math.sin(angle) * r,
+        ];
+        b.cyl(mats.bark, [x, 3 * size, z], tip, 0.06 * size);
+        b.put(b.sphere, j % 2 ? mats.leaf : mats.leaf2, tip, [
+          1.7 * size,
+          1.3 * size,
+          1.6 * size,
+        ]);
+      }
+      return;
+    }
     if (evergreen) {
       for (let level = 0; level < 6; level++)
         for (let j = 0; j < 8; j++) {
@@ -582,7 +613,7 @@ export function createVisionDistrict() {
   }
   for (const building of districtPlan) {
     const { x, z, id, floors, width, depth } = building;
-    b.box(mats.snow, x, 0.17, z, width + 17, 0.2, 43);
+    b.box(shanghai ? mats.ground : mats.snow, x, 0.17, z, width + 17, 0.2, 43);
     b.box(mats.pave, x, 0.29, z + 13, width + 17, 0.1, 5);
     b.box(mats.pave, x, 0.3, z + 20, 3.5, 0.1, 16);
     architecture(x, z, floors, width, depth, id);
@@ -620,6 +651,17 @@ export function createVisionDistrict() {
         false,
       );
   // Small urban water garden, edged with snow and walking paths.
+  if (shanghai) {
+    // Fictional river and embankment. Not a reconstruction of the Huangpu River.
+    b.box(mats.water, 405, 0.05, -85, 105, 0.15, 800);
+    for (const x of [349, 461]) {
+      b.box(mats.pave, x, 0.23, -85, 7, 0.4, 800);
+      b.box(mats.trim, x + (x < 400 ? 3 : -3), 0.75, -85, 0.35, 1, 800);
+      for (let z = -400; z < 260; z += 22) tree(x - 5, z, 1.2, true);
+    }
+    for (let i = 0; i < 5; i++)
+      architecture(-215 + i * 112, -395, 26 + (i % 3) * 7, 31, 24, "", false);
+  }
   b.box(mats.pave, 65, 0.07, 127, 92, 0.12, 43);
   b.box(mats.water, 63, 0.16, 127, 76, 0.1, 27);
   for (let i = 0; i < 10; i++) tree(24 + i * 9, 149, 0.9, false);
@@ -808,7 +850,7 @@ export function createVisionDistrict() {
   function gauge(x: number, y: number, z: number) {
     plant.cyl(mats.steel, [x, y - 0.55, z], [x, y, z], 0.045, id);
     plant.cyl(mats.black, [x, y, z - 0.07], [x, y, z + 0.07], 0.19, id);
-    plant.cyl(mats.snow, [x, y, z + 0.075], [x, y, z + 0.09], 0.16, id);
+    plant.cyl(mats.trim, [x, y, z + 0.075], [x, y, z + 0.09], 0.16, id);
     plant.cyl(
       mats.dark,
       [x, y, z + 0.1],

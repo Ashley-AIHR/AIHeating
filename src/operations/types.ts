@@ -36,6 +36,19 @@ export type History = {
   meanC: number;
 };
 export type Twin = {
+  cityId?: string;
+  city?: {
+    id: string;
+    name: string;
+    localName: string;
+    district: string;
+    climate: string;
+    system: string;
+    scope: string;
+    source: string;
+    technologySource?: string;
+    geometryRevision: string;
+  };
   scenario: string;
   scenarioName: string;
   scenarioDescription: string;
