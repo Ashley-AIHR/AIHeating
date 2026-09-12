@@ -3,6 +3,12 @@
 import * as T from "three";
 type Materials = Record<string, T.MeshStandardMaterial>;
 export const cityIdentity = {
+  beijing: {
+    title: "Beijing · courtyard and capital city",
+    details:
+      "China Zun-inspired skyline · grey-brick siheyuan · winter avenues",
+    image: "/site-assets/beijing-district-vision-v1.png",
+  },
   shanghai: {
     title: "Shanghai · river city",
     details: "Lujiazui-inspired skyline · shikumen lanes · plane trees",
@@ -17,7 +23,7 @@ export const cityIdentity = {
 export function createCityAtmosphere(city: string, mats: Materials) {
   const shanghai = city === "shanghai",
     root = new T.Group();
-  root.name = shanghai ? "Shanghai local identity" : "Yinchuan local identity";
+  root.name = `${city} local identity`;
   const box = new T.BoxGeometry(),
     sphere = new T.SphereGeometry(1, 20, 12);
   const batches = new Map<
@@ -239,6 +245,121 @@ export function createCityAtmosphere(city: string, mats: Materials) {
         cube(warmStone, x, 3.35, z + 7.8, 2.7, 0.45, 0.6);
         cube(mats.dark, x, 1.6, z + 7.75, 1.75, 3, 0.15);
       }
+  } else if (city === "beijing") {
+    // A geographically unregistered art composition: no Helan ridge or Shanghai river.
+    // Curved square sections form the recognisable concave-waisted capital skyline.
+    const vertices: number[] = [],
+      indices: number[] = [];
+    const h = 154,
+      segments = 64;
+    const widthAt = (t: number) => 20 + 10 * Math.pow(2 * t - 1, 2);
+    for (let level = 0; level <= segments; level++) {
+      const t = level / segments,
+        w = widthAt(t);
+      for (const [x, z] of [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ])
+        vertices.push(x * w, t * h, z * w);
+    }
+    for (let level = 0; level < segments; level++)
+      for (let side = 0; side < 4; side++) {
+        const a = level * 4 + side,
+          b = level * 4 + ((side + 1) % 4);
+        indices.push(a, b, a + 4, b, b + 4, a + 4);
+      }
+    const tower = new T.BufferGeometry();
+    tower.setAttribute("position", new T.Float32BufferAttribute(vertices, 3));
+    tower.setIndex(indices);
+    tower.computeVertexNormals();
+    add(tower, glass, -290, 0, -940);
+    for (let side = 0; side < 4; side++)
+      for (let rib = -9; rib <= 9; rib++) {
+        const points = Array.from({ length: 33 }, (_, i) => {
+          const t = i / 32,
+            w = widthAt(t) + 0.12,
+            a = (rib / 9) * w;
+          return new T.Vector3(
+            ...((side === 0
+              ? [a, t * h, -w]
+              : side === 1
+                ? [w, t * h, a]
+                : side === 2
+                  ? [a, t * h, w]
+                  : [-w, t * h, a]) as [number, number, number]),
+          );
+        });
+        add(
+          new T.TubeGeometry(
+            new T.CatmullRomCurve3(points),
+            32,
+            0.12,
+            4,
+            false,
+          ),
+          mats.steel,
+          -290,
+          0,
+          -940,
+        );
+      }
+    for (let floor = 1; floor < 65; floor++) {
+      const y = (floor * h) / 65,
+        w = widthAt(y / h);
+      for (const s of [-1, 1]) {
+        cube(mats.frame, -290, y, -940 + s * w, w * 2, 0.15, 0.18);
+        cube(mats.frame, -290 + s * w, y, -940, 0.18, 0.15, w * 2);
+      }
+    }
+    for (let i = 0; i < 13; i++) {
+      const x = -700 + i * 46,
+        z = -820 - (i % 3) * 60,
+        height = 42 + ((i * 37) % 68);
+      cube(glass, x, height / 2, z, 25, height, 25);
+      for (let f = 3; f < height; f += 3.5)
+        cube(mats.frame, x, f, z + 12.6, 25, 0.16, 0.16);
+    }
+    const greyBrick = warmStone.clone();
+    greyBrick.color.set("#858782");
+    // Courtyard heritage is scenery, never additional simulator load.
+    for (let row = 0; row < 3; row++)
+      for (let col = 0; col < 5; col++) {
+        const x = -303 + col * 33,
+          z = -67 + row * 46;
+        cube(mats.pave, x, 0.12, z, 29, 0.2, 39);
+        for (const [dx, dz, w, d] of [
+          [0, -14, 28, 7],
+          [0, 14, 28, 7],
+          [-11, 0, 6, 22],
+          [11, 0, 6, 22],
+        ]) {
+          cube(greyBrick, x + dx, 2.1, z + dz, w, 4.2, d);
+          for (const side of [-1, 1]) {
+            const panel = add(
+              new T.PlaneGeometry(w + 1, d * 0.59),
+              roof,
+              x + dx,
+              4.4,
+              z + dz + side * d * 0.25,
+            );
+            panel.rotation.set(-Math.PI / 2, side * 0.48, 0);
+          }
+          for (let n = -2; n <= 2; n++)
+            cube(
+              mats.dark,
+              x + dx + (n * w) / 6,
+              2,
+              z + dz + d / 2 + 0.05,
+              1,
+              1.7,
+              0.1,
+            );
+        }
+        cube(brick, x, 1.65, z + 17.6, 2.2, 3.3, 0.3);
+        cube(mats.trim, x, 3.5, z + 17.6, 3.1, 0.35, 0.5);
+      }
   } else {
     // Multi-layer sculpted Helan-inspired ridge; mountains are scenery only.
     for (let layer = 0; layer < 3; layer++) {
@@ -274,7 +395,7 @@ export function createCityAtmosphere(city: string, mats: Materials) {
       }
       geo.setAttribute("color", new T.Float32BufferAttribute(colours, 3));
       geo.computeVertexNormals();
-      add(geo, mountainMaterial, -90, 0, -730 - layer * 140);
+      add(geo, mountainMaterial, -90, 0, -1300 - layer * 140);
     }
     // Gulou-inspired civic pavilion with a real arched opening and shaped roofs.
     const gate = new T.Shape();
@@ -428,6 +549,7 @@ export function createCityAtmosphere(city: string, mats: Materials) {
   return {
     root,
     update,
-    identity: shanghai ? cityIdentity.shanghai : cityIdentity.yinchuan,
+    identity:
+      cityIdentity[city as keyof typeof cityIdentity] || cityIdentity.yinchuan,
   };
 }

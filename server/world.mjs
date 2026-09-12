@@ -19,6 +19,12 @@ export const site = {
   source: "https://www.yinchuan.gov.cn/xwzx/mrdt/202511/t20251102_5072056.html",
   profiles: [
     {
+      id: "beijing",
+      name: "Beijing",
+      system: cities.beijing.system,
+      enabled: true,
+    },
+    {
       id: "yinchuan",
       name: "Yinchuan",
       system: "Residential secondary heating",

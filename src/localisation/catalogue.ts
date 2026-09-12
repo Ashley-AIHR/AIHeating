@@ -2,6 +2,33 @@
 // are intentionally not translated. The legacy prototype keeps its own copy.
 import { engineeringZh } from "./engineering-zh";
 export const zh: Record<string, string> = {
+  BEIJING: "北京",
+  ". Art-directed architecture and mechanical design with adapted public facade and vegetation meshes. Local design coordinates, not a surveyed reconstruction.":
+    "。采用美术设计的建筑与机械系统，并适配公开立面和植被网格。使用本地设计坐标，非实测重建。",
+  "The live scene uses a Poly Haven apartment facade kit, textured trees and shrubs, and outdoor HDR lighting. These are adapted visual assets, not measured buildings or a photoreal reconstruction of the reference image.":
+    "实时场景采用 Poly Haven 住宅立面组件、带纹理的乔灌木与室外 HDR 照明。这些是适配的视觉资源，非实测建筑或参考图的照片级重建。",
+  "3D asset sources and preparation ↗": "三维资源来源与处理说明 ↗",
+  "Professional facade assets could not load. Basic geometry remains available.":
+    "专业立面资源加载失败，仍可使用基础几何。",
+  "Professional vegetation assets could not load. Retry the page to restore landscape detail.":
+    "专业植被资源加载失败，请刷新页面恢复景观细节。",
+  Beijing: "北京",
+  "Beijing · courtyard and capital city": "北京 · 胡同与首都之城",
+  "China Zun-inspired skyline · grey-brick siheyuan · winter avenues":
+    "中国尊启发的天际线 · 灰砖四合院 · 冬日林荫道",
+  "Courtyard and capital energy district": "首都院落能源片区",
+  "Urban residential secondary heating": "城市住宅二次供热网",
+  "Northern continental monsoon; cold, dry winter heating context":
+    "北方大陆性季风气候，寒冷干燥的冬季供热背景",
+  "Fictional Beijing-inspired neighbourhood with an urban secondary heating loop, courtyard heritage and a distant CBD skyline. Authored geometry and synthetic winter weather; shared aggregate building archetypes, no surveyed site or live data.":
+    "受北京启发的虚构片区，包含城市二次供热环网、传统院落和远景商务区。采用设计几何、合成冬季天气及共享的建筑聚合模型，不包含实测场地或实时数据。",
+  "Open connected BIM Studio": "打开联动 BIM 工作室",
+  "Inspect source BIM with the selected asset, heat supply chain and agent context":
+    "结合所选资产、供热链与智能体上下文检查源 BIM",
+  "The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional district.":
+    "观测网关仅适用于银川参考场景，尚未映射到此虚构片区。",
+  "Published context only; no geographic survey data for this city":
+    "仅使用公开背景资料，不包含此城市实测地理数据",
   "Shanghai · river city": "上海 · 滨江之城",
   "Yinchuan · mountain and wetland city": "银川 · 山水湖城",
   "Lujiazui-inspired skyline · shikumen lanes · plane trees":

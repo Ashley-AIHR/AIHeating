@@ -1,5 +1,28 @@
 // Climate context is sourced; every scenario value is a synthetic design input.
 export const cities = {
+  beijing: {
+    id: "beijing",
+    name: "Beijing",
+    localName: "北京",
+    district: "Courtyard and capital energy district",
+    system: "Urban residential secondary heating",
+    climate: "Northern continental monsoon; cold, dry winter heating context",
+    source:
+      "https://english.beijing.gov.cn/livinginbeijing/Housing1/202005/t20200513_1895777.html",
+    scope:
+      "Fictional Beijing-inspired neighbourhood with an urban secondary heating loop, courtyard heritage and a distant CBD skyline. Authored geometry and synthetic winter weather; shared aggregate building archetypes, no surveyed site or live data.",
+    geometryRevision: "vision-beijing-capital-2026-09-13",
+    initialSupplyC: 49,
+    initialPumpHz: 43,
+    windMs: 3.1,
+    weather: {
+      imbalance: [-4, 65],
+      warming: [1, 210],
+      cold: [-11, 20],
+      sensor: [-4, 65],
+      window: [-4, 65],
+    },
+  },
   yinchuan: {
     id: "yinchuan",
     name: "Yinchuan",

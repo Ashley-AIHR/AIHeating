@@ -132,7 +132,7 @@ function noiseTexture(base: string, kind: "stone" | "road" | "tile", seed = 5) {
 function material(colour: string, roughness = 0.75, metalness = 0) {
   return new T.MeshStandardMaterial({ color: colour, roughness, metalness });
 }
-function worldMapped(m: Mat, metres: number) {
+export function worldMapped(m: Mat, metres: number) {
   m.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace(
       "#include <worldpos_vertex>",
@@ -197,6 +197,14 @@ export function createVisionDistrict(cityId = "yinchuan") {
   const shanghai = cityId === "shanghai";
   const b = new Builder(),
     plant = new Builder();
+  const legacyFacades = new Builder(),
+    districtBuilder = b;
+  const treePlacements: {
+    x: number;
+    z: number;
+    size: number;
+    evergreen: boolean;
+  }[] = [];
   plant.root.position.copy(stationPosition);
   const mats = {
     stone: material("#b7b4ab"),
@@ -325,6 +333,7 @@ export function createVisionDistrict(cityId = "yinchuan") {
     id = "",
     detail = true,
   ) {
+    let b = id ? legacyFacades : districtBuilder;
     const h = floors * 3.3 + 1,
       base = 0.35;
     b.box(mats.stone, x, h / 2 + base, z, w, h, d, id);
@@ -501,6 +510,7 @@ export function createVisionDistrict(cityId = "yinchuan") {
         }
       b.box(mats.trim, x + (side * w) / 2, h / 2, z - d / 2, 0.7, h, 0.8, id);
     }
+    b = districtBuilder; // Existing roof equipment remains above the replacement facades.
     b.box(mats.snow, x, h + 0.43, z, w + 0.8, 0.28, d + 0.8, id);
     b.box(mats.dark, x, h + 0.62, z, w - 1, 0.18, d - 1, id);
     for (const side of [-1, 1]) {
@@ -549,6 +559,11 @@ export function createVisionDistrict(cityId = "yinchuan") {
   const random = () =>
     ((seed = (Math.imul(1664525, seed) + 1013904223) | 0) >>> 0) / 4294967296;
   function tree(x: number, z: number, size = 1, evergreen = true) {
+    // Deciduous streets and Shanghai vegetation now use imported textured meshes.
+    if (shanghai || !evergreen) {
+      treePlacements.push({ x, z, size, evergreen });
+      return;
+    }
     b.cyl(mats.bark, [x, 0.3, z], [x, 5.8 * size, z], 0.16 * size);
     if (shanghai && evergreen) {
       // Layered evergreen broadleaf crowns with visible branching, not snowy conifers.
@@ -1135,9 +1150,12 @@ export function createVisionDistrict(cityId = "yinchuan") {
   for (let i = 0; i < 5; i++)
     tree(stationPosition.x - 24, 99 + i * 8, 0.8, true);
   const root = b.finish();
+  root.add(legacyFacades.finish());
   root.add(plant.finish());
   return {
     root,
+    legacyFacades: legacyFacades.root,
+    treePlacements,
     plant: plant.root,
     materials: mats,
     textures,

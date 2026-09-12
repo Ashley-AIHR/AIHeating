@@ -3,6 +3,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { loadProfessionalAssets } from "./professional-assets";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -50,6 +52,7 @@ type Props = {
   findings: Finding[];
   controlContent: ReactNode;
   onOperate: () => void;
+  onOpenBim: () => void;
 };
 export default function CityScene(props: Props) {
   const locale = useLocale();
@@ -71,9 +74,8 @@ export default function CityScene(props: Props) {
   const motion = useRef(true);
   motion.current = ambientMotion;
   const identity =
-    props.frame.cityId === "shanghai"
-      ? cityIdentity.shanghai
-      : cityIdentity.yinchuan;
+    cityIdentity[props.frame.cityId as keyof typeof cityIdentity] ||
+    cityIdentity.yinchuan;
   useEffect(() => {
     if (referenceOpen) referenceDialog.current?.showModal();
     else referenceDialog.current?.close();
@@ -84,6 +86,7 @@ export default function CityScene(props: Props) {
   quality.current = highQuality;
   useEffect(() => {
     const el = host.current!;
+    setError("");
     let renderer: T.WebGLRenderer;
     try {
       renderer = new T.WebGLRenderer({
@@ -123,6 +126,28 @@ export default function CityScene(props: Props) {
     scene.environmentIntensity = 0.38;
     room.dispose();
     pmrem.dispose();
+    let outdoorEnvironment: T.WebGLRenderTarget | undefined;
+    new RGBELoader().load(
+      "/visual-models/kloppenheim_06_1k.hdr",
+      (hdr) => {
+        if (dead) {
+          hdr.dispose();
+          return;
+        }
+        hdr.mapping = T.EquirectangularReflectionMapping;
+        const generator = new T.PMREMGenerator(renderer);
+        outdoorEnvironment = generator.fromEquirectangular(hdr);
+        scene.environment = outdoorEnvironment.texture;
+        scene.environmentIntensity = 0.55;
+        hdr.dispose();
+        generator.dispose();
+        el.dataset.environment = "outdoor-hdri";
+      },
+      undefined,
+      () => {
+        el.dataset.environment = "fallback";
+      },
+    );
     const skyLight = new T.HemisphereLight("#bfd5ef", "#625e4d", 0.48);
     scene.add(skyLight);
     const sun = new T.DirectionalLight("#ffe8c5", 3.8);
@@ -141,7 +166,7 @@ export default function CityScene(props: Props) {
     orbit.maxDistance = 1000;
     const model = createVisionDistrict(props.frame.cityId);
     const shanghai = props.frame.cityId === "shanghai";
-    (scene.fog as T.FogExp2).density = shanghai ? 0.0006 : 0.00035;
+    (scene.fog as T.FogExp2).density = shanghai ? 0.0006 : 0.00075;
     const atmosphere = createCityAtmosphere(
       props.frame.cityId || "yinchuan",
       model.materials,
@@ -152,6 +177,42 @@ export default function CityScene(props: Props) {
     el.dataset.ambientTime = "0";
     el.dataset.city = props.frame.cityId || "yinchuan";
     scene.add(model.root);
+    const professional = loadProfessionalAssets(
+      props.frame.cityId || "yinchuan",
+      model.treePlacements,
+    );
+    model.root.add(professional.root);
+    el.dataset.facades = "loading";
+    el.dataset.vegetation = "loading";
+    professional.facadeReady
+      .then(() => {
+        if (dead) return;
+        model.legacyFacades.visible = false;
+        el.dataset.facades = "professional-cc0";
+        renderer.shadowMap.needsUpdate = true;
+      })
+      .catch(() => {
+        if (!dead) {
+          el.dataset.facades = "fallback";
+          setError(
+            "Professional facade assets could not load. Basic geometry remains available.",
+          );
+        }
+      });
+    professional.vegetationReady
+      .then(() => {
+        if (dead) return;
+        el.dataset.vegetation = "professional-cc0";
+        renderer.shadowMap.needsUpdate = true;
+      })
+      .catch(() => {
+        if (!dead) {
+          el.dataset.vegetation = "unavailable";
+          setError(
+            "Professional vegetation assets could not load. Retry the page to restore landscape detail.",
+          );
+        }
+      });
     el.dataset.instances = String(model.stats.instances);
     const plantLights = [-10, 9].map((x) => {
       const light = new T.PointLight("#ffdaa5", 0, 36, 2);
@@ -701,6 +762,7 @@ export default function CityScene(props: Props) {
         returnMaterial.emissiveIntensity = dark ? 1.5 : 0.65;
         plantLights.forEach((light) => (light.intensity = dark ? 180 : 0));
       }
+      professional.update(lighting.current);
       if (destination.active) {
         const alpha = 1 - Math.exp(-dt / 0.24);
         camera.position.lerp(destination.position, alpha);
@@ -804,10 +866,12 @@ export default function CityScene(props: Props) {
       renderer.domElement.removeEventListener("pointerup", up);
       renderer.domElement.removeEventListener("keydown", key);
       dispose(scene);
+      professional.dispose();
       flowMaterial.dispose();
       returnMaterial.dispose();
       model.textures.forEach((t) => t.dispose());
       environment.dispose();
+      outdoorEnvironment?.dispose();
       sun.shadow.dispose();
       ao.dispose();
       output.dispose();
@@ -866,6 +930,16 @@ export default function CityScene(props: Props) {
         ),
       )}
       <div className="render-settings">
+        <button
+          className="viewport-bim"
+          onClick={props.onOpenBim}
+          aria-label={tx("Open connected BIM Studio")}
+          title={tx(
+            "Inspect source BIM with the selected asset, heat supply chain and agent context",
+          )}
+        >
+          ▧ {tx("BIM Studio")}
+        </button>
         <button onClick={() => setReferenceOpen(true)}>
           {tx("City vision")}
         </button>

@@ -5,6 +5,82 @@ import { newSession, snapshot, dispatch, optimise } from "./twin-node.mjs";
 import { worldContext } from "./world.mjs";
 import { investigate } from "./immersive-agent.mjs";
 
+test("Beijing has distinct simulated winter physics, retained control context and isolated resets", () => {
+  const id = randomUUID(),
+    b = dispatch(id, "reset", { cityId: "beijing" });
+  assert.equal(b.cityId, "beijing");
+  assert.equal(b.outdoorC, -4);
+  assert.equal(b.supplyC, 49);
+  const y = snapshot(newSession()),
+    s = snapshot(newSession("imbalance", "shanghai"));
+  assert(b.loadKw > s.loadKw && b.loadKw < y.loadKw);
+  assert.equal(worldContext(b, "B10").site.id, "beijing-reference");
+  const preview = dispatch(id, "control_preview", {
+    revision: b.revision,
+    assetId: "far",
+    control: "valvePct",
+    value: 45,
+  });
+  assert(preview.verified);
+  assert.equal(preview.firstStep.cityId, "beijing");
+  assert.equal(
+    dispatch(id, "apply", { candidateId: preview.candidateId }).cityId,
+    "beijing",
+  );
+  const cold = dispatch(id, "reset", { scenario: "cold" });
+  assert.equal(cold.cityId, "beijing");
+  assert.equal(cold.outdoorC, -11);
+  const p = optimise(newSession("warming", "beijing"));
+  assert(p.bestAttempt.trace.every((f) => f.state.cityId === "beijing"));
+  const stale = dispatch(id, "control_preview", {
+    revision: cold.revision,
+    assetId: "far",
+    control: "valvePct",
+    value: cold.zones.find((z) => z.id === "far").valvePct,
+  });
+  dispatch(id, "reset", { cityId: "shanghai" });
+  assert.throws(
+    () => dispatch(id, "apply", { candidateId: stale.candidateId }),
+    /expired|unknown/i,
+  );
+});
+
+test("Beijing agent receives Beijing physical and fictional-site context", async () => {
+  const id = randomUUID(),
+    s = dispatch(id, "reset", { cityId: "beijing" });
+  const result = await investigate({
+    session: id,
+    args: {
+      revision: s.revision,
+      role: "diagnostic",
+      assetId: "B10",
+      question: "Investigate this branch",
+    },
+    model: "fixture",
+    rpc: async (session, method, args) => dispatch(session, method, args),
+    complete: async ({ messages }) => {
+      const context = JSON.parse(messages[1].content).context;
+      assert.equal(context.site.id, "beijing-reference");
+      assert.equal(context.state.outdoorC, -4);
+      assert.match(context.site.scope, /synthetic/);
+      assert.equal(context.site.city.name, "Beijing");
+      return {
+        choices: [
+          {
+            message: {
+              role: "assistant",
+              content:
+                "Beijing synthetic winter case: inspect the far branch before changing the heat source.",
+            },
+          },
+        ],
+      };
+    },
+  });
+  assert.equal(result.context.siteId, "beijing-reference");
+  assert.equal(dispatch(id, "snapshot").revision, s.revision);
+});
+
 test("Shanghai agent receives the selected city's physical context at the provider boundary", async () => {
   const id = randomUUID(),
     s = dispatch(id, "reset", { cityId: "shanghai" });

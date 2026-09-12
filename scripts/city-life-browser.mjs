@@ -61,17 +61,25 @@ try {
   await delay(300);
   assert.equal(await stamp(), reduced);
   await p.emulateMedia({ reducedMotion: "no-preference" });
-  for (const city of ["yinchuan", "shanghai"]) {
-    if (city === "shanghai")
+  for (const city of ["yinchuan", "shanghai", "beijing"]) {
+    if (city !== "yinchuan")
       await p
         .getByRole("combobox", { name: "City district" })
         .selectOption(city);
     await p
-      .locator(".city-scene[data-city=" + city + "][data-camera-settled=true]")
+      .locator(
+        ".city-scene[data-city=" +
+          city +
+          "][data-camera-settled=true][data-facades=professional-cc0][data-vegetation=professional-cc0][data-environment=outdoor-hdri]",
+      )
       .waitFor({ timeout: 60000 });
     assert.match(
       await scene.getAttribute("data-identity"),
-      city === "shanghai" ? /river city/ : /mountain and wetland/,
+      city === "shanghai"
+        ? /river city/
+        : city === "beijing"
+          ? /courtyard and capital/
+          : /mountain and wetland/,
     );
     const canvas = await scene.locator("canvas").elementHandle();
     await p.getByRole("button", { name: "City vision", exact: true }).click();
@@ -82,7 +90,9 @@ try {
     await dialog.locator("img").evaluate((img) => img.decode());
     assert.match(
       await dialog.locator("img").getAttribute("src"),
-      new RegExp(city + "-district-vision-v2"),
+      new RegExp(
+        city + "-district-vision-v" + (city === "beijing" ? "1" : "2"),
+      ),
     );
     assert(
       await dialog.locator("img").evaluate((img) => img.naturalWidth >= 1600),
@@ -93,6 +103,20 @@ try {
       .click();
     assert(await canvas.evaluate((c) => c.isConnected));
     await p.screenshot({ path: "../outputs/" + city + "-living-3d.png" });
+    await p
+      .getByRole("button", { name: "Open connected BIM Studio", exact: true })
+      .click();
+    await p
+      .getByRole("dialog", { name: "BIM work studio", exact: true })
+      .waitFor();
+    await p
+      .getByRole("button", { name: "Return to district ×", exact: true })
+      .click();
+    assert(
+      await canvas.evaluate((c) => c.isConnected),
+      "Opening BIM must retain main world canvas",
+    );
+    assert.equal((await state()).cityId, city);
   }
   await p
     .getByRole("button", { name: "⚙ Energy centre", exact: true })
@@ -101,7 +125,7 @@ try {
     .getByRole("button", { name: "Select P-01 in 3D", exact: true })
     .click();
   await p
-    .getByRole("button", { name: "BIM work studio", exact: true })
+    .getByRole("button", { name: "Open connected BIM Studio", exact: true })
     .first()
     .click();
   await p
@@ -115,7 +139,7 @@ try {
     .selectOption("zh-CN");
   await p.getByRole("button", { name: "城市愿景", exact: true }).click();
   await p
-    .getByRole("heading", { name: "上海 · 滨江之城", exact: true })
+    .getByRole("heading", { name: "北京 · 胡同与首都之城", exact: true })
     .waitFor();
   await p.setViewportSize({ width: 390, height: 844 });
   assert(
@@ -133,9 +157,17 @@ try {
     .getByRole("button", { name: "城市愿景", exact: true })
     .boundingBox();
   assert(button.x >= 0 && button.x + button.width <= 390);
+  const bimButton = await p
+    .getByRole("button", { name: "打开联动 BIM 工作室", exact: true })
+    .boundingBox();
+  assert(bimButton.x >= 0 && bimButton.x + bimButton.width <= 390);
+  await p
+    .getByRole("button", { name: "打开联动 BIM 工作室", exact: true })
+    .click();
+  await p.getByRole("dialog", { name: "BIM 工作室", exact: true }).waitFor();
   assert.deepEqual(errors, []);
   console.log(
-    "PASS: two city identities/images, animated and paused streets, reduced motion, immutable physics, live canvas retained, equipment/BIM access, Chinese and mobile. No provider calls.",
+    "PASS: three city identities/images and loaded professional textures/meshes/HDR, animated and paused streets, reduced motion, immutable physics, main canvas retained, direct district/mechanical BIM, Chinese and mobile. No provider calls.",
   );
 } finally {
   await browser?.close();

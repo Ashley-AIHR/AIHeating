@@ -802,6 +802,9 @@ export default function Workspace() {
             <option value="shanghai">
               {locale === "zh-CN" ? "上海" : "SHANGHAI · 上海"}
             </option>
+            <option value="beijing">
+              {locale === "zh-CN" ? "北京" : "BEIJING · 北京"}
+            </option>
           </select>
           <small>
             {tx(twin.city?.district || "Winter-city energy district")}
@@ -879,6 +882,7 @@ export default function Workspace() {
           onEquipment={setEquipment}
           equipment={equipment}
           suspended={bimOpen}
+          onOpenBim={openStudio}
           affected={mission?.affected || []}
           comparison={baselineFrame}
           findings={diagnosis?.findings || []}
@@ -1768,8 +1772,8 @@ export default function Workspace() {
                   "Measurements remain separate from the uncalibrated simulator. A received value is not proof of a commissioned site connection.",
                 )}
                 {tx(
-                  twin.cityId === "shanghai" &&
-                    " The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional Shanghai district.",
+                  twin.cityId !== "yinchuan" &&
+                    " The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional district.",
                 )}
               </p>
               <label>
@@ -1782,7 +1786,7 @@ export default function Workspace() {
                 />
               </label>
               <button
-                disabled={!!busy || !code || twin.cityId === "shanghai"}
+                disabled={!!busy || !code || twin.cityId !== "yinchuan"}
                 onClick={() =>
                   void work("Reading observations", async () =>
                     setFeed(await api<Feed>("telemetry", {}, code)),
@@ -1887,7 +1891,7 @@ export default function Workspace() {
               <p>
                 {tx(twin.city?.district || visionGeometry.name)}
                 {tx(
-                  ". Original architectural and mechanical design, with a city-specific landscape treatment. Local design coordinates, not a surveyed reconstruction.",
+                  ". Art-directed architecture and mechanical design with adapted public facade and vegetation meshes. Local design coordinates, not a surveyed reconstruction.",
                 )}
               </p>
               <p className="muted">
@@ -1896,6 +1900,18 @@ export default function Workspace() {
                 )}
               </p>
               <h3>{tx("Physically based materials")}</h3>
+              <p>
+                {tx(
+                  "The live scene uses a Poly Haven apartment facade kit, textured trees and shrubs, and outdoor HDR lighting. These are adapted visual assets, not measured buildings or a photoreal reconstruction of the reference image.",
+                )}
+              </p>
+              <a
+                href="/visual-models/manifest.json"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {tx("3D asset sources and preparation ↗")}
+              </a>
               <p>
                 {tx("Asphalt, snow, concrete and paving textures by")}
                 {tx(" ")}
@@ -1922,7 +1938,7 @@ export default function Workspace() {
                 {tx(twin.city?.climate)}. {tx(twin.city?.scope)}
               </p>
               {tx(
-                twin.cityId !== "shanghai" && (
+                twin.cityId === "yinchuan" && (
                   <>
                     <p className="muted">
                       {tx(
@@ -2013,12 +2029,12 @@ export default function Workspace() {
                     timeMode,
                     displayTime: frame.time,
                     geographicResearch:
-                      twin.cityId === "shanghai"
+                      twin.cityId !== "yinchuan"
                         ? {
                             source: twin.city?.source,
                             technologySource: twin.city?.technologySource,
                             scope:
-                              "Published context only; no Shanghai geographic survey data",
+                              "Published context only; no geographic survey data for this city",
                           }
                         : {
                             scope: geo.scope,
