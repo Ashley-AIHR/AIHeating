@@ -9,6 +9,7 @@ import { numericalEvidence, guardNarrative } from "./agent-evidence.mjs";
 import { site, registry, worldContext, ObservationStore } from "./world.mjs";
 import { investigate } from "./immersive-agent.mjs";
 import { streamCompletion } from "./provider-stream.mjs";
+import { prepareInvestigation } from "./investigation-context.mjs";
 const observations = new ObservationStore();
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -362,6 +363,10 @@ const server = http.createServer(async (req, res) => {
           return send(res, 400, {
             error: "Question must contain 3–1800 characters.",
           });
+        const prepared =
+          method === "investigation"
+            ? prepareInvestigation(await rpc(session, "snapshot"), args)
+            : null;
         if (Date.now() - hourStart > 3600000) {
           hourStart = Date.now();
           hourlyCalls = 0;
@@ -406,6 +411,11 @@ const server = http.createServer(async (req, res) => {
                 "X-Accel-Buffering": "no",
               });
               res.flushHeaders();
+              write({
+                type: "context",
+                snapshot: prepared.snapshot,
+                rebased: prepared.rebased,
+              });
               heartbeat = setInterval(() => {
                 if (!res.destroyed)
                   write({ type: "heartbeat", at: new Date().toISOString() });
@@ -414,7 +424,7 @@ const server = http.createServer(async (req, res) => {
             try {
               const result = await investigate({
                 session,
-                args,
+                args: { ...prepared.args, syncCurrent: false },
                 rpc,
                 model,
                 signal: controller.signal,
@@ -496,6 +506,9 @@ const server = http.createServer(async (req, res) => {
     res.end(req.method === "HEAD" ? undefined : content);
   } catch (err) {
     const failure = {
+      ...(err.code === "CONTEXT_CHANGED"
+        ? { code: err.code, snapshot: err.snapshot }
+        : {}),
       error:
         err.name === "TimeoutError"
           ? "AI provider timed out. Please retry."
@@ -504,7 +517,7 @@ const server = http.createServer(async (req, res) => {
     if (res.headersSent) {
       if (!res.destroyed)
         res.end(JSON.stringify({ type: "error", ...failure }) + "\n");
-    } else send(res, 400, failure);
+    } else send(res, err.status || 400, failure);
   } finally {
     if (acquired) locked.delete(session);
   }

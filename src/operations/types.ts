@@ -36,6 +36,7 @@ export type History = {
   meanC: number;
 };
 export type Twin = {
+  contextId?: string;
   cityId?: string;
   city?: {
     id: string;

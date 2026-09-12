@@ -45,6 +45,7 @@ type Plan = Omit<Candidate, "trace"> & {
   planHash: string;
 };
 export type Optimisation = {
+  contextId?: string;
   revision: number;
   baseline: Omit<Candidate, "trace"> & { trace: Forecast[] };
   recommendation: Plan | null;
@@ -62,6 +63,7 @@ export type Optimisation = {
   limitations: string[];
 };
 type Run = {
+  contextId?: string;
   completionStatus?: "complete" | "partial";
   warning?: string;
   runId: string;
@@ -344,7 +346,11 @@ export default function Workspace() {
   const building = frame?.buildings.find((b) => b.id === selected),
     zone = frame?.zones.find((z) => z.id === (building?.zone || selected)),
     asset = config?.registry.find((a) => a.id === selected);
-  const stalePlan = !!optimisation && optimisation.revision !== twin?.revision;
+  const stalePlan =
+    !!optimisation &&
+    (optimisation.revision !== twin?.revision ||
+      (optimisation.contextId !== undefined &&
+        optimisation.contextId !== twin?.contextId));
   useEffect(() => {
     if (stalePlan && timeMode === "forecast") setTimeMode("current");
   }, [stalePlan, timeMode]);
@@ -409,8 +415,8 @@ export default function Workspace() {
     if (!twin) return;
     if (!continuing) setCyclesRemaining(0);
     setControlsOpen(false);
-    const origin = twin,
-      assetId = selected;
+    let origin = twin;
+    const assetId = selected;
     await work(
       useAgent
         ? "Agent mission in progress"
@@ -475,13 +481,62 @@ export default function Workspace() {
                 question: brief,
                 objective,
                 revision: origin.revision,
+                contextId: origin.contextId,
+                cityId: origin.cityId || "yinchuan",
+                scenario: origin.scenario,
+                syncCurrent: true,
                 mode: "simulation",
               },
               code,
               event,
               agentAbort.current.signal,
+              (state, rebased) => {
+                origin = state;
+                setTwin(state);
+                setFrames((f) =>
+                  [
+                    ...f.filter(
+                      (x) =>
+                        x.contextId === state.contextId &&
+                        x.revision < state.revision,
+                    ),
+                    state,
+                  ].slice(-48),
+                );
+                setMission(
+                  (m) =>
+                    m && {
+                      ...m,
+                      before: state,
+                      events: rebased
+                        ? [
+                            ...m.events,
+                            {
+                              tool: "context_sync",
+                              status: "completed",
+                              at: new Date().toISOString(),
+                              message: `Using current ${state.city?.name || state.cityId} simulation, revision ${state.revision}.`,
+                            },
+                          ]
+                        : m.events,
+                    },
+                );
+                if (rebased) {
+                  setDiagnosis(null);
+                  setFeed(null);
+                  setImported(null);
+                  setImportName("");
+                  previousFindings.current = new Set();
+                  setOperationEvents([]);
+                  notice(
+                    "Simulation synchronised",
+                    `Using ${state.city?.name || state.cityId} · revision ${state.revision}. Previous scene state and plans have been replaced.`,
+                  );
+                }
+              },
             );
             setRun(r);
+            if (r.diagnosis) setDiagnosis(r.diagnosis);
             setMission((m) => m && { ...m, draft: r.answer });
             if (r.completionStatus === "partial") {
               partialWarning =
@@ -1352,7 +1407,9 @@ export default function Workspace() {
                   {run.equipmentId ? ` / ${run.equipmentId}` : ""} · revision{" "}
                   {run.revision}
                 </h3>
-                {run.revision !== twin.revision && (
+                {(run.revision !== twin.revision ||
+                  (run.contextId !== undefined &&
+                    run.contextId !== twin.contextId)) && (
                   <p className="warning">
                     Historical run—current state has changed.
                   </p>

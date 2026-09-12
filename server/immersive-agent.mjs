@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { guardNarrative } from "./agent-evidence.mjs";
 import { worldContext, registry } from "./world.mjs";
 import { compactEvidence } from "./agent-context.mjs";
+import { prepareInvestigation } from "./investigation-context.mjs";
 const schema = (name, description, properties = {}) => ({
   type: "function",
   function: {
@@ -30,8 +31,7 @@ export async function investigate({
       "Agents currently operate on the current simulation, not replay or field observations",
     );
   const snapshot = await rpc(session, "snapshot");
-  if (args.revision !== snapshot.revision)
-    throw new Error("Context changed; refresh before investigating");
+  prepareInvestigation(snapshot, args);
   const context = worldContext(snapshot, selected),
     startedAt = new Date().toISOString(),
     runId = randomUUID();
@@ -280,6 +280,7 @@ export async function investigate({
     startedAt,
     completedAt: new Date().toISOString(),
     revision: snapshot.revision,
+    contextId: snapshot.contextId,
     assetId: selected,
     equipmentId: context.selectedEquipment?.id || null,
     mode: "simulation",

@@ -1,0 +1,9 @@
+# Investigation context synchronisation
+
+The previous UI captured its locally cached `twin.revision` when starting an investigation. Server sessions are in memory: another tab can advance them, and deployment/restart or expiry can recreate them. Comparing only the local revision against that server state caused the repeated “Context changed; refresh before investigating” error. A recreated session could also happen to reuse the same revision number.
+
+Each simulation instance now has a `contextId`, preserved through steps and forecasts and regenerated on reset. The current-scene UI explicitly requests `syncCurrent` with the city and scenario it is displaying. While holding the session lock, the server resolves the authoritative snapshot **before** provider calls, rate accounting or stream headers. For the same city/scenario it safely rebases the investigation to the latest state. A context event reaches the browser before tool activity, updating both the scene and the mission's comparison baseline.
+
+Changing city/scenario is not silently accepted. A structured HTTP 409 includes the same session's current snapshot; the UI synchronises the scene and stops for operator review. Replay requests remain unsupported and are rejected before provider calls. The synchronisation does not reset or change someone else's chosen scenario. Strict API callers still reject stale revisions or instance IDs, and all control application tokens remain subject to the original revision, expiry and one-use checks. Optimisation hashes and results also carry the simulation instance identity, so reused revision numbers cannot make old plans look current.
+
+This does not make in-memory sessions persistent across Render restarts. It makes such resets explicit and removes unnecessary manual refreshes when the current scene can be safely resynchronised. No automatic paid retry is performed.

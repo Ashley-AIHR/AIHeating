@@ -37,16 +37,33 @@ test("HTTP streams public text and executed tools before completion, retains int
       return response;
     };
     const state = await (await post("state", {})).json();
+    // Stale requests are rejected before stream headers and paid-request accounting.
+    for (let i = 0; i < 21; i++) {
+      const stale = await post("investigation", {
+        revision: state.revision + 1,
+        stream: true,
+        question: "Check this stale view",
+      });
+      assert.equal(stale.status, 409);
+      const failure = await stale.json();
+      assert.equal(failure.code, "CONTEXT_CHANGED");
+      assert.equal(failure.snapshot.contextId, state.contextId);
+    }
     for (const partial of [false, true]) {
       const res = await post("investigation", {
         role: "optimisation",
-        revision: state.revision,
+        revision: state.revision + 10,
+        contextId: "previous-server-session",
+        syncCurrent: true,
+        cityId: state.cityId,
+        scenario: state.scenario,
         stream: true,
         question: partial ? "stream-test-partial" : "Test the physical branch",
       });
       assert.equal(res.headers.get("content-type"), "application/x-ndjson");
       let buffer = "",
         result,
+        context,
         sawText = false,
         sawTool = false;
       for await (const bytes of res.body) {
@@ -55,7 +72,16 @@ test("HTTP streams public text and executed tools before completion, retains int
         buffer = lines.pop();
         for (const line of lines.filter(Boolean)) {
           const item = JSON.parse(line);
+          if (item.type === "context") {
+            context = item.snapshot;
+            assert(item.rebased);
+          }
           if (item.type === "event") {
+            assert.equal(
+              context?.revision,
+              state.revision,
+              "Authoritative scene context must arrive before any tool or provider activity",
+            );
             if (item.event.kind === "text") {
               assert(!result);
               sawText = true;

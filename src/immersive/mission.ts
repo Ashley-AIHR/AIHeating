@@ -26,6 +26,7 @@ export type Mission = {
   draftRound?: number;
 };
 export const toolNames: Record<string, string> = {
+  context_sync: "Scene synchronised with the server",
   agent_decision: "Agent selecting the next investigation step",
   agent_output: "Agent writing its explanation",
   agent_recovery: "Recovering the public explanation",
@@ -41,6 +42,7 @@ export async function streamInvestigation<T>(
   code: string,
   onEvent: (event: MissionEvent) => void,
   signal?: AbortSignal,
+  onContext?: (snapshot: Twin, rebased: boolean) => void,
 ): Promise<T> {
   const res = await fetch("/api/investigation", {
     method: "POST",
@@ -50,8 +52,12 @@ export async function streamInvestigation<T>(
       ? AbortSignal.any([signal, AbortSignal.timeout(255000)])
       : AbortSignal.timeout(255000),
   });
-  if (!res.ok)
-    throw new Error((await res.json()).error || "Investigation failed");
+  if (!res.ok) {
+    const failure = await res.json();
+    if (failure.code === "CONTEXT_CHANGED" && failure.snapshot)
+      onContext?.(failure.snapshot, true);
+    throw new Error(failure.error || "Investigation failed");
+  }
   if (!res.body) throw new Error("Investigation stream unavailable");
   const reader = res.body.getReader(),
     decoder = new TextDecoder();
@@ -60,6 +66,7 @@ export async function streamInvestigation<T>(
   const consume = (line: string) => {
     if (!line.trim()) return;
     const item = JSON.parse(line);
+    if (item.type === "context") onContext?.(item.snapshot, item.rebased);
     if (item.type === "error") throw new Error(item.error);
     if (item.type === "event") onEvent(item.event);
     if (item.type === "result") result = item.result;

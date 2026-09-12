@@ -70,6 +70,7 @@ export function newSession(
     ]),
   );
   const s = {
+    contextId: randomUUID(),
     cityId,
     scenario,
     engine: createEngine(
@@ -127,6 +128,7 @@ export function snapshot(s, history = true) {
     .replace(".000Z", "+08:00");
   return {
     cityId: s.cityId || "yinchuan",
+    contextId: s.contextId,
     city: cityProfile(s.cityId),
     scenario: s.scenario,
     scenarioName: SCENARIOS[s.scenario].name,
@@ -480,6 +482,7 @@ export function optimise(s, args = {}) {
           revision: s.revision,
           scenario: s.scenario,
           cityId: s.cityId,
+          contextId: s.contextId,
           schedule,
           model: "P1A-coherent-v1.2-node",
         }),
@@ -503,6 +506,7 @@ export function optimise(s, args = {}) {
   return {
     revision: s.revision,
     objective,
+    contextId: s.contextId,
     baseline,
     recommendation: feasible ? result : null,
     bestAttempt: result,
