@@ -176,7 +176,10 @@ test("empty public output receives one final-answer retry and never loops indefi
     rpc: async (id, method, args) => dispatch(id, method, args),
     complete: async (payload) => {
       calls++;
-      if (calls === 2) assert.equal(payload.tool_choice, "none");
+      if (calls === 2) {
+        assert.equal(payload.tool_choice, "none");
+        assert.equal(payload.reasoning.enabled, false);
+      }
       return {
         choices: [{ message: { content: "" }, finish_reason: "length" }],
       };

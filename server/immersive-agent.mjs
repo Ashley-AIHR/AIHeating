@@ -155,7 +155,10 @@ export async function investigate({
           tools,
           tool_choice: round === 3 ? "none" : round === 0 ? "required" : "auto",
           max_tokens: 3500,
-          reasoning: { effort: "low", exclude: true },
+          reasoning:
+            round === 3
+              ? { enabled: false, exclude: true }
+              : { effort: "low", exclude: true },
           temperature: 0.2,
           provider: { require_parameters: true },
         },
@@ -172,7 +175,13 @@ export async function investigate({
       progress("agent_decision", "failed", { round, message: warning });
       break;
     }
-    progress("agent_decision", "completed");
+    progress("agent_decision", "completed", {
+      round,
+      finishReason: data.choices?.[0]?.finish_reason || null,
+      completionTokens: data.usage?.completion_tokens ?? null,
+      reasoningTokens:
+        data.usage?.completion_tokens_details?.reasoning_tokens ?? null,
+    });
     const msg = data.choices?.[0]?.message;
     totalTokens += data.usage?.total_tokens || 0;
     if (!msg) {
