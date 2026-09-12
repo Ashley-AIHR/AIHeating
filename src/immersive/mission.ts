@@ -30,10 +30,12 @@ export const toolNames: Record<string, string> = {
   agent_decision: "Agent selecting the next investigation step",
   agent_output: "Agent writing its explanation",
   agent_recovery: "Recovering the public explanation",
+  agent_report: "Preparing the evidence-backed operator report",
   inspect_world: "Tracing the connected network",
   diagnose_building: "Checking thermal and hydraulic evidence",
   simulate_controls: "Testing an alternative in the physical model",
   optimise_network: "Solving and verifying the control schedule",
+  finish_without_plan: "Concluding without a control intervention",
 };
 
 // The stream contains executed tool activity, never model chain-of-thought.

@@ -14,8 +14,11 @@ globalThis.fetch = async (url, options = {}) => {
     return realFetch(url, options);
   const payload = JSON.parse(options.body),
     brief = payload.messages[1].content;
-  const first = !payload.messages.some((m) => m.role === "tool");
-  const tool = payload.tools.some((t) => t.function.name === "optimise_network")
+  const first =
+    !!payload.tools && !payload.messages.some((m) => m.role === "tool");
+  const tool = payload.tools?.some(
+    (t) => t.function.name === "optimise_network",
+  )
     ? "optimise_network"
     : "inspect_world";
   const packets = first

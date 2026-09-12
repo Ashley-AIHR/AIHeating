@@ -46,10 +46,17 @@ export function numericalEvidence(trace) {
       }
     : null;
 }
-export function guardNarrative(answer) {
+export function guardNarrative(answer, allowedAssetIds = []) {
   // Prevent a known failure mode: a numerically plausible but mislabelled model claim.
   // This lexical guard is not a general semantic fact checker or a safety guarantee.
-  const withoutAssetIds = answer.replace(/\bB(?:0[1-9]|1[0-2])\b/g, "asset");
+  let withoutAssetIds = answer.replace(/\bB(?:0[1-9]|1[0-2])\b/g, "asset");
+  for (const id of allowedAssetIds) {
+    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    withoutAssetIds = withoutAssetIds.replace(
+      new RegExp(`\\b${escaped}\\b`, "g"),
+      "asset",
+    );
+  }
   if (/\d/.test(withoutAssetIds))
     return {
       answer:

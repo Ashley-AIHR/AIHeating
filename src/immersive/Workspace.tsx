@@ -156,7 +156,7 @@ export default function Workspace() {
     [feed, setFeed] = useState<Feed | null>(null);
   const [code, setCode] = useState(""),
     [question, setQuestion] = useState(
-      "Investigate the selected asset using physical evidence. Test an alternative explanation where possible.",
+      "Investigate the selected asset using physical evidence. Test an alternative explanation and prepare a verified simulator intervention if appropriate.",
     ),
     [objective, setObjective] = useState("balanced");
   const [busy, setBusy] = useState(""),

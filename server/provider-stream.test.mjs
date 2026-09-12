@@ -165,7 +165,7 @@ test("timeout after successful optimisation preserves verified plan and tool evi
       JSON.stringify(result.optimisation).length / 2,
   );
 });
-test("empty public output receives one final-answer retry and never loops indefinitely", async () => {
+test("empty public output receives bounded tool-free report attempts and never loops indefinitely", async () => {
   const id = randomUUID(),
     state = dispatch(id, "snapshot");
   let calls = 0;
@@ -176,8 +176,9 @@ test("empty public output receives one final-answer retry and never loops indefi
     rpc: async (id, method, args) => dispatch(id, method, args),
     complete: async (payload) => {
       calls++;
-      if (calls === 2) {
-        assert.equal(payload.tool_choice, "none");
+      if (calls >= 2) {
+        assert.equal(payload.tools, undefined);
+        assert.equal(payload.tool_choice, undefined);
         assert.equal(payload.reasoning.enabled, false);
       }
       return {
@@ -185,7 +186,7 @@ test("empty public output receives one final-answer retry and never loops indefi
       };
     },
   });
-  assert.equal(calls, 2);
+  assert.equal(calls, 3);
   assert.equal(result.completionStatus, "partial");
   assert(result.diagnosis);
 });
