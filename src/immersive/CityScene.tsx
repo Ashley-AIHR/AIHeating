@@ -42,6 +42,8 @@ type Props = {
   suspended: boolean;
   onView: (view: "district" | "plant") => void;
   onEquipment: (id: string) => void;
+  affected: string[];
+  comparison?: Twin;
 };
 export default function CityScene(props: Props) {
   const host = useRef<HTMLDivElement>(null),
@@ -53,7 +55,7 @@ export default function CityScene(props: Props) {
     } | null>(null);
   latest.current = props;
   const [error, setError] = useState(""),
-    [dusk, setDusk] = useState(false),
+    [dusk, setDusk] = useState(true),
     [highQuality, setHighQuality] = useState(() => window.innerWidth > 760);
   const lighting = useRef(false),
     quality = useRef(true);
@@ -164,7 +166,9 @@ export default function CityScene(props: Props) {
       renderer.shadowMap.needsUpdate = true;
     }
     function go(target: T.Vector3, offset: T.Vector3) {
-      destination.position.copy(target).addScaledVector(offset, Math.max(1, 0.95 / camera.aspect));
+      destination.position
+        .copy(target)
+        .addScaledVector(offset, Math.max(1, 0.95 / camera.aspect));
       destination.target.copy(target);
       destination.active = true;
     }
@@ -257,11 +261,14 @@ export default function CityScene(props: Props) {
           0.025,
         );
         paths.push({ curve, zone, reverse });
+        const material = (reverse ? returnMaterial : flowMaterial).clone();
         const pipe = new T.Mesh(
           new T.TubeGeometry(curve, 100, 0.3, 8, false),
-          reverse ? returnMaterial : flowMaterial,
+          material,
         );
         pipe.userData.assetId = zone;
+        pipe.userData.zone = zone;
+        pipe.userData.reverse = reverse;
         network.add(pipe);
         for (const b of row) {
           const branch = new T.CatmullRomCurve3(
@@ -276,9 +283,11 @@ export default function CityScene(props: Props) {
           );
           const mesh = new T.Mesh(
             new T.TubeGeometry(branch, 12, 0.2, 8, false),
-            reverse ? returnMaterial : flowMaterial,
+            material,
           );
           mesh.userData.assetId = b.id;
+          mesh.userData.zone = zone;
+          mesh.userData.reverse = reverse;
           network.add(mesh);
         }
       }
@@ -354,20 +363,33 @@ export default function CityScene(props: Props) {
           ),
       );
     function update() {
-      const { frame, layer, selected, view } = latest.current;
+      const { frame, layer, selected, view, affected, comparison } =
+        latest.current;
+      el.dataset.stateRevision = String(frame.revision);
+      el.dataset.physicalTime = String(frame.elapsedMinutes);
+      el.dataset.comparison = String(!!comparison);
       network.visible = !props.imported && layer !== "buildings";
       rings.visible =
         !props.imported && layer === "temperature" && view === "district";
       for (const marker of markers) {
         const building = frame.buildings.find((b) => b.id === marker.id),
           zone = frame.zones.find((z) => z.id === marker.id);
+        const reference = comparison?.buildings.find((b) => b.id === marker.id);
+        const delta =
+          reference && building ? building.modelC - reference.modelC : null;
         marker.button.textContent = building
-          ? `${marker.id}  ${building.indoorC.toFixed(1)}°`
+          ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}`
           : zone
-            ? `${marker.id.toUpperCase()} · ${zone.delayMinutes.toFixed(0)} min`
+            ? `${marker.id.toUpperCase()} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} min`
             : marker.id === "ST01"
-              ? "ST01  ENERGY CENTRE ↗"
-              : marker.id;
+              ? `ST01 · ${frame.supplyC.toFixed(1)}°C · ${frame.pumpHz.toFixed(1)} Hz ↗`
+              : marker.id.startsWith("P-") && marker.id !== "P-03"
+                ? `${marker.id} · equivalent drive ${frame.pumpHz.toFixed(1)} Hz`
+                : marker.id;
+        marker.button.classList.toggle(
+          "mission-affected",
+          affected.includes(marker.plant ? "ST01" : marker.id),
+        );
         marker.button.classList.toggle(
           "active",
           marker.plant === (view === "plant") &&
@@ -375,6 +397,24 @@ export default function CityScene(props: Props) {
         );
         marker.button.classList.toggle("plant-label", marker.plant);
       }
+      network.traverse((obj) => {
+        if (!(obj instanceof T.Mesh) || !obj.userData.zone) return;
+        const z = frame.zones.find((z) => z.id === obj.userData.zone);
+        if (!z) return;
+        const material = obj.material as T.MeshStandardMaterial;
+        const temperature = obj.userData.reverse ? z.returnC : z.supplyC;
+        const value = T.MathUtils.clamp((temperature - 25) / 35, 0, 1);
+        material.color.setHSL(
+          obj.userData.reverse ? 0.57 - value * 0.08 : 0.14 - value * 0.13,
+          0.92,
+          0.5,
+        );
+        material.emissive.copy(material.color);
+        material.emissiveIntensity =
+          affected.length && !affected.includes(obj.userData.zone)
+            ? 0.15
+            : 0.85;
+      });
       for (const b of frame.buildings) {
         const m = thermalMeshes.get(b.id);
         if (m)
@@ -442,7 +482,7 @@ export default function CityScene(props: Props) {
       if (!w || !h) return;
       renderer.setSize(w, h);
       composer.setSize(w, h);
-      const portraitChanged = (camera.aspect < 1) !== (w / h < 1);
+      const portraitChanged = camera.aspect < 1 !== w / h < 1;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       if (portraitChanged) changeView();
@@ -608,6 +648,8 @@ export default function CityScene(props: Props) {
       renderer.domElement.removeEventListener("pointerup", up);
       renderer.domElement.removeEventListener("keydown", key);
       dispose(scene);
+      flowMaterial.dispose();
+      returnMaterial.dispose();
       model.textures.forEach((t) => t.dispose());
       environment.dispose();
       sun.shadow.dispose();
@@ -623,7 +665,15 @@ export default function CityScene(props: Props) {
   }, [props.imported]);
   useEffect(
     () => runtime.current?.update(),
-    [props.frame, props.selected, props.layer, props.view, props.equipment],
+    [
+      props.frame,
+      props.selected,
+      props.layer,
+      props.view,
+      props.equipment,
+      props.affected,
+      props.comparison,
+    ],
   );
   useEffect(() => {
     if (props.focus) runtime.current?.focus();

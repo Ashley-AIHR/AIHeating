@@ -10,6 +10,243 @@
   font-synthesis: none;
   color-scheme: dark;
 }
+.mission-banner {
+  position: absolute;
+  top: 204px;
+  left: 108px;
+  max-width: min(510px, calc(100% - 510px));
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  padding: 12px 16px;
+  background: linear-gradient(110deg, #102c3af2, #0d1b2cf0);
+  border: 1px solid #65b4af70;
+  border-radius: 9px;
+  box-shadow: 0 10px 35px #03091255;
+  backdrop-filter: blur(18px);
+}
+.mission-banner small {
+  display: block;
+  color: #80d8c7;
+  font-size: 8px;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+.mission-banner strong {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  display: block;
+}
+.mission-banner > b {
+  margin-left: auto;
+  color: #8cdecf;
+}
+.mission-pulse {
+  color: #9eecdc;
+  font-size: 28px;
+}
+.mission-control {
+  border-bottom: 1px solid #304858;
+  padding-bottom: 20px;
+}
+.mission-control > h3 {
+  font-size: 23px;
+  letter-spacing: -0.6px;
+  margin: 10px 0;
+}
+.mission-steps {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+  padding: 0;
+  list-style: none;
+  margin: 20px 0;
+}
+.mission-steps li {
+  font-size: 8px;
+  color: #7b95a7;
+  text-align: center;
+}
+.mission-steps b {
+  display: grid;
+  place-items: center;
+  border: 1px solid #385361;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  margin: 0 auto 8px;
+  font-size: 10px;
+}
+.mission-steps .current {
+  color: #99eedb;
+}
+.mission-steps .current b {
+  background: #274e51;
+  border-color: #8ce5ce;
+  box-shadow: 0 0 18px #7ce8ce30;
+}
+.mission-steps .done b {
+  color: #8bdcc7;
+  border-color: #438579;
+}
+.mission-status {
+  padding: 12px;
+  background: #172f3c;
+  border-left: 2px solid #8ddbc8;
+  margin: 18px 0 12px;
+}
+.mission-status small {
+  display: block;
+  color: #87acbd;
+  font-size: 8px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.mission-status strong {
+  font-size: 12px;
+  line-height: 1.6;
+  display: block;
+}
+.mission-status.failed,
+.mission-status.blocked {
+  border-color: #efa76e;
+}
+.mission-events {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #9eb6c6;
+}
+.mission-events > div {
+  display: flex;
+  gap: 9px;
+  padding: 4px 0;
+}
+.mission-events span {
+  color: #76d8c2;
+}
+.mission-events [data-status="running"] {
+  color: #e8ce93;
+}
+.mission-events [data-status="failed"] {
+  color: #f19b85;
+}
+.mission-comparison {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  font-size: 10px;
+  gap: 12px 6px;
+  padding: 15px 10px;
+  border: 1px solid #385361;
+  border-radius: 7px;
+  background: #0a1827;
+}
+.mission-comparison b {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.mission-comparison b:nth-child(3n) {
+  color: #8fe7ce;
+}
+.mission-actuators > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid #263c4c;
+  gap: 8px;
+}
+.mission-actuators span {
+  color: #98afc0;
+}
+.mission-actuators b {
+  color: #bbeedc;
+  font-variant-numeric: tabular-nums;
+}
+.mission-futures {
+  margin-top: 18px;
+}
+.mission-futures button {
+  flex: 1;
+  font-size: 10px;
+  padding: 8px 4px;
+}
+.mission-destinations {
+  margin-top: 20px;
+  display: grid;
+  gap: 8px;
+  font-size: 10px;
+  color: #8f9caa;
+}
+.mission-destinations .connected {
+  color: #8bddbf;
+}
+.mission-autonomy {
+  padding: 13px;
+  margin: 17px 0;
+  border: 1px solid #355461;
+  background: #102733;
+  border-radius: 7px;
+}
+.mission-autonomy > strong {
+  font-size: 12px;
+  color: #a7e3d5;
+}
+.mission-autonomy p {
+  font-size: 10px;
+  margin: 8px 0 12px;
+}
+.mission-autonomy small {
+  display: block;
+  margin-top: 9px;
+  font-size: 8px;
+  color: #87a8b9;
+}
+.mission-building-deltas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin: 12px 0;
+}
+.mission-building-deltas > div {
+  background: #14333b;
+  border: 1px solid #31555c;
+  padding: 9px 4px;
+  text-align: center;
+}
+.mission-building-deltas span {
+  display: block;
+  font-size: 9px;
+  color: #98b8c7;
+  margin-bottom: 6px;
+}
+.mission-building-deltas b {
+  font-size: 12px;
+  color: #9be7d0;
+}
+.city-labels button.mission-affected {
+  border-color: #96dacc;
+  box-shadow: 0 0 16px #64e2c729;
+}
+@media (max-width: 1100px) and (min-width: 761px) {
+  .mission-banner {
+    top: 233px;
+    max-width: calc(100% - 490px);
+  }
+}
+@media (max-width: 760px) {
+  .mission-banner {
+    top: 232px;
+    left: 70px;
+    right: 15px;
+    max-width: none;
+    padding: 8px 11px;
+  }
+  .mission-banner strong {
+    font-size: 10px;
+  }
+}
 * {
   box-sizing: border-box;
 }

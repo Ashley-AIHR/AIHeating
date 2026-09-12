@@ -9,7 +9,14 @@ const schema = (name, description, properties = {}) => ({
     parameters: { type: "object", properties, additionalProperties: false },
   },
 });
-export async function investigate({ session, args, rpc, complete, model }) {
+export async function investigate({
+  session,
+  args,
+  rpc,
+  complete,
+  model,
+  onEvent = () => {},
+}) {
   const role = args.role || "diagnostic";
   if (!["diagnostic", "optimisation"].includes(role))
     throw new Error("Unknown agent role");
@@ -36,26 +43,30 @@ export async function investigate({ session, args, rpc, complete, model }) {
   }
   const trace = [],
     events = [];
+  const progress = (tool, status) => {
+    const event = {
+      tool,
+      at: new Date().toISOString(),
+      status,
+      assetId: selected,
+      revision: snapshot.revision,
+    };
+    events.push(event);
+    onEvent(event);
+  };
   const record = (tool, result) => {
     trace.push({ tool, result });
-    events.push({ tool, at: new Date().toISOString(), status: "completed" });
+    progress(tool, result?.error ? "failed" : "completed");
     return result;
   };
+  progress("diagnose_building", "running");
   const diagnosis = record(
     "diagnose_building",
     await rpc(session, "diagnose", {
       buildingId: selected.startsWith("B") ? selected : undefined,
     }),
   );
-  let optimisation =
-    role === "optimisation"
-      ? record(
-          "optimise_network",
-          await rpc(session, "optimise", {
-            objective: args.objective || "balanced",
-          }),
-        )
-      : null;
+  let optimisation = null;
   const tools = [
     schema(
       "inspect_world",
@@ -90,7 +101,13 @@ export async function investigate({ session, args, rpc, complete, model }) {
     tools.push(
       schema(
         "optimise_network",
-        "Read the computed and independently re-run two-stage optimisation for this run.",
+        "Compute and verify a network control schedule. Call this to prepare an intervention; do not claim a plan exists before this tool succeeds. Choose the objective using the operator brief and evidence.",
+        {
+          objective: {
+            type: "string",
+            enum: ["balanced", "comfort", "energy"],
+          },
+        },
       ),
     );
   const messages = [
@@ -110,10 +127,14 @@ export async function investigate({ session, args, rpc, complete, model }) {
   ];
   messages[0].content +=
     " Your final explanation must contain no numerical measurements, thresholds, dates, numbered lists or spelled-out substitutes for quantities. B01–B12 asset IDs are permitted. Refer to the authoritative numerical evidence card instead. This lexical guard is not a semantic fact checker.";
+  if (role === "optimisation")
+    messages[0].content +=
+      " Direct the mission through your tools: inspect the affected system, test a useful alternative, then call optimise_network to prepare a verified intervention if appropriate. The client will preview the returned numerical trajectory in the city. If the evidence calls for no control intervention, explain why and leave the plan absent.";
   let totalTokens = 0,
     answer = "",
     calls = 0;
   for (let round = 0; round < 4; round++) {
+    progress("agent_decision", "running");
     const data = await complete({
       model,
       messages,
@@ -123,6 +144,7 @@ export async function investigate({ session, args, rpc, complete, model }) {
       temperature: 0.2,
       provider: { require_parameters: true },
     });
+    progress("agent_decision", "completed");
     const msg = data.choices?.[0]?.message;
     totalTokens += data.usage?.total_tokens || 0;
     if (!msg) throw new Error("Provider returned no message");
@@ -149,9 +171,19 @@ export async function investigate({ session, args, rpc, complete, model }) {
           )
         )
           throw new Error("Unknown argument");
+        progress(name, "running");
         if (name === "inspect_world") result = context;
-        else if (name === "optimise_network") result = optimisation;
-        else if (name === "diagnose_building") {
+        else if (name === "optimise_network") {
+          if (
+            p.objective &&
+            !["balanced", "comfort", "energy"].includes(p.objective)
+          )
+            throw new Error("Unknown optimisation objective");
+          optimisation = await rpc(session, "optimise", {
+            objective: p.objective || args.objective || "balanced",
+          });
+          result = optimisation;
+        } else if (name === "diagnose_building") {
           if (
             p.buildingId &&
             !registry.some(

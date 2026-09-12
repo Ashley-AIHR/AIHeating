@@ -363,37 +363,56 @@ const server = http.createServer(async (req, res) => {
         activeAgents++;
         hourlyCalls++;
         try {
-          if (method === "investigation")
-            return send(
-              res,
-              200,
-              await investigate({
-                session,
-                args,
-                rpc,
-                model,
-                complete: async (payload) => {
-                  const response = await fetch(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    {
-                      method: "POST",
-                      headers: {
-                        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json",
-                        "X-Title": "HeatPilot immersive agents",
-                      },
-                      body: JSON.stringify(payload),
-                      signal: AbortSignal.timeout(35000),
+          if (method === "investigation") {
+            const streaming = args.stream === true;
+            const write = (value) => {
+              if (res.destroyed)
+                throw new Error("Investigation viewer disconnected");
+              res.write(JSON.stringify(value) + "\n");
+            };
+            if (streaming) {
+              res.writeHead(200, {
+                "Content-Type": "application/x-ndjson",
+                "Cache-Control": "no-store",
+                "X-Accel-Buffering": "no",
+              });
+              res.flushHeaders();
+            }
+            const result = await investigate({
+              session,
+              args,
+              rpc,
+              model,
+              onEvent: streaming
+                ? (event) => write({ type: "event", event })
+                : undefined,
+              complete: async (payload) => {
+                const response = await fetch(
+                  "https://openrouter.ai/api/v1/chat/completions",
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                      "Content-Type": "application/json",
+                      "X-Title": "HeatPilot immersive agents",
                     },
+                    body: JSON.stringify(payload),
+                    signal: AbortSignal.timeout(35000),
+                  },
+                );
+                if (!response.ok)
+                  throw new Error(
+                    `AI provider returned HTTP ${response.status}`,
                   );
-                  if (!response.ok)
-                    throw new Error(
-                      `AI provider returned HTTP ${response.status}`,
-                    );
-                  return response.json();
-                },
-              }),
-            );
+                return response.json();
+              },
+            });
+            if (streaming) {
+              write({ type: "result", result });
+              return res.end();
+            }
+            return send(res, 200, result);
+          }
           return send(
             res,
             200,
@@ -449,12 +468,16 @@ const server = http.createServer(async (req, res) => {
     });
     res.end(req.method === "HEAD" ? undefined : content);
   } catch (err) {
-    send(res, 400, {
+    const failure = {
       error:
         err.name === "TimeoutError"
           ? "AI provider timed out. Please retry."
           : err.message,
-    });
+    };
+    if (res.headersSent) {
+      if (!res.destroyed)
+        res.end(JSON.stringify({ type: "error", ...failure }) + "\n");
+    } else send(res, 400, failure);
   } finally {
     if (acquired) locked.delete(session);
   }

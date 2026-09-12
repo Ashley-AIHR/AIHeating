@@ -18,6 +18,7 @@ try {
     .locator(".city-scene[data-camera-settled=true]")
     .waitFor({ timeout: 60000 });
   await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "☾ Blue hour", exact: true }).click();
   const gpu = await page.locator(".city-scene canvas").evaluate((c) => {
     const gl = c.getContext("webgl2"),
       d = gl.getExtension("WEBGL_debug_renderer_info");

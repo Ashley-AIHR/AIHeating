@@ -18,6 +18,7 @@ try {
   await page.getByRole("status").waitFor({ state: "hidden" });
   await page.locator(".city-scene canvas").focus();
   await page.keyboard.press("ArrowRight");
+  await page.getByRole("button", { name: "Assets", exact: true }).click();
   await page
     .getByRole("combobox", { name: "Selected asset" })
     .selectOption("B09");

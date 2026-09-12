@@ -10,6 +10,13 @@ import { validateGlb, type BimModel } from "../engineering/model";
 import CityScene, { type Geography } from "./CityScene";
 import visionGeometry from "../../public/site-assets/vision-district.json";
 import "./immersive.css";
+import MissionControl from "./MissionControl";
+import {
+  streamInvestigation,
+  toolNames,
+  type Mission,
+  type MissionEvent,
+} from "./mission";
 const EngineeringScene = lazy(() => import("../engineering/EngineeringScene"));
 type Forecast = Candidate["trace"][number] & {
   state?: Twin;
@@ -28,9 +35,9 @@ type Plan = Omit<Candidate, "trace"> & {
   }[];
   planHash: string;
 };
-type Optimisation = {
+export type Optimisation = {
   revision: number;
-  baseline: Candidate;
+  baseline: Omit<Candidate, "trace"> & { trace: Forecast[] };
   recommendation: Plan | null;
   bestAttempt: Plan;
   status: string;
@@ -58,6 +65,7 @@ type Run = {
   optimisation: Optimisation | null;
   trace: { tool: string; result: unknown }[];
   context: { time: string; relatedAssets: { id: string }[] };
+  sceneActions?: { type: string; assetIds: string[] }[];
 };
 type Observation = {
   assetId: string;
@@ -123,7 +131,7 @@ export default function Workspace() {
     [frames, setFrames] = useState<Twin[]>([]);
   const [selected, setSelected] = useState("B10"),
     [focus, setFocus] = useState(0),
-    [panel, setPanel] = useState("inspect"),
+    [panel, setPanel] = useState("agents"),
     [layer, setLayer] = useState("temperature"),
     [timeMode, setTimeMode] = useState("current"),
     [timeIndex, setTimeIndex] = useState(0);
@@ -150,6 +158,12 @@ export default function Workspace() {
     [search, setSearch] = useState("");
   const [imported, setImported] = useState<ArrayBuffer | null>(null),
     [importName, setImportName] = useState("");
+  const [mission, setMission] = useState<Mission | null>(null),
+    [forecastSide, setForecastSide] = useState<"intervention" | "baseline">(
+      "intervention",
+    ),
+    [previewPlaying, setPreviewPlaying] = useState(false),
+    [cyclesRemaining, setCyclesRemaining] = useState(0);
   const inFlight = useRef(false),
     alive = useRef(true);
   const bimCommand = useMemo(
@@ -242,7 +256,26 @@ export default function Workspace() {
     setPanel("inspect");
   }
   const plan = optimisation?.recommendation,
-    forecast = plan?.trace || [];
+    forecast =
+      (forecastSide === "baseline"
+        ? optimisation?.baseline.trace
+        : plan?.trace) || [];
+  useEffect(() => {
+    if (!previewPlaying || timeMode !== "forecast") return;
+    const timer = setInterval(
+      () =>
+        setTimeIndex((i) => {
+          if (i >= forecast.length - 1) return i;
+          return i + 1;
+        }),
+      1600,
+    );
+    return () => clearInterval(timer);
+  }, [previewPlaying, timeMode, forecast.length]);
+  useEffect(() => {
+    if (timeMode !== "forecast" || timeIndex >= forecast.length - 1)
+      setPreviewPlaying(false);
+  }, [timeMode, timeIndex, forecast.length]);
   let frame = twin;
   if (timeMode === "replay" && frames[timeIndex]) frame = frames[timeIndex];
   if (timeMode === "forecast" && twin && forecast[timeIndex]) {
@@ -265,19 +298,25 @@ export default function Workspace() {
     if (stalePlan && timeMode === "forecast") setTimeMode("current");
   }, [stalePlan, timeMode]);
   function current() {
+    setPreviewPlaying(false);
     setTimeMode("current");
     setTimeIndex(0);
   }
   async function optimise() {
+    setCyclesRemaining(0);
     await work("Optimising + verifying nonlinear trajectories", async () => {
       setPlaying(false);
       const o = await api<Optimisation>("optimise", { objective });
       setOptimisation(o);
+      setMission(null);
+      setForecastSide("intervention");
       setPanel("optimise");
       current();
     });
   }
   async function investigate(role: string) {
+    if (role === "optimisation") return startMission(true);
+    setCyclesRemaining(0);
     await work(
       `${role === "diagnostic" ? "Diagnostic" : "Optimisation"} agent is using numerical tools`,
       async () => {
@@ -304,6 +343,213 @@ export default function Workspace() {
       },
     );
   }
+  function preview(side: "intervention" | "baseline", play = false) {
+    setPlaying(false);
+    setForecastSide(side);
+    setTimeMode("forecast");
+    setTimeIndex(0);
+    setPreviewPlaying(play);
+    setLayer("temperature");
+  }
+  async function startMission(useAgent: boolean, continuing = false) {
+    if (!twin) return;
+    if (!continuing) setCyclesRemaining(0);
+    const origin = twin,
+      assetId = selected;
+    await work(
+      useAgent
+        ? "Agent mission in progress"
+        : "Computing physical alternatives",
+      async () => {
+        setPlaying(false);
+        current();
+        setPanel("agents");
+        setOptimisation(null);
+        setRun(null);
+        const b = origin.buildings.find((b) => b.id === assetId);
+        const zoneId =
+          b?.zone || origin.zones.find((z) => z.id === assetId)?.id;
+        const affected = [
+          "ST01",
+          ...(zoneId
+            ? [
+                zoneId,
+                ...origin.buildings
+                  .filter((b) => b.zone === zoneId)
+                  .map((b) => b.id),
+              ]
+            : origin.buildings.map((b) => b.id)),
+        ];
+        setMission({
+          phase: "investigating",
+          origin: useAgent ? "llm" : "numerical",
+          before: origin,
+          assetId,
+          affected,
+          events: [],
+          message: "Inspecting the current operating state",
+        });
+        setLayer("network");
+        const event = (e: MissionEvent) =>
+          setMission(
+            (m) =>
+              m && {
+                ...m,
+                events: [...m.events, e],
+                message: toolNames[e.tool] || e.tool,
+              },
+          );
+        try {
+          let o: Optimisation | null;
+          if (useAgent) {
+            const r = await streamInvestigation<Run>(
+              {
+                role: "optimisation",
+                assetId,
+                equipmentId:
+                  assetId === "ST01" && sceneView === "plant"
+                    ? equipment
+                    : undefined,
+                question,
+                objective,
+                revision: origin.revision,
+                mode: "simulation",
+              },
+              code,
+              event,
+            );
+            setRun(r);
+            o = r.optimisation;
+            // Apply only validated, known highlight targets; never move the camera after a late response.
+            const targets = r.sceneActions
+              ?.filter((a) => a.type === "highlight")
+              .flatMap((a) => a.assetIds)
+              .filter((id) => config?.registry.some((a) => a.id === id));
+            if (targets?.length)
+              setMission((m) => m && { ...m, affected: targets });
+          } else {
+            event({
+              tool: "diagnose_building",
+              status: "running",
+              at: new Date().toISOString(),
+            });
+            setDiagnosis(
+              await api<Diagnosis>("diagnose", { buildingId: b?.id }),
+            );
+            event({
+              tool: "diagnose_building",
+              status: "completed",
+              at: new Date().toISOString(),
+            });
+            event({
+              tool: "optimise_network",
+              status: "running",
+              at: new Date().toISOString(),
+            });
+            o = await api<Optimisation>("optimise", { objective });
+            event({
+              tool: "optimise_network",
+              status: "completed",
+              at: new Date().toISOString(),
+            });
+          }
+          setOptimisation(o);
+          if (o?.recommendation && o.verification.passed) {
+            setMission(
+              (m) =>
+                m && {
+                  ...m,
+                  phase: "ready",
+                  message:
+                    "Verified intervention · compare its physical consequences",
+                  affected: [
+                    "ST01",
+                    ...origin.zones.map((z) => z.id),
+                    ...origin.buildings.map((b) => b.id),
+                  ],
+                  baseline: o!.baseline.trace[0]?.state,
+                  predicted: o!.recommendation!.trace[0]?.state,
+                },
+            );
+            preview("intervention", true);
+          } else
+            setMission(
+              (m) =>
+                m && {
+                  ...m,
+                  phase: "blocked",
+                  message: o
+                    ? "No feasible intervention found. Review the model evidence."
+                    : "No control plan proposed. Review the investigation findings.",
+                },
+            );
+        } catch (e) {
+          setMission(
+            (m) =>
+              m && {
+                ...m,
+                phase: "failed",
+                message: e instanceof Error ? e.message : String(e),
+              },
+          );
+          throw e;
+        }
+      },
+    );
+  }
+  async function applyControls() {
+    await work(
+      "Applying verified controls and measuring the physical response",
+      async () => {
+        try {
+          const after = await api<Twin>("apply", {
+            candidateId: plan?.candidateId,
+          });
+          setTwin(after);
+          setMission((m) =>
+            m?.phase === "ready"
+              ? {
+                  ...m,
+                  phase: "applied",
+                  after,
+                  message: "Controls applied · measuring the network response",
+                }
+              : m,
+          );
+          setCyclesRemaining((n) => Math.max(0, n - 1));
+          setConfirm(false);
+          current();
+          await refresh();
+        } catch (e) {
+          setCyclesRemaining(0);
+          throw e;
+        }
+      },
+    );
+  }
+  useEffect(() => {
+    if (!cyclesRemaining || busy || inFlight.current || !mission) return;
+    if (
+      ["failed", "blocked"].includes(mission.phase) ||
+      (mission.phase === "ready" && stalePlan)
+    ) {
+      setCyclesRemaining(0);
+      return;
+    }
+    // A visible pause lets the operator inspect or stop; each next call uses fresh state.
+    const timer = setTimeout(() => {
+      if (mission.phase === "ready") void applyControls();
+      else if (mission.phase === "applied") void startMission(true, true);
+    }, 2400);
+    return () => clearTimeout(timer);
+  }, [cyclesRemaining, busy, mission, stalePlan]);
+  const baselineFrame =
+    timeMode === "forecast"
+      ? optimisation?.baseline.trace[timeIndex]?.state
+      : mission?.phase === "applied" &&
+          mission.after?.revision === twin?.revision
+        ? mission.baseline
+        : undefined;
   const displaySeries =
     timeMode === "forecast"
       ? forecast.map((f) =>
@@ -398,8 +644,31 @@ export default function Workspace() {
           onEquipment={setEquipment}
           equipment={equipment}
           suspended={bimOpen}
+          affected={mission?.affected || []}
+          comparison={baselineFrame}
         />
       </section>
+      <button
+        className="mission-banner"
+        onClick={() => setPanel("agents")}
+        aria-label="Open active agent mission"
+      >
+        <span className="mission-pulse">✧</span>
+        <span>
+          <small>
+            {mission
+              ? mission.origin === "llm"
+                ? "AGENT MISSION"
+                : "NUMERICAL EXPLORATION"
+              : "CITY INTELLIGENCE"}
+          </small>
+          <strong>
+            {mission?.message ||
+              "Give the city an objective. Watch it respond."}
+          </strong>
+        </span>
+        <b>↗</b>
+      </button>
       <section className="world-title">
         <div className="eyebrow">YINCHUAN / CONNECTED ENERGY DISTRICT</div>
         <h1>
@@ -726,13 +995,60 @@ export default function Workspace() {
         )}
         {panel === "agents" && (
           <>
+            <MissionControl
+              mission={mission}
+              optimisation={optimisation}
+              current={twin}
+              busy={!!busy}
+              stale={stalePlan}
+              canRunAgent={config.aiConfigured && !!code}
+              forecastSide={forecastSide}
+              previewing={timeMode === "forecast"}
+              animating={previewPlaying}
+              onRun={(agent) => void startMission(agent)}
+              onPreview={(side) => preview(side)}
+              onAnimate={() =>
+                previewPlaying
+                  ? setPreviewPlaying(false)
+                  : preview(forecastSide, true)
+              }
+              onApply={() => {
+                setCyclesRemaining(0);
+                current();
+                setConfirm(true);
+              }}
+              cyclesRemaining={cyclesRemaining}
+              onAutonomous={() => {
+                setCyclesRemaining(3);
+                void startMission(true, true);
+              }}
+              onStop={() => setCyclesRemaining(0)}
+            />
+            <label>
+              Mission objective
+              <select
+                value={objective}
+                onChange={(e) => setObjective(e.target.value)}
+                disabled={!!busy}
+              >
+                <option value="balanced">Balance comfort and energy</option>
+                <option value="comfort">Recover building comfort</option>
+                <option value="energy">Reduce heat and pumping demand</option>
+              </select>
+            </label>
             <div className="agent-card">
               <span className="agent-orb">✧</span>
               <div>
-                <strong>DeepSeek V4 Flash</strong>
+                <strong>
+                  {config.model.startsWith("deepseek/deepseek-v4-flash")
+                    ? "DeepSeek V4 Flash"
+                    : "Configured reasoning model"}
+                </strong>
                 <small>{config.model}</small>
               </div>
-              <span>{config.aiConfigured ? "CONFIGURED" : "OFFLINE"}</span>
+              <span>
+                {config.aiConfigured ? "CONFIGURED" : "NOT CONFIGURED"}
+              </span>
             </div>
             <p>
               Diagnosis and optimisation share asset <b>{selected}</b>, its
@@ -909,6 +1225,7 @@ export default function Workspace() {
                   <button
                     disabled={!plan || stalePlan || !!busy}
                     onClick={() => {
+                      setForecastSide("intervention");
                       setTimeMode("forecast");
                       setTimeIndex(0);
                       setPlaying(false);
@@ -1157,6 +1474,7 @@ export default function Workspace() {
               aria-pressed={timeMode === "forecast"}
               disabled={!plan || stalePlan}
               onClick={() => {
+                setForecastSide("intervention");
                 setTimeMode("forecast");
                 setTimeIndex(0);
                 setPlaying(false);
@@ -1172,11 +1490,13 @@ export default function Workspace() {
             onChange={(e) => {
               const scenario = e.target.value;
               setPlaying(false);
+              setCyclesRemaining(0);
               void work("Resetting scenario", async () => {
                 await api("reset", { scenario });
                 await refresh();
                 setOptimisation(null);
                 setRun(null);
+                setMission(null);
                 current();
               });
             }}
@@ -1211,7 +1531,7 @@ export default function Workspace() {
             <span>{building ? selected : "District mean"} / indoor °C</span>
             <small>
               {timeMode === "forecast"
-                ? "Computed prediction · 30-minute samples"
+                ? `${forecastSide === "baseline" ? "CONTINUE UNCHANGED" : "WITH INTERVENTION"} · computed 30-minute samples`
                 : "Recorded simulation · not field telemetry"}
             </small>
           </div>
@@ -1292,17 +1612,7 @@ export default function Workspace() {
               <button
                 className="primary"
                 disabled={!!busy || stalePlan || !plan}
-                onClick={() =>
-                  void work(
-                    "Revalidating and applying simulator step",
-                    async () => {
-                      await api("apply", { candidateId: plan?.candidateId });
-                      await refresh();
-                      setConfirm(false);
-                      current();
-                    },
-                  )
-                }
+                onClick={() => void applyControls()}
               >
                 Apply to simulation only
               </button>

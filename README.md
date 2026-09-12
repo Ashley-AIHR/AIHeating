@@ -6,6 +6,14 @@ The default route is an authored winter-city vision inspired by Yinchuan: detail
 
 The standalone engineering tools are preserved at **/engineering** (including the independent OpenDHN benchmark), image-backed reference design at **/reference**, earlier procedural scene at **/operations-classic**, and frozen research dashboard at **/legacy**. Shanghai and Shenzhen are documented alternative energy-system profiles, not enabled aliases of the heating engine. No physical plant control is connected.
 
+## Agent missions that change the twin
+
+The default workspace opens on mission control. Choose an objective and an asset, then use **Run agent mission** to let the configured LLM inspect context, test alternatives and request a numerical control schedule. Actual tool activity streams into the persistent mission. A completed, verified plan automatically previews its district trajectory; **Continue unchanged** and **With intervention** compare two futures from the same initial state. Pipe flow animation, branch readings and building temperature deltas follow the selected physical trajectory.
+
+Apply the first 30 minutes to commit controls to the simulator, then inspect the measured model response against the unchanged baseline. **Run 3 agent control cycles** explicitly authorises up to three paid investigations and automatic application of their verified plans to this simulator. Each cycle uses a fresh revision; an absent plan, error, stale context or operator stop prevents further application. The operator must keep the browser open. This is a bounded browser coordinator, not a persistent production control daemon.
+
+Without AI credentials, **Explore with numerical solver** demonstrates the same numerical consequences, clearly labelled as numerical exploration. Real equipment remains disconnected. See [mission control architecture and validation](docs/mission-control.md).
+
 ## Run locally
 
 Requirements: **Node.js 24.14.1 or newer** and a modern WebGL-capable browser. The deployed service is entirely Node.js, including physical simulation and optimisation in a worker thread. Python and IfcOpenShell are only optional offline research/reproduction tools.
@@ -42,7 +50,7 @@ Without AI configuration, the physical twin, rule-based investigations, scenario
 
 Use a **Node.js Web Service**, not a Static Site or Vite preview server.
 
-1. Connect this repository and select the branch containing this upgrade.
+1. Connect this repository and select the **main** branch.
 2. Choose **Node** as the service language/runtime; set NODE_VERSION to **24.14.1**.
 3. Build Command: **npm ci && npm run build**. Start Command: **npm start**.
 4. Set OPENROUTER_API_KEY and AI_ACCESS_TOKEN as secret environment variables. Set OPENROUTER_MODEL if using a different tool-capable model.

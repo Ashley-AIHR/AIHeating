@@ -2,6 +2,8 @@
 
 Design decision, 13 September 2026. This is an implementation direction, not a claim that a field-connected multi-agent system is complete.
 
+Implementation update: the historical status below predates the delivered mission control loop, streamed tool activity, computed scene comparisons and bounded autonomous simulator cycles. See [current mission implementation](mission-control.md) for those capabilities and their validation limits. Field actuation remains unconnected.
+
 ## Model and current status
 
 Use DeepSeek V4 Flash through the existing server-side OpenRouter integration, pinned to `deepseek/deepseek-v4-flash-0731`. Do not silently switch to V4.1 or a moving latest alias. Credentials remain server-side. Existing environment overrides require explicit migration; no paid inference or remote deployment was performed for this configuration change.

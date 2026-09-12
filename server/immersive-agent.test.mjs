@@ -81,6 +81,8 @@ test("stale/replay context is rejected before any paid completion", async () => 
 });
 test("optimisation agent uses actual optimiser tool output, not invented plans", async () => {
   let solved = 0;
+  let rounds = 0;
+  const events = [];
   const result = {
     recommendation: { planHash: "proof" },
     verification: { passed: true },
@@ -89,18 +91,68 @@ test("optimisation agent uses actual optimiser tool output, not invented plans",
     session: "s",
     args: { role: "optimisation", revision: 4 },
     model: "test",
-    rpc: async (s, m) =>
-      m === "snapshot" ? snapshot : m === "optimise" ? (solved++, result) : {},
+    onEvent: (e) => events.push(e),
+    rpc: async (s, m, args) => {
+      if (m === "snapshot") return snapshot;
+      if (m === "optimise") {
+        assert.equal(args.objective, "comfort");
+        solved++;
+        return result;
+      }
+      return {};
+    },
     complete: async () => ({
       choices: [
         {
-          message: { content: "Review the computed evidence before approval." },
+          message:
+            rounds++ === 0
+              ? {
+                  role: "assistant",
+                  tool_calls: [
+                    {
+                      id: "plan",
+                      type: "function",
+                      function: {
+                        name: "optimise_network",
+                        arguments: '{"objective":"comfort"}',
+                      },
+                    },
+                  ],
+                }
+              : { content: "Review the computed evidence before approval." },
         },
       ],
     }),
   });
   assert.equal(solved, 1);
   assert.equal(r.optimisation, result);
+  assert.deepEqual(
+    events.filter((e) => e.tool === "optimise_network").map((e) => e.status),
+    ["running", "completed"],
+  );
+  assert(events.every((e) => e.revision === 4));
+});
+test("agent may decline intervention without secretly running an optimiser", async () => {
+  const r = await investigate({
+    session: "s",
+    args: { role: "optimisation", revision: 4 },
+    model: "test",
+    rpc: async (_, method) => {
+      assert.notEqual(method, "optimise");
+      return method === "snapshot" ? snapshot : {};
+    },
+    complete: async () => ({
+      choices: [
+        {
+          message: {
+            content:
+              "Check the suspect sensor before proposing a control intervention.",
+          },
+        },
+      ],
+    }),
+  });
+  assert.equal(r.optimisation, null);
 });
 test("mechanical agent receives validated assembly context without invented instrument values", async () => {
   let received;
