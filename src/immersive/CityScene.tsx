@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -8,7 +8,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
-import type { Twin } from "../operations/types";
+import type { Twin, Finding } from "../operations/types";
 import {
   createVisionDistrict,
   districtPlan,
@@ -44,9 +44,13 @@ type Props = {
   onEquipment: (id: string) => void;
   affected: string[];
   comparison?: Twin;
+  findings: Finding[];
+  controlContent: ReactNode;
+  onOperate: () => void;
 };
 export default function CityScene(props: Props) {
   const host = useRef<HTMLDivElement>(null),
+    controlAnchor = useRef<HTMLDivElement>(null),
     latest = useRef(props),
     runtime = useRef<{
       update: () => void;
@@ -237,6 +241,8 @@ export default function CityScene(props: Props) {
       curve: T.CatmullRomCurve3;
       zone: string;
       reverse: boolean;
+      phase: number;
+      speed: number;
     }[] = [];
     for (const [zone, index] of [
       ["near", 0],
@@ -260,7 +266,7 @@ export default function CityScene(props: Props) {
           "catmullrom",
           0.025,
         );
-        paths.push({ curve, zone, reverse });
+        paths.push({ curve, zone, reverse, phase: 0, speed: 0 });
         const material = (reverse ? returnMaterial : flowMaterial).clone();
         const pipe = new T.Mesh(
           new T.TubeGeometry(curve, 100, 0.3, 8, false),
@@ -362,6 +368,7 @@ export default function CityScene(props: Props) {
             "Unable to load the local visual model. The vision district remains available.",
           ),
       );
+    const lastReadings = new Map<string, number>();
     function update() {
       const { frame, layer, selected, view, affected, comparison } =
         latest.current;
@@ -377,15 +384,50 @@ export default function CityScene(props: Props) {
         const reference = comparison?.buildings.find((b) => b.id === marker.id);
         const delta =
           reference && building ? building.modelC - reference.modelC : null;
-        marker.button.textContent = building
-          ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}`
-          : zone
-            ? `${marker.id.toUpperCase()} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} min`
-            : marker.id === "ST01"
-              ? `ST01 · ${frame.supplyC.toFixed(1)}°C · ${frame.pumpHz.toFixed(1)} Hz ↗`
-              : marker.id.startsWith("P-") && marker.id !== "P-03"
-                ? `${marker.id} · equivalent drive ${frame.pumpHz.toFixed(1)} Hz`
-                : marker.id;
+        const severity = building
+          ? building.quality === "suspect"
+            ? "suspect"
+            : building.indoorC < 18
+              ? "critical"
+              : building.indoorC < 20
+                ? "warning"
+                : building.indoorC > 23
+                  ? "warm"
+                  : "normal"
+          : "normal";
+        marker.button.dataset.severity = severity;
+        const reading = building?.indoorC ?? zone?.flowM3h ?? frame.pumpHz;
+        const previous = lastReadings.get(marker.id);
+        const changed =
+          previous !== undefined &&
+          Math.abs(previous - reading) >= (building ? 0.01 : 0.05);
+        if (changed) {
+          marker.button.classList.remove("reading-change");
+          void marker.button.offsetWidth;
+          marker.button.classList.add("reading-change");
+        }
+        lastReadings.set(marker.id, reading);
+        marker.button.textContent =
+          (severity === "critical"
+            ? "⛔ "
+            : severity === "suspect"
+              ? "◇ "
+              : severity === "warning" || severity === "warm"
+                ? "△ "
+                : "") +
+          (building
+            ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}`
+            : zone
+              ? `${marker.id.toUpperCase()} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} min`
+              : marker.id === "ST01"
+                ? `ST01 · ${frame.supplyC.toFixed(1)}°C · ${frame.pumpHz.toFixed(1)} Hz ↗`
+                : marker.id.startsWith("P-") && marker.id !== "P-03"
+                  ? `${marker.id} · equivalent drive ${frame.pumpHz.toFixed(1)} Hz`
+                  : marker.id) +
+          (changed && !comparison ? ` ${reading > previous! ? "↑" : "↓"}` : "");
+        marker.button.title = building
+          ? `${building.id}: ${severity === "suspect" ? "sensor disagreement — verify before control" : severity === "normal" ? "within displayed comfort band" : "outside displayed comfort band"}. Click to inspect or operate its supplying branch.`
+          : "Click to inspect and operate this circuit";
         marker.button.classList.toggle(
           "mission-affected",
           affected.includes(marker.plant ? "ST01" : marker.id),
@@ -417,16 +459,21 @@ export default function CityScene(props: Props) {
       });
       for (const b of frame.buildings) {
         const m = thermalMeshes.get(b.id);
-        if (m)
+        if (m) {
           (m.material as T.MeshBasicMaterial).color.set(
             b.quality === "suspect"
               ? "#ec84eb"
-              : b.indoorC < 20
-                ? "#49b7ff"
-                : b.indoorC > 23
-                  ? "#ff954f"
-                  : "#7bd9bb",
+              : b.indoorC < 18
+                ? "#ff5264"
+                : b.indoorC < 20
+                  ? "#49b7ff"
+                  : b.indoorC > 23
+                    ? "#ff954f"
+                    : "#7bd9bb",
           );
+          m.userData.warning =
+            b.quality === "suspect" || b.indoorC < 20 || b.indoorC > 23;
+        }
       }
       const b = districtPlan.find((b) => b.id === selected);
       selection.visible = !!b && view === "district" && !props.imported;
@@ -591,12 +638,28 @@ export default function CityScene(props: Props) {
           destination.active = false;
       }
       orbit.update();
+      for (const path of paths) {
+        const flow =
+          latest.current.frame.zones.find((z) => z.id === path.zone)?.flowM3h ||
+          0;
+        path.speed += (flow - path.speed) * (1 - Math.exp(-dt * 3));
+        path.phase = (path.phase + (dt * 0.024 * path.speed) / 15) % 1;
+      }
+      for (const m of thermalMeshes.values()) {
+        const pulse =
+          m.userData.warning &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? 0.5 + 0.5 * Math.sin(t * 3)
+            : 0;
+        m.scale.setScalar(1 + pulse * 0.035);
+        (m.material as T.MeshBasicMaterial).opacity = m.userData.warning
+          ? 0.55 + pulse * 0.4
+          : 0.7;
+      }
       if (network.visible)
         for (let i = 0; i < 72; i++) {
           const path = paths[Math.floor(i / 12)],
-            zone = latest.current.frame.zones.find((z) => z.id === path.zone),
-            phase =
-              ((i % 12) / 12 + (t * 0.024 * (zone?.flowM3h || 10)) / 15) % 1;
+            phase = ((i % 12) / 12 + path.phase) % 1;
           helper.position.copy(
             path.curve.getPoint(path.reverse ? 1 - phase : phase),
           );
@@ -616,6 +679,27 @@ export default function CityScene(props: Props) {
         marker.button.style.display = visible ? "" : "none";
         if (visible)
           marker.button.style.transform = `translate(${(point.x * 0.5 + 0.5) * el.clientWidth}px,${(-point.y * 0.5 + 0.5) * el.clientHeight}px) translate(-50%,-100%)`;
+      }
+      if (controlAnchor.current) {
+        const anchor = controlAnchor.current;
+        const selectedPoint = positions
+          .get(
+            latest.current.view === "plant"
+              ? latest.current.equipment
+              : latest.current.selected,
+          )
+          ?.clone()
+          .project(camera);
+        const px = selectedPoint
+          ? (selectedPoint.x * 0.5 + 0.5) * el.clientWidth + 22
+          : 20;
+        const py = selectedPoint
+          ? (-selectedPoint.y * 0.5 + 0.5) * el.clientHeight + 20
+          : 150;
+        anchor.style.left = `${Math.max(12, Math.min(el.clientWidth - anchor.offsetWidth - 12, px))}px`;
+        anchor.style.top = `${Math.max(120, Math.min(el.clientHeight - anchor.offsetHeight - 20, py))}px`;
+        anchor.style.display =
+          props.imported || latest.current.suspended ? "none" : "";
       }
       renderer.info.reset();
       ao.enabled = quality.current;
@@ -673,6 +757,7 @@ export default function CityScene(props: Props) {
       props.equipment,
       props.affected,
       props.comparison,
+      props.findings,
     ],
   );
   useEffect(() => {
@@ -684,6 +769,18 @@ export default function CityScene(props: Props) {
       ref={host}
       className={`city-scene ${props.view === "plant" ? "plant-view" : ""}`}
     >
+      <div
+        ref={controlAnchor}
+        className="scene-control-anchor"
+        data-open={!!props.controlContent}
+      >
+        {props.controlContent || (
+          <button className="operate-trigger" onClick={props.onOperate}>
+            ⚙ Operate{" "}
+            {props.view === "plant" ? props.equipment : props.selected}
+          </button>
+        )}
+      </div>
       {error && (
         <div className="scene-error" role="alert">
           {error}

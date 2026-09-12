@@ -249,10 +249,14 @@ const server = http.createServer(async (req, res) => {
       });
     if (url.pathname === "/api/config")
       return send(res, 200, {
-        aiConfigured:
-          !!process.env.OPENROUTER_API_KEY && !!process.env.AI_ACCESS_TOKEN,
+        aiConfigured: !!process.env.OPENROUTER_API_KEY?.trim(),
+        aiConfiguration: {
+          providerKeyPresent: !!process.env.OPENROUTER_API_KEY?.trim(),
+          operatorCodeRequired: !!process.env.AI_ACCESS_TOKEN?.trim(),
+        },
+        release: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
         model,
-        accessCodeRequired: true,
+        accessCodeRequired: !!process.env.AI_ACCESS_TOKEN?.trim(),
         scenarios: ["imbalance", "warming", "cold", "sensor", "window"],
         sources,
         site,
@@ -303,6 +307,7 @@ const server = http.createServer(async (req, res) => {
         "/api/world": "world",
         "/api/replay": "replay",
         "/api/optimise": "optimise",
+        "/api/control/preview": "control_preview",
       }[url.pathname];
       if (!method) return send(res, 404, { error: "Unknown endpoint." });
       const args = await body(req);
@@ -328,12 +333,13 @@ const server = http.createServer(async (req, res) => {
           worldContext(await rpc(session, "snapshot"), args.assetId || "ST01"),
         );
       if (method === "agent" || method === "investigation") {
-        if (!process.env.OPENROUTER_API_KEY || !process.env.AI_ACCESS_TOKEN)
+        if (!process.env.OPENROUTER_API_KEY?.trim())
           return send(res, 503, {
             error:
-              "AI is not configured. Set OPENROUTER_API_KEY and AI_ACCESS_TOKEN on the server. Numerical investigations still work.",
+              "Set OPENROUTER_API_KEY in this Render service’s environment, then redeploy. The optional operator password is not required.",
           });
         if (
+          process.env.AI_ACCESS_TOKEN?.trim() &&
           !equalSecret(
             req.headers["x-ai-access-code"],
             process.env.AI_ACCESS_TOKEN,

@@ -8,6 +8,8 @@ The standalone engineering tools are preserved at **/engineering** (including th
 
 ## Agent missions that change the twin
 
+Select an asset in 3D and use **Operate** to adjust its supplying branch valve, or operate the energy centre’s shared supply temperature and pump drive. Test the request, then apply a verified 30-minute model step. This is the same revision-bound control path used by AI plans. Manual takeover stops subsequent automatic cycles. The scene shows model-driven flow particles, thermal warning rings, sensor-quality badges, changed-number indicators and command acknowledgement/failure events. The equipment workbench links station controls to branch flows and delays; the source BIM library is an optional engineering reference with focus, isolation, clipping and picked-point distance measurement.
+
 The default workspace opens on mission control. Choose an objective and an asset, then use **Run agent mission** to let the configured LLM inspect context, test alternatives and request a numerical control schedule. Actual tool activity streams into the persistent mission. A completed, verified plan automatically previews its district trajectory; **Continue unchanged** and **With intervention** compare two futures from the same initial state. Pipe flow animation, branch readings and building temperature deltas follow the selected physical trajectory.
 
 Apply the first 30 minutes to commit controls to the simulator, then inspect the measured model response against the unchanged baseline. **Run 3 agent control cycles** explicitly authorises up to three paid investigations and automatic application of their verified plans to this simulator. Each cycle uses a fresh revision; an absent plan, error, stale context or operator stop prevents further application. The operator must keep the browser open. This is a bounded browser coordinator, not a persistent production control daemon.
@@ -37,10 +39,10 @@ Create an untracked .env file using .env.example as the template, or set environ
 | OPENROUTER_API_KEY | Provider key, server only |
 | OPENROUTER_MODEL | Tool-capable model; default deepseek/deepseek-v4-flash-0731 (pinned DeepSeek V4 Flash release) |
 | TELEMETRY_INGEST_TOKEN | Separate gateway secret; permits read-only measurement ingestion, never actuator writes |
-| AI_ACCESS_TOKEN | A separate, strong operator access code protecting paid requests |
+| AI_ACCESS_TOKEN | Optional operator password; omit for the public demonstrator. Required only to protect observation reads if using telemetry. |
 | PORT | HTTP listener port |
 
-Enter **AI_ACCESS_TOKEN**, not the provider key, in the browser's AI copilot access-code field. The operator code is held in component memory, not localStorage or exported evidence. Never prefix secrets with VITE_. Never put secrets in render.yaml, source files, URLs or Git remotes. Rotate credentials that have been posted in a chat or other shared location.
+**OPENROUTER_API_KEY is sufficient to enable AI.** Keep it on the server. If you additionally set AI_ACCESS_TOKEN, the browser asks for that optional operator password. Without it, public demo visitors can use the bounded AI budget (20 investigations per hour globally, at most two simultaneously). Telemetry reads retain their separate password check. Never prefix secrets with VITE_ or put provider keys in browser fields, source files or Git remotes.
 
 Existing `.env` or Render environment values override the default. To migrate an existing deployment, explicitly set `OPENROUTER_MODEL=deepseek/deepseek-v4-flash-0731` and restart/redeploy. A bounded live DeepSeek diagnostic tool-call test passed on 13 September 2026; provider availability and routing can change. The earlier Gemini validation record is historical. See `docs/integrated-system.md` for delivered capabilities, validation and remaining field-commissioning requirements; `docs/immersive-agents.md` retains the broader architecture direction.
 
@@ -53,11 +55,11 @@ Use a **Node.js Web Service**, not a Static Site or Vite preview server.
 1. Connect this repository and select the **main** branch.
 2. Choose **Node** as the service language/runtime; set NODE_VERSION to **24.14.1**.
 3. Build Command: **npm ci && npm run build**. Start Command: **npm start**.
-4. Set OPENROUTER_API_KEY and AI_ACCESS_TOKEN as secret environment variables. Set OPENROUTER_MODEL if using a different tool-capable model.
+4. Set OPENROUTER_API_KEY as a secret environment variable. AI_ACCESS_TOKEN is optional. Set OPENROUTER_MODEL only if overriding the pinned default.
 5. Set the health-check path to **/api/health**. Render supplies PORT automatically.
 6. Deploy and verify the twin, one +30 min step, the scenario comparison and the AI access-code protection.
 
-The supplied render.yaml describes the same service as a Render Blueprint and generates the separate AI_ACCESS_TOKEN. Read that generated value from the Render environment settings when an authorised operator needs it. Never commit it.
+The supplied render.yaml describes the same service as a Render Blueprint. It does not require a second AI token. /api/config exposes configuration booleans and the deployed release identifier, never secret values.
 
 **Existing services:** change an old npm run preview start command to npm start. A Git push does not necessarily update dashboard settings. If the existing service uses Docker, create a native Node service or follow Render's supported runtime-migration workflow. The optional Dockerfile also uses Node only. See [Render's Node deployment documentation](https://render.com/docs/deploy-node-express-app).
 

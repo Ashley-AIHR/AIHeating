@@ -539,6 +539,50 @@ export function dispatch(id, method, args = {}) {
   if (method === "compare") return compare(s);
   if (method === "simulate") return rollout(s, candidateControls(s, args));
   if (method === "optimise") return optimise(s, args);
+  if (method === "control_preview") {
+    if (args.revision !== s.revision)
+      throw Error("State changed. Refresh the control before testing it.");
+    const control = args.control;
+    const controls = structuredClone(s.engine.controls);
+    const zoneIndex = ["near", "mid", "far"].indexOf(args.assetId);
+    if (control === "valvePct" && zoneIndex >= 0)
+      controls.valvesPct[zoneIndex] = args.value;
+    else if (args.assetId === "ST01" && ["supplyC", "pumpHz"].includes(control))
+      controls[control] = args.value;
+    else throw Error("This control is not mapped to the selected asset.");
+    const validated = candidateControls(s, controls);
+    const baseline = rollout(s, s.engine.controls),
+      proposed = rollout(s, validated);
+    const verified =
+      proposed.verified &&
+      proposed.maxResidual <= 1e-6 &&
+      proposed.maxPressureKpa <= 250;
+    const candidateId = verified
+      ? storePlan(s, {
+          controls: validated,
+          expires: Date.now() + 120000,
+          manual: true,
+          optimised: true,
+          assetId: args.assetId,
+          control,
+        })
+      : null;
+    return {
+      revision: s.revision,
+      assetId: args.assetId,
+      control,
+      value: args.value,
+      verified,
+      candidateId,
+      baseline,
+      proposed,
+      reason: verified
+        ? "Model checks passed. Apply a 30-minute simulator step."
+        : "Command blocked: the three-hour trajectory violates model temperature or pressure limits.",
+      firstStep: snapshotAfter(s, validated, 6),
+      baselineStep: snapshotAfter(s, s.engine.controls, 6),
+    };
+  }
   if (method === "apply") {
     const proposal = s.candidates[args.candidateId];
     if (
@@ -561,10 +605,17 @@ export function dispatch(id, method, args = {}) {
     advance(s, 6, controls);
     s.events.push({
       time: snapshot(s).time,
-      title: "Operator applied simulated controls",
-      detail: `Supply ${controls.supplyC.toFixed(1)}°C · pump ${controls.pumpHz.toFixed(1)} Hz · verified 3-hour model rollout`,
+      title: proposal.manual
+        ? `Manual command applied · ${proposal.assetId}`
+        : "Operator applied simulated controls",
+      detail: `Supply ${controls.supplyC.toFixed(1)}°C · pump ${controls.pumpHz.toFixed(1)} Hz · valves ${controls.valvesPct.join(" / ")}% · verified 3-hour model rollout`,
     });
     return snapshot(s);
   }
   throw Error("Unknown twin tool");
+}
+function snapshotAfter(s, controls, steps) {
+  const copy = structuredClone(s);
+  advance(copy, steps, controls);
+  return snapshot(copy, false);
 }

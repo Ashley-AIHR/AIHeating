@@ -73,8 +73,9 @@ try {
   await page.getByRole("button", { name: "Replay", exact: true }).click();
   await page.getByRole("slider", { name: "Timeline sample" }).fill("0");
   assert.match(await page.locator(".mode-badge").textContent(), /REPLAY/);
+  await page.getByRole("button", { name: "Evidence", exact: true }).click();
   await page
-    .getByRole("button", { name: "BIM reference ↗", exact: true })
+    .getByRole("button", { name: "Open source BIM library ↗", exact: true })
     .click();
   await page
     .getByRole("status")
@@ -108,7 +109,7 @@ try {
     });
   });
   const input = page.getByLabel("Operator access code");
-  await input.fill("mock-only");
+  if (await input.count()) await input.fill("mock-only");
   if (
     await page
       .getByRole("button", { name: "Run diagnostic agent", exact: true })

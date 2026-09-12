@@ -79,8 +79,9 @@ export default function MissionControl(p: Props) {
       </div>
       {!p.canRunAgent && (
         <p className="muted">
-          Agent missions need configured AI credentials and the operator code
-          below. The numerical route runs the same physics without an LLM.
+          Set the server’s OpenRouter key to enable agent missions. An operator
+          password is needed only if explicitly enabled. The numerical route
+          runs the same physics without an LLM.
         </p>
       )}
       <div className="mission-autonomy">

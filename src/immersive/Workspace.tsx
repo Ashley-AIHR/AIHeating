@@ -6,11 +6,20 @@ import {
   type Diagnosis,
   type Candidate,
 } from "../operations/types";
-import { validateGlb, type BimModel } from "../engineering/model";
+import {
+  validateGlb,
+  type BimModel,
+  type Measurement,
+} from "../engineering/model";
 import CityScene, { type Geography } from "./CityScene";
 import visionGeometry from "../../public/site-assets/vision-district.json";
 import "./immersive.css";
 import MissionControl from "./MissionControl";
+import DirectControl, {
+  type CommandPreview,
+  type OperationEvent,
+} from "./DirectControl";
+import { AnimatedValue, EventSignals, EquipmentWorkbench } from "./Signals";
 import {
   streamInvestigation,
   toolNames,
@@ -87,6 +96,8 @@ type Feed = {
 };
 type Config = {
   aiConfigured: boolean;
+  accessCodeRequired: boolean;
+  release?: string;
   model: string;
   telemetryConfigured: boolean;
   registry: { id: string; name: string; kind: string; parent: string | null }[];
@@ -164,11 +175,19 @@ export default function Workspace() {
     ),
     [previewPlaying, setPreviewPlaying] = useState(false),
     [cyclesRemaining, setCyclesRemaining] = useState(0);
+  const [controlsOpen, setControlsOpen] = useState(false),
+    [operationEvents, setOperationEvents] = useState<OperationEvent[]>([]);
+  const eventId = useRef(0),
+    previousFindings = useRef(new Set<string>());
+  const [bimMeasure, setBimMeasure] = useState(false),
+    [bimMeasurement, setBimMeasurement] = useState<Measurement | null>(null),
+    [bimIsolated, setBimIsolated] = useState<string | null>(null),
+    [bimAction, setBimAction] = useState<"fit" | "focus">("fit");
   const inFlight = useRef(false),
     alive = useRef(true);
   const bimCommand = useMemo(
-    () => ({ id: bimFocus, type: "fit" as const }),
-    [bimFocus],
+    () => ({ id: bimFocus, type: bimAction }),
+    [bimFocus, bimAction],
   );
   async function work(label: string, fn: () => Promise<void>) {
     if (inFlight.current) return;
@@ -179,6 +198,12 @@ export default function Workspace() {
       await fn();
     } catch (e) {
       setPlaying(false);
+      setCyclesRemaining(0);
+      notice(
+        "Operation failed",
+        e instanceof Error ? e.message : String(e),
+        true,
+      );
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       inFlight.current = false;
@@ -210,6 +235,27 @@ export default function Workspace() {
       alive.current = false;
     };
   }, []);
+  useEffect(() => {
+    if (!diagnosis || !twin) return;
+    const fresh = diagnosis.findings.filter(
+      (f) => !previousFindings.current.has(f.id),
+    );
+    previousFindings.current = new Set(diagnosis.findings.map((f) => f.id));
+    if (fresh.length)
+      setOperationEvents((events) =>
+        [
+          ...events,
+          ...fresh.map((f) => ({
+            id: ++eventId.current,
+            title: f.title,
+            detail: `${f.asset} · ${f.evidence}`,
+            kind: "warning" as const,
+            asset: f.asset,
+            time: twin.time.slice(11, 16),
+          })),
+        ].slice(-30),
+      );
+  }, [diagnosis, twin]);
   useEffect(() => {
     if (!playing) return;
     const timer = setInterval(
@@ -251,6 +297,7 @@ export default function Workspace() {
     };
   }, [panel, code]);
   function select(id: string) {
+    setControlsOpen(false);
     setSelected(id);
     setFocus((x) => x + 1);
     setPanel("inspect");
@@ -351,9 +398,14 @@ export default function Workspace() {
     setPreviewPlaying(play);
     setLayer("temperature");
   }
-  async function startMission(useAgent: boolean, continuing = false) {
+  async function startMission(
+    useAgent: boolean,
+    continuing = false,
+    brief = question,
+  ) {
     if (!twin) return;
     if (!continuing) setCyclesRemaining(0);
+    setControlsOpen(false);
     const origin = twin,
       assetId = selected;
     await work(
@@ -410,7 +462,7 @@ export default function Workspace() {
                   assetId === "ST01" && sceneView === "plant"
                     ? equipment
                     : undefined,
-                question,
+                question: brief,
                 objective,
                 revision: origin.revision,
                 mode: "simulation",
@@ -506,6 +558,12 @@ export default function Workspace() {
             candidateId: plan?.candidateId,
           });
           setTwin(after);
+          notice(
+            "AI plan applied",
+            `Supply ${fmt(after.supplyC)}°C · drive ${fmt(after.pumpHz)} Hz · +30 simulated minutes`,
+            false,
+            "command",
+          );
           setMission((m) =>
             m?.phase === "ready"
               ? {
@@ -550,6 +608,56 @@ export default function Workspace() {
           mission.after?.revision === twin?.revision
         ? mission.baseline
         : undefined;
+  function notice(
+    title: string,
+    detail: string,
+    failed = false,
+    kind: OperationEvent["kind"] = "info",
+  ) {
+    setOperationEvents((events) =>
+      [
+        ...events,
+        {
+          id: ++eventId.current,
+          title,
+          detail,
+          kind: failed ? "failure" : kind,
+          asset: selected,
+          time: twin?.time.slice(11, 16) || "",
+        },
+      ].slice(-30),
+    );
+  }
+  function openControls() {
+    setCyclesRemaining(0);
+    setPlaying(false);
+    setPreviewPlaying(false);
+    if (inFlight.current) {
+      notice(
+        "Manual takeover requested",
+        "Waiting for the active operation to finish. Further automatic cycles are stopped.",
+      );
+      return;
+    }
+    setControlsOpen(true);
+    setFocus((x) => x + 1);
+  }
+  function manualApplied(after: Twin, command: CommandPreview) {
+    setTwin(after);
+    setOptimisation(null);
+    setMission(null);
+    current();
+    setFrames((f) => [...f, after].slice(-48));
+    notice(
+      "Manual command applied",
+      `${command.assetId} ${command.control} → ${fmt(command.value)} · model advanced 30 min`,
+      false,
+      "command",
+    );
+    void api<Diagnosis>("diagnose")
+      .then(setDiagnosis)
+      .catch(() => {});
+  }
   const displaySeries =
     timeMode === "forecast"
       ? forecast.map((f) =>
@@ -646,6 +754,39 @@ export default function Workspace() {
           suspended={bimOpen}
           affected={mission?.affected || []}
           comparison={baselineFrame}
+          findings={diagnosis?.findings || []}
+          controlContent={
+            controlsOpen ? (
+              <DirectControl
+                key={`${selected}/${equipment}/${twin.revision}`}
+                state={twin}
+                selected={selected}
+                equipment={equipment}
+                plant={sceneView === "plant"}
+                enabled={timeMode === "current"}
+                busy={!!busy}
+                onPending={(label) => {
+                  inFlight.current = !!label;
+                  setBusy(label);
+                }}
+                onApplied={manualApplied}
+                onNotice={notice}
+                onAgent={() => {
+                  setControlsOpen(false);
+                  setPanel("agents");
+                  const brief = `Investigate ${selected} and test an improved control plan for its connected circuit.`;
+                  setQuestion(brief);
+                  if (
+                    config.aiConfigured &&
+                    (!config.accessCodeRequired || code)
+                  )
+                    void startMission(true, false, brief);
+                }}
+                onClose={() => setControlsOpen(false)}
+              />
+            ) : null
+          }
+          onOperate={openControls}
         />
       </section>
       <button
@@ -725,7 +866,15 @@ export default function Workspace() {
         >
           Focus station
         </button>
-        <button onClick={() => setBimOpen(true)}>BIM reference ↗</button>
+        <button
+          onClick={() => {
+            setSelected("ST01");
+            setSceneView("plant");
+            setPanel("inspect");
+          }}
+        >
+          Equipment workbench ↗
+        </button>
       </div>
       <section
         className="scene-metrics"
@@ -734,34 +883,53 @@ export default function Workspace() {
         <div>
           <span>Delivered heat</span>
           <strong>
-            {fmt(frame.heatKw / 1000, 3)}
+            <AnimatedValue
+              key={`${timeMode}/${forecastSide}`}
+              value={frame.heatKw / 1000}
+              digits={3}
+            />
             <small> MW</small>
           </strong>
         </div>
         <div>
           <span>Outdoor temperature</span>
           <strong>
-            {fmt(frame.outdoorC, 1)}
+            <AnimatedValue
+              key={`${timeMode}/${forecastSide}`}
+              value={frame.outdoorC}
+            />
             <small> °C</small>
           </strong>
         </div>
         <div>
           <span>Pump electricity</span>
           <strong>
-            {fmt(frame.pumpKw, 1)}
+            <AnimatedValue
+              key={`${timeMode}/${forecastSide}`}
+              value={frame.pumpKw}
+            />
             <small> kW</small>
           </strong>
         </div>
         <div>
           <span>Selected / {selected}</span>
           <strong>
-            {building
-              ? fmt(building.indoorC, 1)
-              : fmt(zone?.flowM3h || frame.flowM3h, 1)}
+            <AnimatedValue
+              key={`${selected}/${timeMode}/${forecastSide}`}
+              value={
+                building ? building.indoorC : (zone?.flowM3h ?? frame.flowM3h)
+              }
+            />
             <small>{building ? " °C" : " m³/h"}</small>
           </strong>
         </div>
       </section>
+      <EventSignals
+        events={operationEvents}
+        diagnosis={diagnosis}
+        onSelect={select}
+        onAlarms={() => setPanel("alarms")}
+      />
       <div className="scene-caption">
         <span className="legend-dot warm" /> Supply{" "}
         <span className="legend-dot cool" /> Return{" "}
@@ -798,6 +966,9 @@ export default function Workspace() {
         </div>
         {panel === "inspect" && (
           <>
+            <button className="primary full" onClick={openControls}>
+              Operate selected asset in 3D
+            </button>
             <div className="asset-search">
               <input
                 aria-label="Search assets"
@@ -834,7 +1005,10 @@ export default function Workspace() {
                     : "SUPPLY TEMPERATURE"}
               </small>
               <strong>
-                {fmt(building?.indoorC ?? zone?.flowM3h ?? frame.supplyC, 1)}
+                <AnimatedValue
+                  key={`${selected}/${timeMode}/${forecastSide}`}
+                  value={building?.indoorC ?? zone?.flowM3h ?? frame.supplyC}
+                />
                 <span>{building ? "°C" : zone ? "m³/h" : "°C"}</span>
               </strong>
               <span className="quality">
@@ -929,6 +1103,18 @@ export default function Workspace() {
                     </small>
                   </div>
                 )}
+                {sceneView === "plant" && (
+                  <EquipmentWorkbench
+                    state={frame}
+                    equipment={equipment}
+                    onSelect={(id) => {
+                      select(id);
+                      setSceneView("district");
+                    }}
+                    onOperate={openControls}
+                    onAgent={() => setPanel("agents")}
+                  />
+                )}
                 <Pair
                   label="Return temperature"
                   value={`${fmt(frame.returnC, 1)} °C`}
@@ -1001,7 +1187,9 @@ export default function Workspace() {
               current={twin}
               busy={!!busy}
               stale={stalePlan}
-              canRunAgent={config.aiConfigured && !!code}
+              canRunAgent={
+                config.aiConfigured && (!config.accessCodeRequired || !!code)
+              }
               forecastSide={forecastSide}
               previewing={timeMode === "forecast"}
               animating={previewPlaying}
@@ -1054,16 +1242,18 @@ export default function Workspace() {
               Diagnosis and optimisation share asset <b>{selected}</b>, its
               branch, the current physical state and model limitations.
             </p>
-            <label>
-              Operator access code
-              <input
-                type="password"
-                autoComplete="off"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Not your OpenRouter key"
-              />
-            </label>
+            {config.accessCodeRequired && (
+              <label>
+                Operator access code
+                <input
+                  type="password"
+                  autoComplete="off"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Not your OpenRouter key"
+                />
+              </label>
+            )}
             <label>
               Investigation brief
               <textarea
@@ -1079,7 +1269,7 @@ export default function Workspace() {
                   !!busy ||
                   timeMode !== "current" ||
                   !config.aiConfigured ||
-                  !code
+                  (config.accessCodeRequired && !code)
                 }
                 onClick={() => void investigate("diagnostic")}
               >
@@ -1090,7 +1280,7 @@ export default function Workspace() {
                   !!busy ||
                   timeMode !== "current" ||
                   !config.aiConfigured ||
-                  !code
+                  (config.accessCodeRequired && !code)
                 }
                 onClick={() => void investigate("optimisation")}
               >
@@ -1253,6 +1443,16 @@ export default function Workspace() {
         )}
         {panel === "connection" && (
           <>
+            <p className="muted">
+              Running release {config.release || "older build"} · AI{" "}
+              {config.aiConfigured
+                ? "provider key configured"
+                : "OPENROUTER_API_KEY missing"}{" "}
+              ·{" "}
+              {config.accessCodeRequired
+                ? "optional operator password enabled"
+                : "no operator password required"}
+            </p>
             <div className="verification">
               <span>{feed?.status?.toUpperCase() || "NOT CONNECTED"}</span>
               <strong>Read-only observation gateway</strong>
@@ -1355,6 +1555,13 @@ export default function Workspace() {
         )}
         {panel === "sources" && (
           <>
+            <button className="full" onClick={() => setBimOpen(true)}>
+              Open source BIM library ↗
+            </button>
+            <p className="muted">
+              Optional public geometry reference. Operate the mapped heating
+              equipment through the equipment workbench.
+            </p>
             <h3>Vision, geometry and identity</h3>
             <p>
               {visionGeometry.name}. Original architectural and mechanical
@@ -1497,6 +1704,9 @@ export default function Workspace() {
                 setOptimisation(null);
                 setRun(null);
                 setMission(null);
+                setControlsOpen(false);
+                setOperationEvents([]);
+                previousFindings.current = new Set();
                 current();
               });
             }}
@@ -1641,7 +1851,39 @@ export default function Workspace() {
             to these components.
           </p>
           <div className="bim-tools">
-            <button onClick={() => setBimFocus((x) => x + 1)}>Fit model</button>
+            <button
+              onClick={() => {
+                setBimAction("fit");
+                setBimFocus((x) => x + 1);
+              }}
+            >
+              Fit model
+            </button>
+            <button
+              disabled={!bimSelected}
+              onClick={() => {
+                setBimAction("focus");
+                setBimFocus((x) => x + 1);
+              }}
+            >
+              Focus component
+            </button>
+            <button
+              disabled={!bimSelected && !bimIsolated}
+              aria-pressed={!!bimIsolated}
+              onClick={() => setBimIsolated(bimIsolated ? null : bimSelected)}
+            >
+              {bimIsolated ? "Show full assembly" : "Isolate component"}
+            </button>
+            <button
+              aria-pressed={bimMeasure}
+              onClick={() => {
+                setBimMeasure((v) => !v);
+                setBimMeasurement(null);
+              }}
+            >
+              {bimMeasure ? "Stop measuring" : "Measure clearance"}
+            </button>
             <label>
               Section
               <select
@@ -1659,6 +1901,13 @@ export default function Workspace() {
                 "Select a component to inspect its source identity"}
             </span>
           </div>
+          {bimMeasure && (
+            <p className="bim-measurement" role="status">
+              {bimMeasurement
+                ? `Picked-point distance: ${fmt(bimMeasurement.distance, 3)} ${bim?.units || "model units"}. Source geometry only.`
+                : "Pick two surfaces in the reference model to measure their distance."}
+            </p>
+          )}
           <div className="bim-canvas">
             <Suspense fallback={<p>Loading BIM viewer…</p>}>
               <EngineeringScene
@@ -1670,15 +1919,15 @@ export default function Workspace() {
                 selected={bimSelected}
                 kind="all"
                 hidden={[]}
-                isolated={null}
+                isolated={bimIsolated}
                 highlight={[]}
                 removed={[]}
                 clipAxis={clip}
                 clipPercent={50}
-                measure={false}
+                measure={bimMeasure}
                 command={bimCommand}
                 onSelect={setBimSelected}
-                onMeasure={fixed}
+                onMeasure={setBimMeasurement}
                 onPose={fixed}
                 onLocalAssets={fixed}
               />

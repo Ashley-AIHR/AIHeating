@@ -115,6 +115,6 @@ test("missing AI configuration fails explicitly, numerical diagnosis remains ava
   const a = client();
   const r = await a("agent", { question: "Diagnose the network." });
   assert.equal(r.status, 503);
-  assert.match(r.value.error, /not configured/);
+  assert.match(r.value.error, /OPENROUTER_API_KEY/);
   assert.equal((await a("diagnose")).status, 200);
 });

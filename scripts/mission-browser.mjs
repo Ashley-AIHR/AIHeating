@@ -19,6 +19,34 @@ try {
     .getByRole("button", { name: "Quality: cinematic", exact: true })
     .click();
   await idle();
+  const initial = await state();
+  await page
+    .getByRole("button", { name: "⚙ Operate B10", exact: true })
+    .click();
+  await page
+    .getByRole("slider", { name: "Requested valve opening", exact: true })
+    .fill("45");
+  await page
+    .getByRole("button", { name: "Test manual change", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Apply command · +30 min", exact: true })
+    .waitFor();
+  await page.locator(".command-verdict.passed").waitFor();
+  assert.equal((await state()).revision, initial.revision);
+  await page.screenshot({ path: out + "/direct-valve-control.png" });
+  await page
+    .getByRole("button", { name: "Apply command · +30 min", exact: true })
+    .click();
+  await page.waitForFunction(() =>
+    document.querySelector(".context-line")?.textContent.includes("Revision 2"),
+  );
+  const manualState = await state();
+  assert.equal(manualState.zones[2].valvePct, 45);
+  assert.equal(manualState.elapsedMinutes, initial.elapsedMinutes + 30);
+  await page
+    .getByRole("button", { name: "Close 3D control", exact: true })
+    .click();
   const before = await state();
   await page
     .getByRole("button", { name: "Explore with numerical solver", exact: true })
@@ -130,9 +158,8 @@ try {
   await page
     .getByRole("button", { name: "Quality: cinematic", exact: true })
     .click();
-  await page
-    .getByLabel("Operator access code", { exact: true })
-    .fill("mock-only");
+  const operatorCode = page.getByLabel("Operator access code", { exact: true });
+  if (await operatorCode.count()) await operatorCode.fill("mock-only");
   const loopBefore = await state();
   await page
     .getByRole("button", { name: "Run 3 agent control cycles", exact: true })
