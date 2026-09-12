@@ -18,7 +18,7 @@ npm start
 
 Open **http://localhost:3000**. The public HTTP listener binds to 0.0.0.0 and uses PORT, defaulting to 3000. No Python subprocess is launched.
 
-For frontend development, leave npm start running and run npm run dev in a second terminal. Vite proxies /api to port 3000. Do not deploy the Vite development or preview server as the operations backend.
+For frontend development, leave npm start running and run npm run dev in a second terminal. Vite proxies /api to port 3000. `npm run preview` is retained as a production-service compatibility alias for older Render services; it starts the Node API and static client, not the Vite preview server.
 
 ## Enable the AI copilot
 

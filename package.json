@@ -16,7 +16,7 @@
     "test:engineering:browser": "node scripts/engineering-browser.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "preview": "node server/index.mjs",
     "test": "tsx scripts/p0-invariants.ts",
     "test:p4-alignment": "node scripts/p4-ui-alignment-invariants.mjs",
     "test:p7": "tsx scripts/p7-invariants.ts && node scripts/p7-ui-invariants.mjs && tsx scripts/p7-gates.ts",
