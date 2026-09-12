@@ -57,7 +57,7 @@ export function guardNarrative(answer, allowedAssetIds = []) {
       "asset",
     );
   }
-  if (/\d/.test(withoutAssetIds))
+  if (/\p{Nd}/u.test(withoutAssetIds))
     return {
       answer:
         "The AI explanation was withheld because it included unchecked numerical claims. Inspect the authoritative tool evidence below, or ask a qualitative follow-up.",

@@ -1,3 +1,4 @@
+import { tx } from "../localisation";
 import { useState } from "react";
 import { api, fmt, type Twin } from "../operations/types";
 export type CommandPreview = {
@@ -101,77 +102,93 @@ export default function DirectControl(p: Props) {
     }
   }
   return (
-    <section className="direct-control" aria-label="Direct 3D control">
+    <section className="direct-control" aria-label={tx("Direct 3D control")}>
       <header>
         <div>
-          <small>MANUAL · SIMULATOR</small>
+          <small>{tx("MANUAL · SIMULATOR")}</small>
           <strong>
-            {branch
-              ? `${branch.toUpperCase()} branch valve`
-              : "Energy centre control"}
+            {tx(
+              branch
+                ? `${branch.toUpperCase()} branch valve`
+                : "Energy centre control",
+            )}
           </strong>
         </div>
-        <button aria-label="Close 3D control" onClick={p.onClose}>
+        <button aria-label={tx("Close 3D control")} onClick={p.onClose}>
           ×
         </button>
       </header>
-      {branch && p.selected !== branch && (
-        <p>
-          {p.selected} is supplied by this branch. Adjusting it affects all four
-          connected buildings.
-        </p>
+      {tx(
+        branch && p.selected !== branch && (
+          <p>
+            {tx(p.selected)}
+            {tx(
+              " is supplied by this branch. Adjusting it affects all four connected buildings.",
+            )}
+          </p>
+        ),
       )}
-      {!branch && (
-        <div className="segmented">
-          <button
-            aria-pressed={control === "supplyC"}
-            onClick={() => {
-              setStationControl("supplyC");
-              setDraft(null);
-              setProposal(null);
-            }}
-          >
-            Heat supply
-          </button>
-          <button
-            aria-pressed={control === "pumpHz"}
-            onClick={() => {
-              setStationControl("pumpHz");
-              setDraft(null);
-              setProposal(null);
-            }}
-          >
-            Pump drive
-          </button>
-        </div>
+      {tx(
+        !branch && (
+          <div className="segmented">
+            <button
+              aria-pressed={control === "supplyC"}
+              onClick={() => {
+                setStationControl("supplyC");
+                setDraft(null);
+                setProposal(null);
+              }}
+            >
+              {tx("Heat supply")}
+            </button>
+            <button
+              aria-pressed={control === "pumpHz"}
+              onClick={() => {
+                setStationControl("pumpHz");
+                setDraft(null);
+                setProposal(null);
+              }}
+            >
+              {tx("Pump drive")}
+            </button>
+          </div>
+        ),
       )}
-      {!branch && (
-        <p>
-          Controls the shared station model. Individual duty/standby switching
-          is not represented.
-        </p>
+      {tx(
+        !branch && (
+          <p>
+            {tx(
+              "Controls the shared station model. Individual duty/standby switching is not represented.",
+            )}
+          </p>
+        ),
       )}
       <div className="control-setpoint">
         <span>
-          Actual{" "}
+          {tx("Actual")}
+          {tx(" ")}
           <b>
-            {fmt(actual)} {unit}
+            {tx(fmt(actual))} {tx(unit)}
           </b>
         </span>
         <span>
-          Requested{" "}
+          {tx("Requested")}
+          {tx(" ")}
           <b>
-            {fmt(value)} {unit}
+            {tx(fmt(value))} {tx(unit)}
           </b>
         </span>
       </div>
       <label>
-        Requested{" "}
-        {branch
-          ? "valve opening"
-          : control === "pumpHz"
-            ? "pump frequency"
-            : "supply temperature"}
+        {tx("Requested")}
+        {tx(" ")}
+        {tx(
+          branch
+            ? "valve opening"
+            : control === "pumpHz"
+              ? "pump frequency"
+              : "supply temperature",
+        )}
         <input
           type="range"
           min={min}
@@ -188,26 +205,29 @@ export default function DirectControl(p: Props) {
       </label>
       <div className="control-range">
         <span>
-          {fmt(min, 0)} {unit}
+          {tx(fmt(min, 0))} {tx(unit)}
         </span>
         <span>
-          Step limit ±{ramp} {unit}
+          {tx("Step limit ±")}
+          {tx(ramp)} {tx(unit)}
         </span>
         <span>
-          {fmt(max, 0)} {unit}
+          {tx(fmt(max, 0))} {tx(unit)}
         </span>
       </div>
-      {!p.enabled && (
-        <p className="warning">
-          Return to current simulation to operate this asset.
-        </p>
+      {tx(
+        !p.enabled && (
+          <p className="warning">
+            {tx("Return to current simulation to operate this asset.")}
+          </p>
+        ),
       )}
       <div className="dock-actions">
         <button
           disabled={disabled || value === actual}
           onClick={() => void test()}
         >
-          Test manual change
+          {tx("Test manual change")}
         </button>
         <button
           className="primary"
@@ -218,43 +238,53 @@ export default function DirectControl(p: Props) {
           }
           onClick={() => void apply()}
         >
-          Apply command · +30 min
+          {tx("Apply command · +30 min")}
         </button>
       </div>
-      {proposal && (
-        <div
-          className={
-            proposal.verified
-              ? "command-verdict passed"
-              : "command-verdict blocked"
-          }
-          role="status"
-        >
-          <strong>
-            {proposal.verified ? "✓ VERIFIED — READY TO APPLY" : "! BLOCKED"}
-          </strong>
-          <p>{proposal.reason}</p>
-          <span>
-            Predicted flow {fmt(proposal.baselineStep.flowM3h)} →{" "}
-            {fmt(proposal.firstStep.flowM3h)} m³/h
-          </span>
-          <span>
-            Predicted pump {fmt(proposal.baselineStep.pumpKw, 2)} →{" "}
-            {fmt(proposal.firstStep.pumpKw, 2)} kW
-          </span>
-        </div>
+      {tx(
+        proposal && (
+          <div
+            className={
+              proposal.verified
+                ? "command-verdict passed"
+                : "command-verdict blocked"
+            }
+            role="status"
+          >
+            <strong>
+              {tx(
+                proposal.verified ? "✓ VERIFIED — READY TO APPLY" : "! BLOCKED",
+              )}
+            </strong>
+            <p>{tx(proposal.reason)}</p>
+            <span>
+              {tx("Predicted flow ")}
+              {tx(fmt(proposal.baselineStep.flowM3h))} →{tx(" ")}
+              {tx(fmt(proposal.firstStep.flowM3h))}
+              {tx(" m³/h")}
+            </span>
+            <span>
+              {tx("Predicted pump ")}
+              {tx(fmt(proposal.baselineStep.pumpKw, 2))} →{tx(" ")}
+              {tx(fmt(proposal.firstStep.pumpKw, 2))}
+              {tx(" kW")}
+            </span>
+          </div>
+        ),
       )}
-      {error && (
-        <p className="warning" role="alert">
-          {error}
-        </p>
+      {tx(
+        error && (
+          <p className="warning" role="alert">
+            {tx(error)}
+          </p>
+        ),
       )}
       <button
         className="full control-agent"
         disabled={p.busy}
         onClick={p.onAgent}
       >
-        ✧ Let the agent optimise this circuit
+        {tx("✧ Let the agent optimise this circuit")}
       </button>
     </section>
   );

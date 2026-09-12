@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tx, useLocale } from "../localisation";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -59,6 +60,7 @@ function dispose(root: THREE.Object3D) {
   for (const t of textures) t.dispose();
 }
 export default function EngineeringScene(props: Props) {
+  const locale = useLocale();
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(props),
     runtime = useRef<{
@@ -69,6 +71,12 @@ export default function EngineeringScene(props: Props) {
   latest.current = props;
   const [status, setStatus] = useState("Loading engineering geometry…"),
     [failed, setFailed] = useState(false);
+  useEffect(() => {
+    host.current?.querySelector("canvas")?.setAttribute(
+      "aria-label",
+      tx("Orbitable engineering model. Drag to orbit, right-drag to pan, scroll to zoom. Arrow keys orbit, plus/minus zoom, Home fits the model."),
+    );
+  }, [locale, status]);
   useEffect(() => {
     if (
       (props.mode === "bim" && !props.bim && !props.localGlb) ||
@@ -593,14 +601,14 @@ export default function EngineeringScene(props: Props) {
         className={`eng-render-status ${failed ? "failed" : ""}`}
         role="status"
       >
-        {status}
+        {tx(status)}
       </div>
       <div className="eng-axis" aria-hidden="true">
         <b>Y</b>
         <span>Z └ X</span>
       </div>
       <div className="eng-orbit-help">
-        Drag to orbit · right-drag to pan · scroll to zoom
+        {tx("Drag to orbit · right-drag to pan · scroll to zoom")}
       </div>
     </div>
   );

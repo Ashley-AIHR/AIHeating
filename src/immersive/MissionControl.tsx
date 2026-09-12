@@ -1,3 +1,4 @@
+import { tx } from "../localisation";
 import { fmt, type Twin } from "../operations/types";
 import { useEffect, useRef } from "react";
 import { toolNames, type Mission } from "./mission";
@@ -55,24 +56,30 @@ export default function MissionControl(p: Props) {
           : 1;
   const result = o?.recommendation;
   return (
-    <section className="mission-control" aria-label="Agent mission control">
-      <div className="eyebrow">INTENT → PHYSICAL CONSEQUENCE</div>
-      <h3>Make the city respond.</h3>
+    <section
+      className="mission-control"
+      aria-label={tx("Agent mission control")}
+    >
+      <div className="eyebrow">{tx("INTENT → PHYSICAL CONSEQUENCE")}</div>
+      <h3>{tx("Make the city respond.")}</h3>
       <p>
-        Investigate the selected asset, test a control strategy and watch its
-        effect propagate through the district.
+        {tx(
+          "Investigate the selected asset, test a control strategy and watch its effect propagate through the district.",
+        )}
       </p>
-      <ol className="mission-steps" aria-label="Control loop progress">
-        {steps.map((s, i) => (
-          <li
-            key={s}
-            className={i === stage ? "current" : i < stage ? "done" : ""}
-            aria-current={i === stage ? "step" : undefined}
-          >
-            <b>{i < stage ? "✓" : i + 1}</b>
-            {s}
-          </li>
-        ))}
+      <ol className="mission-steps" aria-label={tx("Control loop progress")}>
+        {tx(
+          steps.map((s, i) => (
+            <li
+              key={s}
+              className={i === stage ? "current" : i < stage ? "done" : ""}
+              aria-current={i === stage ? "step" : undefined}
+            >
+              <b>{tx(i < stage ? "✓" : i + 1)}</b>
+              {tx(s)}
+            </li>
+          )),
+        )}
       </ol>
       <div className="dock-actions">
         <button
@@ -80,275 +87,357 @@ export default function MissionControl(p: Props) {
           disabled={p.busy || !p.canRunAgent}
           onClick={() => p.onRun(true)}
         >
-          ✧ Run agent mission
+          {tx("✧ Run agent mission")}
         </button>
         <button disabled={p.busy} onClick={() => p.onRun(false)}>
-          Explore with numerical solver
+          {tx("Explore with numerical solver")}
         </button>
       </div>
-      {!p.canRunAgent && (
-        <p className="muted">
-          Set the server’s OpenRouter key to enable agent missions. An operator
-          password is needed only if explicitly enabled. The numerical route
-          runs the same physics without an LLM.
-        </p>
+      {tx(
+        !p.canRunAgent && (
+          <p className="muted">
+            {tx(
+              "Set the server’s OpenRouter key to enable agent missions. An operator password is needed only if explicitly enabled. The numerical route runs the same physics without an LLM.",
+            )}
+          </p>
+        ),
       )}
       <div className="mission-autonomy">
-        <strong>Closed-loop operation</strong>
+        <strong>{tx("Closed-loop operation")}</strong>
         <p>
-          Let the agent investigate, test, apply a verified simulator step and
-          reassess the changed network. Three cycles, each using a fresh
-          physical state.
+          {tx(
+            "Let the agent investigate, test, apply a verified simulator step and reassess the changed network. Three cycles, each using a fresh physical state.",
+          )}
         </p>
-        {p.cyclesRemaining > 0 ? (
-          <button className="full" onClick={p.onStop}>
-            Stop further cycles · {p.cyclesRemaining} remaining
-          </button>
-        ) : (
-          <button
-            className="full"
-            disabled={p.busy || !p.canRunAgent}
-            onClick={p.onAutonomous}
-          >
-            Run 3 agent control cycles
-          </button>
+        {tx(
+          p.cyclesRemaining > 0 ? (
+            <button className="full" onClick={p.onStop}>
+              {tx("Stop further cycles · ")}
+              {tx(p.cyclesRemaining)}
+              {tx(" remaining")}
+            </button>
+          ) : (
+            <button
+              className="full"
+              disabled={p.busy || !p.canRunAgent}
+              onClick={p.onAutonomous}
+            >
+              {tx("Run 3 agent control cycles")}
+            </button>
+          ),
         )}
         <small>
-          Up to 3 paid agent runs · automatic simulator application only
+          {tx("Up to 3 paid agent runs · automatic simulator application only")}
         </small>
       </div>
-      {m && (
-        <>
-          {m.phase === "investigating" && (
-            <button className="full" onClick={p.onStop}>
-              Stop investigation
-            </button>
-          )}
-          <div
-            ref={liveStatus}
-            className={`mission-status ${m.phase}`}
-            aria-live="polite"
-          >
-            <small>
-              {m.origin === "llm"
-                ? "LLM-DIRECTED MISSION"
-                : "NUMERICAL EXPLORATION"}{" "}
-              · {m.assetId}
-            </small>
-            <strong>{m.message}</strong>
-          </div>
-          <div
-            className="mission-events"
-            aria-label="Executed mission activity"
-          >
-            {m.events.map((e, i) => (
-              <div key={i} data-status={e.status}>
-                <span>
-                  {e.status === "completed"
-                    ? "✓"
-                    : e.status === "failed"
-                      ? "!"
-                      : "◌"}
-                </span>
-                <section>
-                  <small>
-                    {e.at.slice(11, 19)} · {e.status}
-                  </small>
-                  <strong>{toolNames[e.tool] || e.tool}</strong>
-                  {e.message && <p>{e.message}</p>}
-                  {!!(e.arguments || e.result) && (
-                    <details>
-                      <summary>
-                        {e.arguments
-                          ? "Tool inputs"
-                          : "Tool result · model evidence"}
-                      </summary>
-                      <pre>
-                        {JSON.stringify(e.arguments || e.result, null, 2)}
-                      </pre>
-                    </details>
+      {tx(
+        m && (
+          <>
+            {tx(
+              m.phase === "investigating" && (
+                <button className="full" onClick={p.onStop}>
+                  {tx("Stop investigation")}
+                </button>
+              ),
+            )}
+            <div
+              ref={liveStatus}
+              className={`mission-status ${m.phase}`}
+              aria-live="polite"
+            >
+              <small>
+                {tx(
+                  m.origin === "llm"
+                    ? "LLM-DIRECTED MISSION"
+                    : "NUMERICAL EXPLORATION",
+                )}
+                {tx(" ")}· {tx(m.assetId)}
+              </small>
+              <strong>{tx(m.message)}</strong>
+            </div>
+            <div
+              className="mission-events"
+              aria-label={tx("Executed mission activity")}
+            >
+              {tx(
+                m.events.map((e, i) => (
+                  <div key={i} data-status={e.status}>
+                    <span>
+                      {tx(
+                        e.status === "completed"
+                          ? "✓"
+                          : e.status === "failed"
+                            ? "!"
+                            : "◌",
+                      )}
+                    </span>
+                    <section>
+                      <small>
+                        {tx(e.at.slice(11, 19))} · {tx(e.status)}
+                      </small>
+                      <strong>{tx(toolNames[e.tool] || e.tool)}</strong>
+                      {tx(e.message && <p>{tx(e.message)}</p>)}
+                      {tx(
+                        !!(e.arguments || e.result) && (
+                          <details>
+                            <summary>
+                              {tx(
+                                e.arguments
+                                  ? "Tool inputs"
+                                  : "Tool result · model evidence",
+                              )}
+                            </summary>
+                            <pre>
+                              {tx(
+                                JSON.stringify(
+                                  e.arguments || e.result,
+                                  null,
+                                  2,
+                                ),
+                              )}
+                            </pre>
+                          </details>
+                        ),
+                      )}
+                    </section>
+                  </div>
+                )),
+              )}
+            </div>
+            <div
+              className="agent-live-output"
+              aria-label={tx("Live agent explanation")}
+              lang={m.locale === "zh-CN" ? "zh-CN" : "en-GB"}
+            >
+              <small>
+                {tx(
+                  m.phase === "investigating"
+                    ? "LIVE DRAFT · UNVERIFIED MODEL TEXT"
+                    : "AGENT EXPLANATION",
+                )}
+              </small>
+              <p>
+                {m.draft ||
+                  tx(
+                    m.phase === "investigating"
+                      ? "Connected. Waiting for public assistant output; executed tools appear above."
+                      : "Review the retained tool activity above.",
                   )}
-                </section>
+              </p>
+              <small>
+                {tx(
+                  "Only public response text is shown, not private reasoning. Numerical tool results are authoritative; draft text never applies controls.",
+                )}
+              </small>
+            </div>
+          </>
+        ),
+      )}
+      {tx(
+        m && result && !outcome && (
+          <>
+            <h3>{tx("Two futures. One starting state.")}</h3>
+            <p className="muted">
+              {tx("Solver objective: ")}
+              {tx(o.objective)}.
+            </p>
+            <p className="muted">
+              {tx(
+                "The same weather and initial state drive both three-hour rollouts. Values below are computed predictions.",
+              )}
+            </p>
+            <div className="mission-comparison">
+              <span>{tx("3-hour outcome")}</span>
+              <b>{tx("Unchanged")}</b>
+              <b>{tx("Intervention")}</b>
+              <span>{tx("Heat / kWh")}</span>
+              <b>{tx(fmt(o.baseline.heatKwh, 0))}</b>
+              <b>{tx(fmt(result.heatKwh, 0))}</b>
+              <span>{tx("Pump / kWh")}</span>
+              <b>{tx(fmt(o.baseline.pumpKwh, 1))}</b>
+              <b>{tx(fmt(result.pumpKwh, 1))}</b>
+              <span>{tx("End minimum / °C")}</span>
+              <b>{tx(fmt(o.baseline.endMinimumC, 2))}</b>
+              <b>{tx(fmt(result.endMinimumC, 2))}</b>
+            </div>
+            <h3>{tx("What physically changes")}</h3>
+            <div className="mission-actuators">
+              <div>
+                <span>{tx("Supply setpoint")}</span>
+                <b>
+                  {tx(fmt(m.before.supplyC))} →{" "}
+                  {tx(fmt(result.controls.supplyC))}
+                  {tx(" °C")}
+                </b>
               </div>
-            ))}
-          </div>
+              <div>
+                <span>{tx("Pump drive")}</span>
+                <b>
+                  {tx(fmt(m.before.pumpHz))} → {tx(fmt(result.controls.pumpHz))}
+                  {tx(" Hz")}
+                </b>
+              </div>
+              {tx(
+                m.before.zones.map((z, i) => (
+                  <div key={z.id}>
+                    <span>
+                      {tx(z.id)}
+                      {tx(" valve")}
+                    </span>
+                    <b>
+                      {tx(fmt(z.valvePct, 0))} →{" "}
+                      {tx(fmt(result.controls.valvesPct[i], 0))}%
+                    </b>
+                  </div>
+                )),
+              )}
+            </div>
+            <div
+              className="segmented mission-futures"
+              aria-label={tx("Compare scene futures")}
+            >
+              <button
+                disabled={p.busy || p.stale}
+                aria-pressed={p.previewing && p.forecastSide === "baseline"}
+                onClick={() => p.onPreview("baseline")}
+              >
+                {tx("Continue unchanged")}
+              </button>
+              <button
+                disabled={p.busy || p.stale}
+                aria-pressed={p.previewing && p.forecastSide === "intervention"}
+                onClick={() => p.onPreview("intervention")}
+              >
+                {tx("With intervention")}
+              </button>
+            </div>
+            <div className="dock-actions">
+              <button disabled={p.busy || p.stale} onClick={p.onAnimate}>
+                {tx(
+                  p.animating
+                    ? "Pause prediction"
+                    : "▶ Play physical consequences",
+                )}
+              </button>
+              <button
+                className="primary"
+                disabled={p.busy || p.stale}
+                onClick={p.onApply}
+              >
+                {tx("Apply first 30 min to simulation")}
+              </button>
+            </div>
+            {tx(
+              p.stale && (
+                <p className="warning">
+                  {tx(
+                    "State changed. Run a fresh mission before applying this plan.",
+                  )}
+                </p>
+              ),
+            )}
+          </>
+        ),
+      )}
+      {tx(
+        outcome && m?.after && m.baseline && (
           <div
-            className="agent-live-output"
-            aria-label="Live agent explanation"
+            className="mission-outcome"
+            aria-label={tx("Measured simulation outcome")}
           >
-            <small>
-              {m.phase === "investigating"
-                ? "LIVE DRAFT · UNVERIFIED MODEL TEXT"
-                : "AGENT EXPLANATION"}
-            </small>
+            <div className="eyebrow">
+              {tx("CONTROL APPLIED · +30 SIMULATED MINUTES")}
+            </div>
+            <h3>{tx("The network has changed.")}</h3>
             <p>
-              {m.draft ||
-                (m.phase === "investigating"
-                  ? "Connected. Waiting for public assistant output; executed tools appear above."
-                  : "Review the retained tool activity above.")}
+              {tx(
+                "Computed response against continuing unchanged over the same period.",
+              )}
             </p>
-            <small>
-              Only public response text is shown, not private reasoning.
-              Numerical tool results are authoritative; draft text never applies
-              controls.
-            </small>
-          </div>
-        </>
-      )}
-      {m && result && !outcome && (
-        <>
-          <h3>Two futures. One starting state.</h3>
-          <p className="muted">Solver objective: {o.objective}.</p>
-          <p className="muted">
-            The same weather and initial state drive both three-hour rollouts.
-            Values below are computed predictions.
-          </p>
-          <div className="mission-comparison">
-            <span>3-hour outcome</span>
-            <b>Unchanged</b>
-            <b>Intervention</b>
-            <span>Heat / kWh</span>
-            <b>{fmt(o.baseline.heatKwh, 0)}</b>
-            <b>{fmt(result.heatKwh, 0)}</b>
-            <span>Pump / kWh</span>
-            <b>{fmt(o.baseline.pumpKwh, 1)}</b>
-            <b>{fmt(result.pumpKwh, 1)}</b>
-            <span>End minimum / °C</span>
-            <b>{fmt(o.baseline.endMinimumC, 2)}</b>
-            <b>{fmt(result.endMinimumC, 2)}</b>
-          </div>
-          <h3>What physically changes</h3>
-          <div className="mission-actuators">
-            <div>
-              <span>Supply setpoint</span>
-              <b>
-                {fmt(m.before.supplyC)} → {fmt(result.controls.supplyC)} °C
-              </b>
-            </div>
-            <div>
-              <span>Pump drive</span>
-              <b>
-                {fmt(m.before.pumpHz)} → {fmt(result.controls.pumpHz)} Hz
-              </b>
-            </div>
-            {m.before.zones.map((z, i) => (
-              <div key={z.id}>
-                <span>{z.id} valve</span>
+            <div className="mission-actuators">
+              <div>
+                <span>{tx("Network flow")}</span>
                 <b>
-                  {fmt(z.valvePct, 0)} → {fmt(result.controls.valvesPct[i], 0)}%
+                  {tx(delta(m.after.flowM3h - m.baseline.flowM3h))}
+                  {tx(" m³/h")}
                 </b>
               </div>
-            ))}
-          </div>
-          <div
-            className="segmented mission-futures"
-            aria-label="Compare scene futures"
-          >
-            <button
-              disabled={p.busy || p.stale}
-              aria-pressed={p.previewing && p.forecastSide === "baseline"}
-              onClick={() => p.onPreview("baseline")}
-            >
-              Continue unchanged
-            </button>
-            <button
-              disabled={p.busy || p.stale}
-              aria-pressed={p.previewing && p.forecastSide === "intervention"}
-              onClick={() => p.onPreview("intervention")}
-            >
-              With intervention
-            </button>
-          </div>
-          <div className="dock-actions">
-            <button disabled={p.busy || p.stale} onClick={p.onAnimate}>
-              {p.animating
-                ? "Pause prediction"
-                : "▶ Play physical consequences"}
-            </button>
-            <button
-              className="primary"
-              disabled={p.busy || p.stale}
-              onClick={p.onApply}
-            >
-              Apply first 30 min to simulation
-            </button>
-          </div>
-          {p.stale && (
-            <p className="warning">
-              State changed. Run a fresh mission before applying this plan.
-            </p>
-          )}
-        </>
-      )}
-      {outcome && m?.after && m.baseline && (
-        <div
-          className="mission-outcome"
-          aria-label="Measured simulation outcome"
-        >
-          <div className="eyebrow">CONTROL APPLIED · +30 SIMULATED MINUTES</div>
-          <h3>The network has changed.</h3>
-          <p>
-            Computed response against continuing unchanged over the same period.
-          </p>
-          <div className="mission-actuators">
-            <div>
-              <span>Network flow</span>
-              <b>{delta(m.after.flowM3h - m.baseline.flowM3h)} m³/h</b>
-            </div>
-            <div>
-              <span>Pump demand</span>
-              <b>{delta(m.after.pumpKw - m.baseline.pumpKw)} kW</b>
-            </div>
-            <div>
-              <span>Delivered heat</span>
-              <b>{delta(m.after.heatKw - m.baseline.heatKw)} kW</b>
-            </div>
-          </div>
-          <h3>Building response / Δ°C vs unchanged</h3>
-          <div className="mission-building-deltas">
-            {m.after.buildings.map((b) => (
-              <div key={b.id}>
-                <span>{b.id}</span>
+              <div>
+                <span>{tx("Pump demand")}</span>
                 <b>
-                  {delta(
-                    b.modelC -
-                      (m.baseline!.buildings.find((v) => v.id === b.id)
-                        ?.modelC ?? b.modelC),
-                    2,
-                  )}
+                  {tx(delta(m.after.pumpKw - m.baseline.pumpKw))}
+                  {tx(" kW")}
                 </b>
               </div>
-            ))}
-          </div>
-          {m.predicted && (
-            <p className="muted">
-              Largest indoor model prediction residual:{" "}
-              {fmt(
-                Math.max(
-                  ...m.after.buildings.map((b) =>
-                    Math.abs(
-                      b.modelC -
-                        (m.predicted!.buildings.find((v) => v.id === b.id)
-                          ?.modelC ?? b.modelC),
+              <div>
+                <span>{tx("Delivered heat")}</span>
+                <b>
+                  {tx(delta(m.after.heatKw - m.baseline.heatKw))}
+                  {tx(" kW")}
+                </b>
+              </div>
+            </div>
+            <h3>{tx("Building response / Δ°C vs unchanged")}</h3>
+            <div className="mission-building-deltas">
+              {tx(
+                m.after.buildings.map((b) => (
+                  <div key={b.id}>
+                    <span>{tx(b.id)}</span>
+                    <b>
+                      {tx(
+                        delta(
+                          b.modelC -
+                            (m.baseline!.buildings.find((v) => v.id === b.id)
+                              ?.modelC ?? b.modelC),
+                          2,
+                        ),
+                      )}
+                    </b>
+                  </div>
+                )),
+              )}
+            </div>
+            {tx(
+              m.predicted && (
+                <p className="muted">
+                  {tx("Largest indoor model prediction residual:")}
+                  {tx(" ")}
+                  {tx(
+                    fmt(
+                      Math.max(
+                        ...m.after.buildings.map((b) =>
+                          Math.abs(
+                            b.modelC -
+                              (m.predicted!.buildings.find((v) => v.id === b.id)
+                                ?.modelC ?? b.modelC),
+                          ),
+                        ),
+                      ),
+                      4,
                     ),
-                  ),
-                ),
-                4,
-              )}{" "}
-              °C. This checks model execution, not field accuracy.
-            </p>
-          )}
-          {p.current.revision !== m.after.revision && (
-            <p className="muted">
-              Recorded outcome at revision {m.after.revision}; the current
-              simulation has since advanced.
-            </p>
-          )}
-        </div>
+                  )}
+                  {tx(" ")}
+                  {tx("°C. This checks model execution, not field accuracy.")}
+                </p>
+              ),
+            )}
+            {tx(
+              p.current.revision !== m.after.revision && (
+                <p className="muted">
+                  {tx("Recorded outcome at revision ")}
+                  {tx(m.after.revision)}
+                  {tx("; the current simulation has since advanced.")}
+                </p>
+              ),
+            )}
+          </div>
+        ),
       )}
       <div className="mission-destinations">
-        <span className="connected">● Simulator · controls enabled</span>
-        <span>○ Real equipment · not connected</span>
+        <span className="connected">
+          {tx("● Simulator · controls enabled")}
+        </span>
+        <span>{tx("○ Real equipment · not connected")}</span>
       </div>
     </section>
   );

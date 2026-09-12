@@ -10,6 +10,7 @@ import { site, registry, worldContext, ObservationStore } from "./world.mjs";
 import { investigate } from "./immersive-agent.mjs";
 import { streamCompletion } from "./provider-stream.mjs";
 import { prepareInvestigation } from "./investigation-context.mjs";
+import { agentLocale } from "./agent-language.mjs";
 const observations = new ObservationStore();
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -365,7 +366,10 @@ const server = http.createServer(async (req, res) => {
           });
         const prepared =
           method === "investigation"
-            ? prepareInvestigation(await rpc(session, "snapshot"), args)
+            ? prepareInvestigation(await rpc(session, "snapshot"), {
+                ...args,
+                locale: agentLocale(args.locale),
+              })
             : null;
         if (Date.now() - hourStart > 3600000) {
           hourStart = Date.now();

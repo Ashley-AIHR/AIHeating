@@ -14,6 +14,7 @@ globalThis.fetch = async (url, options = {}) => {
     return realFetch(url, options);
   const payload = JSON.parse(options.body),
     brief = payload.messages[1].content;
+  const chinese = payload.messages[0].content.includes("Simplified Chinese");
   const first =
     !!payload.tools && !payload.messages.some((m) => m.role === "tool");
   const tool = payload.tools?.some(
@@ -53,17 +54,17 @@ globalThis.fetch = async (url, options = {}) => {
             {
               delta: {
                 reasoning: "PRIVATE_NOT_FOR_UI",
-                content: "The far branch ",
+                content: chinese ? "远端支路" : "The far branch ",
               },
             },
           ],
         },
-        { choices: [{ delta: { content: "needs careful balancing. " } }] },
+        { choices: [{ delta: { content: chinese ? "需要进行水力平衡。" : "needs careful balancing. " } }] },
         {
           choices: [
             {
               delta: {
-                content: "Review the physical evidence before applying a plan.",
+                content: chinese ? "应用方案前，请检查物理模型依据。" : "Review the physical evidence before applying a plan.",
               },
             },
           ],

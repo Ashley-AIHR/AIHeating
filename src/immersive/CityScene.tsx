@@ -1,3 +1,4 @@
+import { tx, useLocale } from "../localisation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -49,6 +50,7 @@ type Props = {
   onOperate: () => void;
 };
 export default function CityScene(props: Props) {
+  const locale = useLocale();
   const host = useRef<HTMLDivElement>(null),
     controlAnchor = useRef<HTMLDivElement>(null),
     latest = useRef(props),
@@ -91,7 +93,9 @@ export default function CityScene(props: Props) {
     renderer.domElement.tabIndex = 0;
     renderer.domElement.setAttribute(
       "aria-label",
-      `Orbitable ${props.frame.city?.name || "Yinchuan"} fictional district twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.`,
+      tx(
+        `Orbitable ${props.frame.city?.name || "Yinchuan"} fictional district twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.`,
+      ),
     );
     el.appendChild(renderer.domElement);
     const scene = new T.Scene();
@@ -202,7 +206,7 @@ export default function CityScene(props: Props) {
     function badge(id: string, point: T.Vector3, plant = false, name = "") {
       const button = document.createElement("button");
       button.dataset.asset = id;
-      button.setAttribute("aria-label", `Select ${id} in 3D`);
+      button.setAttribute("aria-label", tx(`Select ${id} in 3D`));
       button.title = name;
       button.onclick = () => {
         if (plant) {
@@ -371,6 +375,12 @@ export default function CityScene(props: Props) {
       );
     const lastReadings = new Map<string, number>();
     function update() {
+      renderer.domElement.setAttribute(
+        "aria-label",
+        tx(
+          `Orbitable ${latest.current.frame.city?.name || "Yinchuan"} fictional district twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.`,
+        ),
+      );
       const { frame, layer, selected, view, affected, comparison } =
         latest.current;
       el.dataset.stateRevision = String(frame.revision);
@@ -380,6 +390,10 @@ export default function CityScene(props: Props) {
       rings.visible =
         !props.imported && layer === "temperature" && view === "district";
       for (const marker of markers) {
+        marker.button.setAttribute(
+          "aria-label",
+          tx(`Select ${marker.id} in 3D`),
+        );
         const building = frame.buildings.find((b) => b.id === marker.id),
           zone = frame.zones.find((z) => z.id === marker.id);
         const reference = comparison?.buildings.find((b) => b.id === marker.id);
@@ -419,16 +433,20 @@ export default function CityScene(props: Props) {
           (building
             ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}`
             : zone
-              ? `${marker.id.toUpperCase()} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} min`
+              ? `${tx(marker.id.toUpperCase())} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} ${tx("min")}`
               : marker.id === "ST01"
                 ? `ST01 · ${frame.supplyC.toFixed(1)}°C · ${frame.pumpHz.toFixed(1)} Hz ↗`
                 : marker.id.startsWith("P-") && marker.id !== "P-03"
-                  ? `${marker.id} · equivalent drive ${frame.pumpHz.toFixed(1)} Hz`
+                  ? tx(
+                      `${marker.id} · equivalent drive ${frame.pumpHz.toFixed(1)} Hz`,
+                    )
                   : marker.id) +
           (changed && !comparison ? ` ${reading > previous! ? "↑" : "↓"}` : "");
-        marker.button.title = building
-          ? `${building.id}: ${severity === "suspect" ? "sensor disagreement — verify before control" : severity === "normal" ? "within displayed comfort band" : "outside displayed comfort band"}. Click to inspect or operate its supplying branch.`
-          : "Click to inspect and operate this circuit";
+        marker.button.title = tx(
+          building
+            ? `${building.id}: ${severity === "suspect" ? "sensor disagreement — verify before control" : severity === "normal" ? "within displayed comfort band" : "outside displayed comfort band"}. Click to inspect or operate its supplying branch.`
+            : "Click to inspect and operate this circuit",
+        );
         marker.button.classList.toggle(
           "mission-affected",
           affected.includes(marker.plant ? "ST01" : marker.id),
@@ -759,6 +777,7 @@ export default function CityScene(props: Props) {
       props.affected,
       props.comparison,
       props.findings,
+      locale,
     ],
   );
   useEffect(() => {
@@ -775,36 +794,46 @@ export default function CityScene(props: Props) {
         className="scene-control-anchor"
         data-open={!!props.controlContent}
       >
-        {props.controlContent || (
-          <button className="operate-trigger" onClick={props.onOperate}>
-            ⚙ Operate{" "}
-            {props.view === "plant" ? props.equipment : props.selected}
-          </button>
+        {tx(
+          props.controlContent || (
+            <button className="operate-trigger" onClick={props.onOperate}>
+              {tx("⚙ Operate")}
+              {tx(" ")}
+              {tx(props.view === "plant" ? props.equipment : props.selected)}
+            </button>
+          ),
         )}
       </div>
-      {error && (
-        <div className="scene-error" role="alert">
-          {error}
-        </div>
+      {tx(
+        error && (
+          <div className="scene-error" role="alert">
+            {tx(error)}
+          </div>
+        ),
       )}
       <div className="render-settings">
         <button
           onClick={() => setDusk(!dusk)}
           aria-pressed={dusk}
-          title="Art-directed lighting, independent of the simulation clock"
+          title={tx(
+            "Art-directed lighting, independent of the simulation clock",
+          )}
         >
-          {dusk ? "☾ Blue hour" : "☀ Winter daylight"}
+          {tx(dusk ? "☾ Blue hour" : "☀ Winter daylight")}
         </button>
         <button
           onClick={() => setHighQuality(!highQuality)}
           aria-pressed={highQuality}
         >
-          {highQuality ? "Quality: cinematic" : "Quality: performance"}
+          {tx(highQuality ? "Quality: cinematic" : "Quality: performance")}
         </button>
       </div>
       <div className="orbit-hint">
-        DRAG TO ORBIT <span>·</span> SCROLL TO EXPLORE <span>·</span> CLICK TO
-        INSPECT
+        {tx("DRAG TO ORBIT ")}
+        <span>·</span>
+        {tx(" SCROLL TO EXPLORE ")}
+        <span>·</span>
+        {tx(" CLICK TO INSPECT")}
       </div>
     </div>
   );

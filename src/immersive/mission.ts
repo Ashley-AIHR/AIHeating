@@ -1,4 +1,5 @@
 import type { Twin } from "../operations/types";
+import type { Locale } from "../localisation";
 
 export type MissionEvent = {
   tool: string;
@@ -12,6 +13,7 @@ export type MissionEvent = {
   result?: unknown;
 };
 export type Mission = {
+  locale?: Locale;
   phase: "investigating" | "ready" | "applied" | "blocked" | "failed";
   origin: "llm" | "numerical";
   before: Twin;

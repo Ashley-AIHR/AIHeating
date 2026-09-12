@@ -1921,3 +1921,63 @@ pre {
     display: none;
   }
 }
+.immersive .language-switch {
+  width: 112px;
+  flex: 0 0 auto;
+  min-width: 104px;
+  color: #b6f4e5;
+  border: 1px solid #41645f;
+  border-radius: 7px;
+  background: #112732;
+  padding: 8px 10px;
+  font: inherit;
+}
+.language-switch:focus-visible {
+  outline: 2px solid #7bd9bb;
+  outline-offset: 3px;
+}
+.header-state {
+  flex-shrink: 0;
+}
+.header-state .mode-badge,
+.header-state .offline,
+.header-state button {
+  white-space: nowrap;
+  word-break: keep-all;
+  flex-shrink: 0;
+}
+html[lang="zh-CN"] .immersive {
+  font-family:
+    Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+html[lang="zh-CN"] .immersive .eyebrow,
+html[lang="zh-CN"] .immersive .tool-rail {
+  letter-spacing: 0.04em;
+}
+html[lang="zh-CN"] .immersive .ops-dock {
+  line-height: 1.65;
+}
+@media (max-width: 760px) {
+  .immersive .language-switch {
+    width: 94px;
+    min-width: 94px;
+    padding: 7px 6px;
+    font-size: 11px;
+  }
+  .header-state .mode-badge,
+  .header-state .offline,
+  .header-state button {
+    display: none;
+  }
+  .site-title {
+    flex: 1;
+    min-width: 64px;
+    padding-left: 8px;
+  }
+  .site-title select {
+    width: 100%;
+    padding: 7px 4px;
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+}

@@ -1,3 +1,4 @@
+import { tx } from "../localisation";
 import { useEffect, useRef, useState } from "react";
 import { fmt, type Diagnosis, type Twin } from "../operations/types";
 import type { OperationEvent } from "./DirectControl";
@@ -28,16 +29,18 @@ export function AnimatedValue({
   }, [value]);
   return (
     <span className="animated-reading">
-      <span>{fmt(shown, digits)}</span>
-      {Math.abs(delta) >= 10 ** -digits / 2 && (
-        <small
-          key={value}
-          className={`reading-delta ${delta > 0 ? "up" : "down"}`}
-          title="Change since the previous displayed sample"
-        >
-          {delta > 0 ? "↑ +" : "↓ "}
-          {fmt(delta, digits)}
-        </small>
+      <span>{tx(fmt(shown, digits))}</span>
+      {tx(
+        Math.abs(delta) >= 10 ** -digits / 2 && (
+          <small
+            key={value}
+            className={`reading-delta ${delta > 0 ? "up" : "down"}`}
+            title={tx("Change since the previous displayed sample")}
+          >
+            {tx(delta > 0 ? "↑ +" : "↓ ")}
+            {tx(fmt(delta, digits))}
+          </small>
+        ),
       )}
     </span>
   );
@@ -55,42 +58,53 @@ export function EventSignals({
 }) {
   const findings = diagnosis?.findings || [];
   return (
-    <section className="event-signals" aria-label="Operational signals">
+    <section className="event-signals" aria-label={tx("Operational signals")}>
       <button
         className={`alarm-summary ${findings.length ? "has-alarms" : "clear"}`}
         onClick={onAlarms}
       >
-        <b>{findings.length ? "△" : "✓"}</b>
+        <b>{tx(findings.length ? "△" : "✓")}</b>
         <span>
-          {findings.length} active findings
+          {tx(findings.length)}
+          {tx(" active findings")}
           <small>
-            {findings.length
-              ? "Inspect affected assets"
-              : "No active model findings"}
+            {tx(
+              findings.length
+                ? "Inspect affected assets"
+                : "No active model findings",
+            )}
           </small>
         </span>
       </button>
       <div className="event-log" role="log" aria-live="polite">
-        {events
-          .slice(-2)
-          .reverse()
-          .map((e) => (
-            <button
-              key={e.id}
-              className={`event-item ${e.kind}`}
-              onClick={() => onSelect(e.asset)}
-            >
-              <span>
-                {e.kind === "failure" ? "!" : e.kind === "command" ? "✓" : "•"}
-              </span>
-              <div>
-                <strong>{e.title}</strong>
-                <small>
-                  {e.time} · {e.detail}
-                </small>
-              </div>
-            </button>
-          ))}
+        {tx(
+          events
+            .slice(-2)
+            .reverse()
+            .map((e) => (
+              <button
+                key={e.id}
+                className={`event-item ${e.kind}`}
+                onClick={() => onSelect(e.asset)}
+              >
+                <span>
+                  {tx(
+                    e.kind === "failure"
+                      ? "!"
+                      : e.kind === "command"
+                        ? "✓"
+                        : "•",
+                  )}
+                </span>
+                <div>
+                  <strong>{tx(e.title)}</strong>
+                  <small>
+                    {tx(e.time)} · {tx(e.detail)}
+                  </small>
+                </div>
+              </button>
+            )),
+        )}
       </div>
     </section>
   );
@@ -111,56 +125,78 @@ export function EquipmentWorkbench({
   return (
     <section
       className="equipment-workbench"
-      aria-label="Connected equipment workbench"
+      aria-label={tx("Connected equipment workbench")}
     >
-      <div className="eyebrow">{equipment} · CONNECTED MODEL CONTEXT</div>
+      <div className="eyebrow">
+        {tx(equipment)}
+        {tx(" · CONNECTED MODEL CONTEXT")}
+      </div>
       <h3>
-        {equipment.startsWith("HX")
-          ? "Heat transfer to the district"
-          : "Circulation and distribution"}
+        {tx(
+          equipment.startsWith("HX")
+            ? "Heat transfer to the district"
+            : "Circulation and distribution",
+        )}
       </h3>
       <p>
-        {equipment.startsWith("HX")
-          ? "Adjust the secondary supply setpoint and test heat delivery to every connected branch."
-          : "Adjust the equivalent drive frequency and test flow redistribution, pressure and electrical demand."}
+        {tx(
+          equipment.startsWith("HX")
+            ? "Adjust the secondary supply setpoint and test heat delivery to every connected branch."
+            : "Adjust the equivalent drive frequency and test flow redistribution, pressure and electrical demand.",
+        )}
       </p>
       <div className="process-network">
         <button onClick={onOperate}>
-          ST01 · {fmt(state.supplyC)}°C
+          {tx("ST01 · ")}
+          {tx(fmt(state.supplyC))}
+          {tx("°C")}
           <small>
-            {fmt(state.pumpHz)} Hz / {fmt(state.pressureKpa)} kPa
+            {tx(fmt(state.pumpHz))}
+            {tx(" Hz / ")}
+            {tx(fmt(state.pressureKpa))}
+            {tx(" kPa")}
           </small>
         </button>
         <div>
-          {state.zones.map((z) => (
-            <button key={z.id} onClick={() => onSelect(z.id)}>
-              <b>
-                {z.id.toUpperCase()} · {fmt(z.valvePct, 0)}%
-              </b>
-              <small>
-                {fmt(z.flowM3h)} m³/h · {fmt(z.delayMinutes, 0)} min
-              </small>
-            </button>
-          ))}
+          {tx(
+            state.zones.map((z) => (
+              <button key={z.id} onClick={() => onSelect(z.id)}>
+                <b>
+                  {tx(z.id.toUpperCase())} · {tx(fmt(z.valvePct, 0))}%
+                </b>
+                <small>
+                  {tx(fmt(z.flowM3h))}
+                  {tx(" m³/h · ")}
+                  {tx(fmt(z.delayMinutes, 0))}
+                  {tx(" min")}
+                </small>
+              </button>
+            )),
+          )}
         </div>
       </div>
       <div className="dock-actions">
         <button className="primary" onClick={onOperate}>
-          Operate in 3D
+          {tx("Operate in 3D")}
         </button>
-        <button onClick={onAgent}>Investigate with agent</button>
+        <button onClick={onAgent}>{tx("Investigate with agent")}</button>
       </div>
-      <h3>Useful checks</h3>
+      <h3>{tx("Useful checks")}</h3>
       <ul>
-        <li>Compare branch response before raising station supply.</li>
-        <li>Inspect transport delay before judging a temperature change.</li>
+        <li>{tx("Compare branch response before raising station supply.")}</li>
         <li>
-          Check suspect sensor readings against the model before intervention.
+          {tx("Inspect transport delay before judging a temperature change.")}
+        </li>
+        <li>
+          {tx(
+            "Check suspect sensor readings against the model before intervention.",
+          )}
         </li>
       </ul>
       <small>
-        Shared model readings; this geometry has no separately instrumented pump
-        or heat exchanger model.
+        {tx(
+          "Shared model readings; this geometry has no separately instrumented pump or heat exchanger model.",
+        )}
       </small>
     </section>
   );

@@ -1,3 +1,11 @@
+import {
+  tx,
+  useLocale,
+  setLocale,
+  translate,
+  defaultBrief,
+  type Locale,
+} from "../localisation";
 import { useEffect, useRef, useState, useMemo, lazy, Suspense } from "react";
 import {
   api,
@@ -63,6 +71,7 @@ export type Optimisation = {
   limitations: string[];
 };
 type Run = {
+  locale?: Locale;
   contextId?: string;
   completionStatus?: "complete" | "partial";
   warning?: string;
@@ -134,12 +143,13 @@ function download(name: string, value: unknown) {
 function Pair({ label, value }: { label: string; value: string }) {
   return (
     <div className="pair">
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <span>{tx(label)}</span>
+      <strong>{tx(value)}</strong>
     </div>
   );
 }
 export default function Workspace() {
+  const locale = useLocale();
   const [config, setConfig] = useState<Config | null>(null),
     [twin, setTwin] = useState<Twin | null>(null),
     [geo, setGeo] = useState<Geography | null>(null),
@@ -155,10 +165,15 @@ export default function Workspace() {
     [run, setRun] = useState<Run | null>(null),
     [feed, setFeed] = useState<Feed | null>(null);
   const [code, setCode] = useState(""),
-    [question, setQuestion] = useState(
-      "Investigate the selected asset using physical evidence. Test an alternative explanation and prepare a verified simulator intervention if appropriate.",
-    ),
+    [question, setQuestion] = useState(translate(defaultBrief)),
     [objective, setObjective] = useState("balanced");
+  useEffect(() => {
+    setQuestion((q) =>
+      [defaultBrief, translate(defaultBrief, "zh-CN")].includes(q)
+        ? translate(defaultBrief, locale)
+        : q,
+    );
+  }, [locale]);
   const [busy, setBusy] = useState(""),
     [error, setError] = useState(""),
     [playing, setPlaying] = useState(false),
@@ -442,6 +457,7 @@ export default function Workspace() {
             : origin.buildings.map((b) => b.id)),
         ];
         setMission({
+          locale,
           phase: "investigating",
           origin: useAgent ? "llm" : "numerical",
           before: origin,
@@ -482,6 +498,7 @@ export default function Workspace() {
                 objective,
                 revision: origin.revision,
                 contextId: origin.contextId,
+                locale,
                 cityId: origin.cityId || "yinchuan",
                 scenario: origin.scenario,
                 syncCurrent: true,
@@ -768,12 +785,17 @@ export default function Workspace() {
     return (
       <main className="immersive loading">
         <h1>
-          HEATPILOT<span> / CONNECTED OPERATIONS</span>
+          {tx("HEATPILOT")}
+          <span>{tx(" / CONNECTED OPERATIONS")}</span>
         </h1>
         <p>
-          {error || "Loading source geometry and nonlinear physical state…"}
+          {tx(error || "Loading source geometry and nonlinear physical state…")}
         </p>
-        {error && <button onClick={() => location.reload()}>Retry</button>}
+        {tx(
+          error && (
+            <button onClick={() => location.reload()}>{tx("Retry")}</button>
+          ),
+        )}
       </main>
     );
   return (
@@ -782,57 +804,83 @@ export default function Workspace() {
         <div className="brand">
           <span className="brand-symbol">◈</span>
           <div>
-            HEATPILOT <small>SPATIAL ENERGY OPERATIONS</small>
+            {tx("HEATPILOT ")}
+            <small>{tx("SPATIAL ENERGY OPERATIONS")}</small>
           </div>
         </div>
         <div className="site-title">
           <select
-            aria-label="City district"
+            aria-label={tx("City district")}
             value={twin.cityId || "yinchuan"}
             disabled={!!busy}
             onChange={(e) => void resetWorld(e.target.value, twin.scenario)}
           >
-            <option value="yinchuan">YINCHUAN · 银川</option>
-            <option value="shanghai">SHANGHAI · 上海</option>
+            <option value="yinchuan">
+              {locale === "zh-CN" ? "银川" : "YINCHUAN · 银川"}
+            </option>
+            <option value="shanghai">
+              {locale === "zh-CN" ? "上海" : "SHANGHAI · 上海"}
+            </option>
           </select>
           <small>
-            {twin.city?.district || "Winter-city energy district"} · fictional
+            {tx(twin.city?.district || "Winter-city energy district")}
+            {tx(" · fictional")}
           </small>
         </div>
         <div className="header-state">
+          <select
+            className="language-switch"
+            aria-label={tx("Interface language")}
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+          >
+            <option value="en" lang="en">
+              English
+            </option>
+            <option value="zh-CN" lang="zh-CN">
+              简体中文
+            </option>
+          </select>
           <span className="mode-badge">
-            {timeMode === "current" ? "SIMULATION" : timeMode.toUpperCase()}
+            {tx(timeMode === "current" ? "SIMULATION" : timeMode.toUpperCase())}
           </span>
-          <span className="offline">SIMULATED DATA</span>
-          <button onClick={() => setPanel("connection")}>Connections ↗</button>
+          <span className="offline">{tx("SIMULATED DATA")}</span>
+          <button onClick={() => setPanel("connection")}>
+            {tx("Connections ↗")}
+          </button>
         </div>
       </header>
-      <nav className="tool-rail" aria-label="Workspace tools">
-        {[
-          ["inspect", "◈", "Assets"],
-          ["alarms", "△", "Alarms"],
-          ["agents", "✧", "Agents"],
-          ["optimise", "⌁", "Optimise"],
-          ["connection", "⌘", "Data"],
-          ["sources", "▤", "Evidence"],
-        ].map(([id, icon, label]) => (
-          <button
-            key={id}
-            className={panel === id ? "active" : ""}
-            aria-label={label}
-            onClick={() => setPanel(id)}
-          >
-            <b aria-hidden="true">{icon}</b>
-            {label}
-          </button>
-        ))}
+      <nav className="tool-rail" aria-label={tx("Workspace tools")}>
+        {tx(
+          [
+            ["inspect", "◈", "Assets"],
+            ["alarms", "△", "Alarms"],
+            ["agents", "✧", "Agents"],
+            ["optimise", "⌁", "Optimise"],
+            ["connection", "⌘", "Data"],
+            ["sources", "▤", "Evidence"],
+          ].map(([id, icon, label]) => (
+            <button
+              key={id}
+              className={panel === id ? "active" : ""}
+              aria-label={tx(label)}
+              onClick={() => setPanel(id)}
+            >
+              <b aria-hidden="true">{tx(icon)}</b>
+              {tx(label)}
+            </button>
+          )),
+        )}
         <div className="rail-bottom">
-          3D
+          {tx("3D")}
           <br />
-          TWIN
+          {tx("TWIN")}
         </div>
       </nav>
-      <section className="world-stage" aria-label="Integrated 3D district">
+      <section
+        className="world-stage"
+        aria-label={tx("Integrated 3D district")}
+      >
         <CityScene
           geo={geo}
           frame={frame}
@@ -868,7 +916,9 @@ export default function Workspace() {
                 onAgent={() => {
                   setControlsOpen(false);
                   setPanel("agents");
-                  const brief = `Investigate ${selected} and test an improved control plan for its connected circuit.`;
+                  const brief = tx(
+                    `Investigate ${selected} and test an improved control plan for its connected circuit.`,
+                  );
                   setQuestion(brief);
                   if (
                     config.aiConfigured &&
@@ -886,46 +936,54 @@ export default function Workspace() {
       <button
         className="mission-banner"
         onClick={() => setPanel("agents")}
-        aria-label="Open active agent mission"
+        aria-label={tx("Open active agent mission")}
       >
         <span className="mission-pulse">✧</span>
         <span>
           <small>
-            {mission
-              ? mission.origin === "llm"
-                ? "AGENT MISSION"
-                : "NUMERICAL EXPLORATION"
-              : "CITY INTELLIGENCE"}
+            {tx(
+              mission
+                ? mission.origin === "llm"
+                  ? "AGENT MISSION"
+                  : "NUMERICAL EXPLORATION"
+                : "CITY INTELLIGENCE",
+            )}
           </small>
           <strong>
-            {mission?.message ||
-              "Give the city an objective. Watch it respond."}
+            {tx(
+              mission?.message ||
+                "Give the city an objective. Watch it respond.",
+            )}
           </strong>
         </span>
         <b>↗</b>
       </button>
       <section className="world-title">
         <div className="eyebrow">
-          {(twin.city?.name || "Yinchuan").toUpperCase()} / CONNECTED ENERGY
-          DISTRICT
+          {tx((twin.city?.name || "Yinchuan").toUpperCase())}
+          {tx(" / CONNECTED ENERGY DISTRICT")}
         </div>
         <h1>
-          {sceneView === "plant"
-            ? "Inside the energy centre."
-            : "The city, in balance."}
+          {tx(
+            sceneView === "plant"
+              ? "Inside the energy centre."
+              : "The city, in balance.",
+          )}
         </h1>
         <p>
-          {sceneView === "plant"
-            ? "Mechanical systems. Network intelligence. One operating context."
-            : "A living model of heat, buildings and the decisions that connect them."}
+          {tx(
+            sceneView === "plant"
+              ? "Mechanical systems. Network intelligence. One operating context."
+              : "A living model of heat, buildings and the decisions that connect them.",
+          )}
         </p>
       </section>
-      <div className="view-switch" aria-label="Spatial view">
+      <div className="view-switch" aria-label={tx("Spatial view")}>
         <button
           aria-pressed={sceneView === "district"}
           onClick={() => setSceneView("district")}
         >
-          ◈ District
+          {tx("◈ District")}
         </button>
         <button
           aria-pressed={sceneView === "plant"}
@@ -935,24 +993,26 @@ export default function Workspace() {
             setSceneView("plant");
           }}
         >
-          ⚙ Energy centre
+          {tx("⚙ Energy centre")}
         </button>
       </div>
       <div className="scene-controls">
         <div className="segmented">
-          {[
-            ["temperature", "Thermal"],
-            ["network", "Network"],
-            ["buildings", "Buildings"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              aria-pressed={layer === id}
-              onClick={() => setLayer(id)}
-            >
-              {label}
-            </button>
-          ))}
+          {tx(
+            [
+              ["temperature", "Thermal"],
+              ["network", "Network"],
+              ["buildings", "Buildings"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                aria-pressed={layer === id}
+                onClick={() => setLayer(id)}
+              >
+                {tx(label)}
+              </button>
+            )),
+          )}
         </div>
         <button
           onClick={() => {
@@ -961,7 +1021,7 @@ export default function Workspace() {
             setFocus((x) => x + 1);
           }}
         >
-          Focus station
+          {tx("Focus station")}
         </button>
         <button
           onClick={() => {
@@ -970,46 +1030,49 @@ export default function Workspace() {
             setPanel("inspect");
           }}
         >
-          Equipment workbench ↗
+          {tx("Equipment workbench ↗")}
         </button>
       </div>
       <section
         className="scene-metrics"
-        aria-label="Current physical indicators"
+        aria-label={tx("Current physical indicators")}
       >
         <div>
-          <span>Delivered heat</span>
+          <span>{tx("Delivered heat")}</span>
           <strong>
             <AnimatedValue
               key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.heatKw / 1000}
               digits={3}
             />
-            <small> MW</small>
+            <small>{tx(" MW")}</small>
           </strong>
         </div>
         <div>
-          <span>Outdoor temperature</span>
+          <span>{tx("Outdoor temperature")}</span>
           <strong>
             <AnimatedValue
               key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.outdoorC}
             />
-            <small> °C</small>
+            <small>{tx(" °C")}</small>
           </strong>
         </div>
         <div>
-          <span>Pump electricity</span>
+          <span>{tx("Pump electricity")}</span>
           <strong>
             <AnimatedValue
               key={`${twin.cityId}/${timeMode}/${forecastSide}`}
               value={frame.pumpKw}
             />
-            <small> kW</small>
+            <small>{tx(" kW")}</small>
           </strong>
         </div>
         <div>
-          <span>Selected / {selected}</span>
+          <span>
+            {tx("Selected / ")}
+            {tx(selected)}
+          </span>
           <strong>
             <AnimatedValue
               key={`${twin.cityId}/${selected}/${timeMode}/${forecastSide}`}
@@ -1017,7 +1080,7 @@ export default function Workspace() {
                 building ? building.indoorC : (zone?.flowM3h ?? frame.flowM3h)
               }
             />
-            <small>{building ? " °C" : " m³/h"}</small>
+            <small>{tx(building ? " °C" : " m³/h")}</small>
           </strong>
         </div>
       </section>
@@ -1028,21 +1091,30 @@ export default function Workspace() {
         onAlarms={() => setPanel("alarms")}
       />
       <div className="scene-caption">
-        <span className="legend-dot warm" /> Supply{" "}
-        <span className="legend-dot cool" /> Return{" "}
+        <span className="legend-dot warm" />
+        {tx(" Supply")}
+        {tx(" ")}
+        <span className="legend-dot cool" />
+        {tx(" Return")}
+        {tx(" ")}
         <span>
-          {imported
-            ? "Local visual model · no georeferencing or asset mapping"
-            : `Fictional ${twin.city?.name || "Yinchuan"} district · physically simulated operation`}
+          {tx(
+            imported
+              ? "Local visual model · no georeferencing or asset mapping"
+              : `Fictional ${twin.city?.name || "Yinchuan"} district · physically simulated operation`,
+          )}
         </span>
       </div>
-      <aside className="ops-dock" aria-label="Contextual operations panel">
+      <aside
+        className="ops-dock"
+        aria-label={tx("Contextual operations panel")}
+      >
         <div className="dock-heading">
           <div className="eyebrow">
-            {panel === "inspect" ? "ASSET CONTEXT" : "OPERATIONS TOOL"}
+            {tx(panel === "inspect" ? "ASSET CONTEXT" : "OPERATIONS TOOL")}
           </div>
           <h2>
-            {
+            {tx(
               (
                 {
                   inspect: asset?.name || selected,
@@ -1052,779 +1124,953 @@ export default function Workspace() {
                   connection: "Data connections",
                   sources: "Evidence & provenance",
                 } as Record<string, string>
-              )[panel]
-            }
+              )[panel],
+            )}
           </h2>
           <div className="context-line">
-            {selected} <span>·</span>{" "}
-            {timeMode === "current" ? `Revision ${frame.revision}` : timeMode}{" "}
-            <span>·</span> {frame.time.slice(11, 16)}
+            {tx(selected)} <span>·</span>
+            {tx(" ")}
+            {tx(
+              timeMode === "current" ? `Revision ${frame.revision}` : timeMode,
+            )}
+            {tx(" ")}
+            <span>·</span> {tx(frame.time.slice(11, 16))}
           </div>
         </div>
-        {panel === "inspect" && (
-          <>
-            <button className="primary full" onClick={openControls}>
-              Operate selected asset in 3D
-            </button>
-            <div className="asset-search">
-              <input
-                aria-label="Search assets"
-                placeholder="Find a building or branch…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <select
-                aria-label="Selected asset"
-                value={selected}
-                onChange={(e) => select(e.target.value)}
-              >
-                {config.registry
-                  .filter(
-                    (a) =>
-                      a.id === selected ||
-                      `${a.id} ${a.name}`
-                        .toLowerCase()
-                        .includes(search.toLowerCase()),
-                  )
-                  .map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.id} · {a.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="hero-reading">
-              <small>
-                {building
-                  ? "INDOOR TEMPERATURE"
-                  : zone
-                    ? "BRANCH FLOW"
-                    : "SUPPLY TEMPERATURE"}
-              </small>
-              <strong>
-                <AnimatedValue
-                  key={`${twin.cityId}/${selected}/${timeMode}/${forecastSide}`}
-                  value={building?.indoorC ?? zone?.flowM3h ?? frame.supplyC}
-                />
-                <span>{building ? "°C" : zone ? "m³/h" : "°C"}</span>
-              </strong>
-              <span className="quality">
-                {timeMode === "forecast"
-                  ? "PREDICTED · UNCALIBRATED"
-                  : building?.quality === "suspect"
-                    ? "SUSPECT SIMULATED SENSOR"
-                    : "SYNTHETIC MODEL VALUE"}
-              </span>
-            </div>
-            {building && (
-              <>
-                <Pair
-                  label="Physical-model temperature"
-                  value={`${fmt(building.modelC, 1)} °C`}
-                />
-                <Pair
-                  label="Delivered heat"
-                  value={`${fmt(building.heatKw, 1)} kW`}
-                />
-                <Pair
-                  label="Return temperature"
-                  value={`${fmt(building.returnC, 1)} °C`}
-                />
-                <Pair
-                  label="Heated floor area (archetype)"
-                  value={`${fmt(building.areaM2, 0)} m²`}
-                />
-              </>
-            )}
-            {zone && (
-              <>
-                <h3>Connected heating branch</h3>
-                <button
-                  className="connection-path"
-                  onClick={() => select(zone.id)}
-                >
-                  ST01 → {zone.id.toUpperCase()}{" "}
-                  {building ? `→ ${building.id}` : ""}
-                </button>
-                <Pair
-                  label="Transport delay (model)"
-                  value={`${fmt(zone.delayMinutes, 1)} min`}
-                />
-                <Pair
-                  label="Branch valve (displayed frame)"
-                  value={`${fmt(zone.valvePct, 0)} %`}
-                />
-              </>
-            )}
-            {!building && !zone && (
-              <>
-                {sceneView === "plant" && (
-                  <div className="equipment-card">
-                    <div className="eyebrow">
-                      MECHANICAL ASSEMBLY / {equipment}
-                    </div>
-                    <h3>
-                      {equipment.startsWith("HX")
-                        ? "Plate heat exchanger"
-                        : equipment === "MCC"
-                          ? "Motor control centre"
-                          : equipment === "P-03"
-                            ? "Standby circulation pump"
-                            : "Duty circulation pump"}
-                    </h3>
-                    <div className="equipment-picker">
-                      {["HX-A", "HX-B", "P-01", "P-02", "P-03", "MCC"].map(
-                        (id) => (
-                          <button
-                            key={id}
-                            aria-pressed={equipment === id}
-                            onClick={() => setEquipment(id)}
-                          >
-                            {id}
-                          </button>
-                        ),
-                      )}
-                    </div>
-                    <p>
-                      {equipment.startsWith("HX")
-                        ? "Primary-to-secondary heat transfer. Inspect the common supply and return headers, then preview the effect of a supply-temperature change across every connected building."
-                        : equipment === "MCC"
-                          ? "Variable-frequency drive coordination. Test a pump-speed proposal against branch pressure, transport delay and indoor comfort before simulator approval."
-                          : equipment === "P-03"
-                            ? "Standby unit in the visual design. The numerical model currently represents one equivalent pump characteristic, not individual duty/standby switching."
-                            : "Secondary circulation. The model couples equivalent pump speed to branch resistance, water flow and delayed heat delivery."}
-                    </p>
-                    <small>
-                      Readings below are shared station-model values, not
-                      individual equipment instruments.
-                    </small>
-                  </div>
-                )}
-                {sceneView === "plant" && (
-                  <EquipmentWorkbench
-                    state={frame}
-                    equipment={equipment}
-                    onSelect={(id) => {
-                      select(id);
-                      setSceneView("district");
-                    }}
-                    onOperate={openControls}
-                    onAgent={() => setPanel("agents")}
-                  />
-                )}
-                <Pair
-                  label="Return temperature"
-                  value={`${fmt(frame.returnC, 1)} °C`}
-                />
-                <Pair
-                  label="Total flow"
-                  value={`${fmt(frame.flowM3h, 1)} m³/h`}
-                />
-                <Pair
-                  label="Available pressure"
-                  value={`${fmt(frame.pressureKpa, 1)} kPa`}
-                />
-                <Pair
-                  label="Pump frequency"
-                  value={`${fmt(frame.pumpHz, 1)} Hz`}
-                />
-              </>
-            )}
-            <div className="dock-actions">
-              <button className="primary" onClick={() => setPanel("agents")}>
-                ✧ Investigate this asset
+        {tx(
+          panel === "inspect" && (
+            <>
+              <button className="primary full" onClick={openControls}>
+                {tx("Operate selected asset in 3D")}
               </button>
-              <button
-                onClick={() => {
-                  setSelected("ST01");
-                  setSceneView(sceneView === "plant" ? "district" : "plant");
-                }}
-              >
-                {sceneView === "plant"
-                  ? "Return to connected district"
-                  : "Explore energy centre"}
-              </button>
-            </div>
-            <p className="muted">
-              One shared selection links the scene, network, timeline and agent
-              investigation.
-            </p>
-          </>
-        )}
-        {panel === "alarms" && (
-          <>
-            <p className="muted">
-              Current simulation findings · revision {diagnosis?.revision}.
-              Selecting a finding focuses the same asset in the district.
-            </p>
-            {diagnosis?.findings.map((f) => (
-              <button
-                className={`finding ${f.severity}`}
-                key={f.id}
-                onClick={() => select(f.asset)}
-              >
-                <span>
-                  {f.asset} / {f.severity}
-                </span>
-                <strong>{f.title}</strong>
-                <p>{f.evidence}</p>
-                <small>{f.certainty}</small>
-              </button>
-            ))}
-            {!diagnosis?.findings.length && (
-              <p>No active rule-based findings in this frame.</p>
-            )}
-          </>
-        )}
-        {panel === "agents" && (
-          <>
-            <MissionControl
-              mission={mission}
-              optimisation={optimisation}
-              current={twin}
-              busy={!!busy}
-              stale={stalePlan}
-              canRunAgent={
-                config.aiConfigured && (!config.accessCodeRequired || !!code)
-              }
-              forecastSide={forecastSide}
-              previewing={timeMode === "forecast"}
-              animating={previewPlaying}
-              onRun={(agent) => void startMission(agent)}
-              onPreview={(side) => preview(side)}
-              onAnimate={() =>
-                previewPlaying
-                  ? setPreviewPlaying(false)
-                  : preview(forecastSide, true)
-              }
-              onApply={() => {
-                setCyclesRemaining(0);
-                current();
-                setConfirm(true);
-              }}
-              cyclesRemaining={cyclesRemaining}
-              onAutonomous={() => {
-                setCyclesRemaining(3);
-                void startMission(true, true);
-              }}
-              onStop={() => {
-                setCyclesRemaining(0);
-                agentAbort.current?.abort(
-                  new Error("Investigation stopped by operator"),
-                );
-              }}
-            />
-            <label>
-              Mission objective
-              <select
-                value={objective}
-                onChange={(e) => setObjective(e.target.value)}
-                disabled={!!busy}
-              >
-                <option value="balanced">Balance comfort and energy</option>
-                <option value="comfort">Recover building comfort</option>
-                <option value="energy">Reduce heat and pumping demand</option>
-              </select>
-            </label>
-            <div className="agent-card">
-              <span className="agent-orb">✧</span>
-              <div>
-                <strong>
-                  {config.model.startsWith("deepseek/deepseek-v4-flash")
-                    ? "DeepSeek V4 Flash"
-                    : "Configured reasoning model"}
-                </strong>
-                <small>{config.model}</small>
-              </div>
-              <span>
-                {config.aiConfigured ? "CONFIGURED" : "NOT CONFIGURED"}
-              </span>
-            </div>
-            <p>
-              Diagnosis and optimisation share asset <b>{selected}</b>, its
-              branch, the current physical state and model limitations.
-            </p>
-            {config.accessCodeRequired && (
-              <label>
-                Operator access code
+              <div className="asset-search">
                 <input
-                  type="password"
-                  autoComplete="off"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="Not your OpenRouter key"
+                  aria-label={tx("Search assets")}
+                  placeholder={tx("Find a building or branch…")}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <select
+                  aria-label={tx("Selected asset")}
+                  value={selected}
+                  onChange={(e) => select(e.target.value)}
+                >
+                  {tx(
+                    config.registry
+                      .filter(
+                        (a) =>
+                          a.id === selected ||
+                          `${a.id} ${a.name}`
+                            .toLowerCase()
+                            .includes(search.toLowerCase()),
+                      )
+                      .map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {tx(a.id)} · {tx(a.name)}
+                        </option>
+                      )),
+                  )}
+                </select>
+              </div>
+              <div className="hero-reading">
+                <small>
+                  {tx(
+                    building
+                      ? "INDOOR TEMPERATURE"
+                      : zone
+                        ? "BRANCH FLOW"
+                        : "SUPPLY TEMPERATURE",
+                  )}
+                </small>
+                <strong>
+                  <AnimatedValue
+                    key={`${twin.cityId}/${selected}/${timeMode}/${forecastSide}`}
+                    value={building?.indoorC ?? zone?.flowM3h ?? frame.supplyC}
+                  />
+                  <span>{tx(building ? "°C" : zone ? "m³/h" : "°C")}</span>
+                </strong>
+                <span className="quality">
+                  {tx(
+                    timeMode === "forecast"
+                      ? "PREDICTED · UNCALIBRATED"
+                      : building?.quality === "suspect"
+                        ? "SUSPECT SIMULATED SENSOR"
+                        : "SYNTHETIC MODEL VALUE",
+                  )}
+                </span>
+              </div>
+              {tx(
+                building && (
+                  <>
+                    <Pair
+                      label={tx("Physical-model temperature")}
+                      value={`${fmt(building.modelC, 1)} °C`}
+                    />
+                    <Pair
+                      label={tx("Delivered heat")}
+                      value={`${fmt(building.heatKw, 1)} kW`}
+                    />
+                    <Pair
+                      label={tx("Return temperature")}
+                      value={`${fmt(building.returnC, 1)} °C`}
+                    />
+                    <Pair
+                      label={tx("Heated floor area (archetype)")}
+                      value={`${fmt(building.areaM2, 0)} m²`}
+                    />
+                  </>
+                ),
+              )}
+              {tx(
+                zone && (
+                  <>
+                    <h3>{tx("Connected heating branch")}</h3>
+                    <button
+                      className="connection-path"
+                      onClick={() => select(zone.id)}
+                    >
+                      {tx("ST01 → ")}
+                      {tx(zone.id.toUpperCase())}
+                      {tx(" ")}
+                      {tx(building ? `→ ${building.id}` : "")}
+                    </button>
+                    <Pair
+                      label={tx("Transport delay (model)")}
+                      value={`${fmt(zone.delayMinutes, 1)} min`}
+                    />
+                    <Pair
+                      label={tx("Branch valve (displayed frame)")}
+                      value={`${fmt(zone.valvePct, 0)} %`}
+                    />
+                  </>
+                ),
+              )}
+              {tx(
+                !building && !zone && (
+                  <>
+                    {tx(
+                      sceneView === "plant" && (
+                        <div className="equipment-card">
+                          <div className="eyebrow">
+                            {tx("MECHANICAL ASSEMBLY / ")}
+                            {tx(equipment)}
+                          </div>
+                          <h3>
+                            {tx(
+                              equipment.startsWith("HX")
+                                ? "Plate heat exchanger"
+                                : equipment === "MCC"
+                                  ? "Motor control centre"
+                                  : equipment === "P-03"
+                                    ? "Standby circulation pump"
+                                    : "Duty circulation pump",
+                            )}
+                          </h3>
+                          <div className="equipment-picker">
+                            {tx(
+                              [
+                                "HX-A",
+                                "HX-B",
+                                "P-01",
+                                "P-02",
+                                "P-03",
+                                "MCC",
+                              ].map((id) => (
+                                <button
+                                  key={id}
+                                  aria-pressed={equipment === id}
+                                  onClick={() => setEquipment(id)}
+                                >
+                                  {tx(id)}
+                                </button>
+                              )),
+                            )}
+                          </div>
+                          <p>
+                            {tx(
+                              equipment.startsWith("HX")
+                                ? "Primary-to-secondary heat transfer. Inspect the common supply and return headers, then preview the effect of a supply-temperature change across every connected building."
+                                : equipment === "MCC"
+                                  ? "Variable-frequency drive coordination. Test a pump-speed proposal against branch pressure, transport delay and indoor comfort before simulator approval."
+                                  : equipment === "P-03"
+                                    ? "Standby unit in the visual design. The numerical model currently represents one equivalent pump characteristic, not individual duty/standby switching."
+                                    : "Secondary circulation. The model couples equivalent pump speed to branch resistance, water flow and delayed heat delivery.",
+                            )}
+                          </p>
+                          <small>
+                            {tx(
+                              "Readings below are shared station-model values, not individual equipment instruments.",
+                            )}
+                          </small>
+                        </div>
+                      ),
+                    )}
+                    {tx(
+                      sceneView === "plant" && (
+                        <EquipmentWorkbench
+                          state={frame}
+                          equipment={equipment}
+                          onSelect={(id) => {
+                            select(id);
+                            setSceneView("district");
+                          }}
+                          onOperate={openControls}
+                          onAgent={() => setPanel("agents")}
+                        />
+                      ),
+                    )}
+                    <Pair
+                      label={tx("Return temperature")}
+                      value={`${fmt(frame.returnC, 1)} °C`}
+                    />
+                    <Pair
+                      label={tx("Total flow")}
+                      value={`${fmt(frame.flowM3h, 1)} m³/h`}
+                    />
+                    <Pair
+                      label={tx("Available pressure")}
+                      value={`${fmt(frame.pressureKpa, 1)} kPa`}
+                    />
+                    <Pair
+                      label={tx("Pump frequency")}
+                      value={`${fmt(frame.pumpHz, 1)} Hz`}
+                    />
+                  </>
+                ),
+              )}
+              <div className="dock-actions">
+                <button className="primary" onClick={() => setPanel("agents")}>
+                  {tx("✧ Investigate this asset")}
+                </button>
+                <button
+                  onClick={() => {
+                    setSelected("ST01");
+                    setSceneView(sceneView === "plant" ? "district" : "plant");
+                  }}
+                >
+                  {tx(
+                    sceneView === "plant"
+                      ? "Return to connected district"
+                      : "Explore energy centre",
+                  )}
+                </button>
+              </div>
+              <p className="muted">
+                {tx(
+                  "One shared selection links the scene, network, timeline and agent investigation.",
+                )}
+              </p>
+            </>
+          ),
+        )}
+        {tx(
+          panel === "alarms" && (
+            <>
+              <p className="muted">
+                {tx("Current simulation findings · revision ")}
+                {tx(diagnosis?.revision)}
+                {tx(
+                  ". Selecting a finding focuses the same asset in the district.",
+                )}
+              </p>
+              {tx(
+                diagnosis?.findings.map((f) => (
+                  <button
+                    className={`finding ${f.severity}`}
+                    key={f.id}
+                    onClick={() => select(f.asset)}
+                  >
+                    <span>
+                      {tx(f.asset)} / {tx(f.severity)}
+                    </span>
+                    <strong>{tx(f.title)}</strong>
+                    <p>{tx(f.evidence)}</p>
+                    <small>{tx(f.certainty)}</small>
+                  </button>
+                )),
+              )}
+              {tx(
+                !diagnosis?.findings.length && (
+                  <p>{tx("No active rule-based findings in this frame.")}</p>
+                ),
+              )}
+            </>
+          ),
+        )}
+        {tx(
+          panel === "agents" && (
+            <>
+              <MissionControl
+                mission={mission}
+                optimisation={optimisation}
+                current={twin}
+                busy={!!busy}
+                stale={stalePlan}
+                canRunAgent={
+                  config.aiConfigured && (!config.accessCodeRequired || !!code)
+                }
+                forecastSide={forecastSide}
+                previewing={timeMode === "forecast"}
+                animating={previewPlaying}
+                onRun={(agent) => void startMission(agent)}
+                onPreview={(side) => preview(side)}
+                onAnimate={() =>
+                  previewPlaying
+                    ? setPreviewPlaying(false)
+                    : preview(forecastSide, true)
+                }
+                onApply={() => {
+                  setCyclesRemaining(0);
+                  current();
+                  setConfirm(true);
+                }}
+                cyclesRemaining={cyclesRemaining}
+                onAutonomous={() => {
+                  setCyclesRemaining(3);
+                  void startMission(true, true);
+                }}
+                onStop={() => {
+                  setCyclesRemaining(0);
+                  agentAbort.current?.abort(
+                    new Error("Investigation stopped by operator"),
+                  );
+                }}
+              />
+              <label>
+                {tx("Mission objective")}
+                <select
+                  value={objective}
+                  onChange={(e) => setObjective(e.target.value)}
+                  disabled={!!busy}
+                >
+                  <option value="balanced">
+                    {tx("Balance comfort and energy")}
+                  </option>
+                  <option value="comfort">
+                    {tx("Recover building comfort")}
+                  </option>
+                  <option value="energy">
+                    {tx("Reduce heat and pumping demand")}
+                  </option>
+                </select>
+              </label>
+              <div className="agent-card">
+                <span className="agent-orb">✧</span>
+                <div>
+                  <strong>
+                    {tx(
+                      config.model.startsWith("deepseek/deepseek-v4-flash")
+                        ? "DeepSeek V4 Flash"
+                        : "Configured reasoning model",
+                    )}
+                  </strong>
+                  <small>{tx(config.model)}</small>
+                </div>
+                <span>
+                  {tx(config.aiConfigured ? "CONFIGURED" : "NOT CONFIGURED")}
+                </span>
+              </div>
+              <p>
+                {tx("Diagnosis and optimisation share asset ")}
+                <b>{tx(selected)}</b>
+                {tx(
+                  ", its branch, the current physical state and model limitations.",
+                )}
+              </p>
+              {tx(
+                config.accessCodeRequired && (
+                  <label>
+                    {tx("Operator access code")}
+                    <input
+                      type="password"
+                      autoComplete="off"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder={tx("Not your OpenRouter key")}
+                    />
+                  </label>
+                ),
+              )}
+              <label>
+                {tx("Investigation brief")}
+                <textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  maxLength={1800}
                 />
               </label>
-            )}
-            <label>
-              Investigation brief
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                maxLength={1800}
-              />
-            </label>
-            <div className="dock-actions">
-              <button
-                className="primary"
-                disabled={
-                  !!busy ||
-                  timeMode !== "current" ||
-                  !config.aiConfigured ||
-                  (config.accessCodeRequired && !code)
-                }
-                onClick={() => void investigate("diagnostic")}
-              >
-                Run diagnostic agent
-              </button>
-              <button
-                disabled={
-                  !!busy ||
-                  timeMode !== "current" ||
-                  !config.aiConfigured ||
-                  (config.accessCodeRequired && !code)
-                }
-                onClick={() => void investigate("optimisation")}
-              >
-                Run optimisation agent
-              </button>
-            </div>
-            <p className="muted">
-              Operator-triggered paid calls. No background LLM polling.
-              Numerical optimisation remains available without AI access.
-            </p>
-            {run && (
-              <article className="agent-result">
-                <div className="eyebrow">
-                  {run.completionStatus === "partial"
-                    ? "PARTIAL · EVIDENCE RETAINED"
-                    : "COMPLETED"}{" "}
-                  / {run.role}
-                </div>
-                {run.warning && <p className="warning">{run.warning}</p>}
-                <h3>
-                  {run.assetId}
-                  {run.equipmentId ? ` / ${run.equipmentId}` : ""} · revision{" "}
-                  {run.revision}
-                </h3>
-                {(run.revision !== twin.revision ||
-                  (run.contextId !== undefined &&
-                    run.contextId !== twin.contextId)) && (
-                  <p className="warning">
-                    Historical run—current state has changed.
-                  </p>
+              <p className="muted">
+                {tx(
+                  "New agent runs use the selected language. Existing reports keep their original language.",
                 )}
-                <p className="narrative">{run.answer}</p>
+              </p>
+              <div className="dock-actions">
                 <button
-                  onClick={() => {
-                    select(run.assetId);
-                    if (run.equipmentId) {
-                      setEquipment(run.equipmentId);
-                      setSceneView("plant");
-                    }
-                  }}
-                >
-                  Focus investigated asset
-                </button>
-                <h3>Executed tools</h3>
-                {run.trace.map((t, i) => (
-                  <details key={i}>
-                    <summary>
-                      {i + 1}. {t.tool}
-                    </summary>
-                    <pre>{JSON.stringify(t.result, null, 2)}</pre>
-                  </details>
-                ))}
-                <button
-                  onClick={() =>
-                    download(`heatpilot-agent-${run.runId}.json`, run)
+                  className="primary"
+                  disabled={
+                    !!busy ||
+                    timeMode !== "current" ||
+                    !config.aiConfigured ||
+                    (config.accessCodeRequired && !code)
                   }
+                  onClick={() => void investigate("diagnostic")}
                 >
-                  Export run evidence
+                  {tx("Run diagnostic agent")}
                 </button>
-              </article>
-            )}
-          </>
-        )}
-        {panel === "optimise" && (
-          <>
-            <p>
-              Search two 90-minute control blocks against the nonlinear physical
-              model. A fresh rollout verifies the best plan found.
-            </p>
-            <label>
-              Objective
-              <select
-                value={objective}
-                onChange={(e) => setObjective(e.target.value)}
-              >
-                <option value="balanced">Balanced comfort + energy</option>
-                <option value="comfort">Comfort priority</option>
-                <option value="energy">Energy priority</option>
-              </select>
-            </label>
-            <button
-              className="primary full"
-              disabled={!!busy || timeMode !== "current"}
-              onClick={() => void optimise()}
-            >
-              Compute & verify schedule
-            </button>
-            {optimisation && (
-              <>
-                <div className="verification">
-                  <span>
-                    {optimisation.verification.passed
-                      ? "✓ MODEL GATES PASSED"
-                      : "! NO FEASIBLE PLAN"}
-                  </span>
-                  <strong>{optimisation.status}</strong>
-                  <small>
-                    {optimisation.evaluations} evaluations · revision{" "}
-                    {optimisation.revision}
-                  </small>
-                </div>
-                {stalePlan && (
-                  <p className="warning">
-                    Expired context. Recompute against the current state.
-                  </p>
-                )}
-                <Pair
-                  label="Baseline heat / 3 h"
-                  value={`${fmt(optimisation.baseline.heatKwh, 1)} kWh`}
-                />
-                <Pair
-                  label="Proposed heat / 3 h"
-                  value={`${fmt(optimisation.bestAttempt.heatKwh, 1)} kWh`}
-                />
-                <Pair
-                  label="Lowest trajectory temperature"
-                  value={`${fmt(optimisation.bestAttempt.minimumC, 2)} °C`}
-                />
-                <Pair
-                  label="End minimum temperature"
-                  value={`${fmt(optimisation.bestAttempt.endMinimumC, 2)} °C`}
-                />
-                <Pair
-                  label="Maximum numerical residual"
-                  value={optimisation.verification.maxResidual.toExponential(2)}
-                />
-                <h3>Computed schedule</h3>
-                {optimisation.bestAttempt.schedule.map((s) => (
-                  <div className="schedule" key={s.minute}>
-                    <b>+{s.minute} min</b>
-                    <span>
-                      {fmt(s.supplyC, 1)}°C · {fmt(s.pumpHz, 1)} Hz
-                    </span>
-                    <small>
-                      Valves {s.valvesPct.map((v) => fmt(v, 0)).join(" / ")}%
-                    </small>
-                  </div>
-                ))}
-                <div className="dock-actions">
-                  <button
-                    disabled={!plan || stalePlan || !!busy}
-                    onClick={() => {
-                      setForecastSide("intervention");
-                      setTimeMode("forecast");
-                      setTimeIndex(0);
-                      setPlaying(false);
-                    }}
-                  >
-                    Preview in district
-                  </button>
-                  <button
-                    className="primary"
-                    disabled={
-                      !plan || stalePlan || !!busy || timeMode !== "current"
-                    }
-                    onClick={() => setConfirm(true)}
-                  >
-                    Approve simulator step…
-                  </button>
-                </div>
-                <p className="muted">
-                  {optimisation.verification.scope}. No field command. No global
-                  optimality or savings guarantee.
-                </p>
-              </>
-            )}
-          </>
-        )}
-        {panel === "connection" && (
-          <>
-            <p className="muted">
-              Running release {config.release || "older build"} · AI{" "}
-              {config.aiConfigured
-                ? "provider key configured"
-                : "OPENROUTER_API_KEY missing"}{" "}
-              ·{" "}
-              {config.accessCodeRequired
-                ? "optional operator password enabled"
-                : "no operator password required"}
-            </p>
-            <div className="verification">
-              <span>{feed?.status?.toUpperCase() || "NOT CONNECTED"}</span>
-              <strong>Read-only observation gateway</strong>
-              <small>
-                {config.telemetryConfigured
-                  ? "Gateway token configured"
-                  : "Set TELEMETRY_INGEST_TOKEN on the server"}
-              </small>
-            </div>
-            <p>
-              Measurements remain separate from the uncalibrated simulator. A
-              received value is not proof of a commissioned site connection.
-              {twin.cityId === "shanghai" &&
-                " The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional Shanghai district."}
-            </p>
-            <label>
-              Operator access code
-              <input
-                type="password"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                autoComplete="off"
-              />
-            </label>
-            <button
-              disabled={!!busy || !code || twin.cityId === "shanghai"}
-              onClick={() =>
-                void work("Reading observations", async () =>
-                  setFeed(await api<Feed>("telemetry", {}, code)),
-                )
-              }
-            >
-              Read latest observations
-            </button>
-            {feed && (
-              <>
-                <p className="muted">{feed.scope}</p>
-                {feed.observations.map((r) => (
-                  <div className="observation" key={r.assetId + r.metric}>
-                    <button onClick={() => select(r.assetId)}>
-                      {r.assetId}
-                    </button>
-                    <strong>
-                      {r.metric}: {fmt(r.value, 2)} {r.unit}
-                    </strong>
-                    <small>
-                      {r.stale ? "STALE" : r.quality.toUpperCase()} ·{" "}
-                      {Math.round(r.ageSeconds)} s old · {r.source}
-                    </small>
-                  </div>
-                ))}
-                {!feed.observations.length && <p>No measurements received.</p>}
-                <p className="muted">{feed.retention}</p>
-              </>
-            )}
-            <h3>Gateway contract</h3>
-            <p className="muted">
-              POST /api/telemetry/ingest with X-Telemetry-Token. Explicit site,
-              asset, metric, unit, timestamp, quality and source are required.
-              Latest observations refresh every 10 seconds while this panel is
-              open and authenticated.
-            </p>
-            <h3>Detailed district geometry</h3>
-            <label className="file-button">
-              Import local self-contained GLB
-              <input
-                type="file"
-                accept=".glb"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  void work("Checking model", async () => {
-                    if (file.size > 50 * 1024 * 1024)
-                      throw new Error("Maximum model size is 50 MiB");
-                    const bytes = await file.arrayBuffer();
-                    validateGlb(bytes);
-                    setImported(bytes);
-                    setImportName(file.name);
-                  });
-                }}
-              />
-            </label>
-            {importName && (
-              <>
-                <p>{importName}</p>
                 <button
-                  onClick={() => {
-                    setImported(null);
-                    setImportName("");
-                  }}
+                  disabled={
+                    !!busy ||
+                    timeMode !== "current" ||
+                    !config.aiConfigured ||
+                    (config.accessCodeRequired && !code)
+                  }
+                  onClick={() => void investigate("optimisation")}
                 >
-                  Restore vision district
+                  {tx("Run optimisation agent")}
                 </button>
-              </>
-            )}
-            <p className="muted">
-              Local visual inspection only. Imported model is centred for
-              viewing, not georeferenced or linked to instruments; asset labels
-              are hidden until a surveyed mapping exists.
-            </p>
-          </>
+              </div>
+              <p className="muted">
+                {tx(
+                  "Operator-triggered paid calls. No background LLM polling. Numerical optimisation remains available without AI access.",
+                )}
+              </p>
+              {tx(
+                run && (
+                  <article className="agent-result">
+                    <div className="eyebrow">
+                      {tx(
+                        run.completionStatus === "partial"
+                          ? "PARTIAL · EVIDENCE RETAINED"
+                          : "COMPLETED",
+                      )}
+                      {tx(" ")}/ {tx(run.role)}
+                    </div>
+                    {tx(
+                      run.warning && (
+                        <p className="warning">{tx(run.warning)}</p>
+                      ),
+                    )}
+                    <h3>
+                      {tx(run.assetId)}
+                      {tx(run.equipmentId ? ` / ${run.equipmentId}` : "")}
+                      {tx(" · revision")}
+                      {tx(" ")}
+                      {tx(run.revision)}
+                    </h3>
+                    {tx(
+                      (run.revision !== twin.revision ||
+                        (run.contextId !== undefined &&
+                          run.contextId !== twin.contextId)) && (
+                        <p className="warning">
+                          {tx("Historical run—current state has changed.")}
+                        </p>
+                      ),
+                    )}
+                    <small>
+                      {tx("Agent response language")} ·{" "}
+                      {run.locale === "zh-CN" ? "简体中文" : "English"}
+                    </small>
+                    <p
+                      className="narrative"
+                      lang={run.locale === "zh-CN" ? "zh-CN" : "en-GB"}
+                    >
+                      {run.answer}
+                    </p>
+                    <button
+                      onClick={() => {
+                        select(run.assetId);
+                        if (run.equipmentId) {
+                          setEquipment(run.equipmentId);
+                          setSceneView("plant");
+                        }
+                      }}
+                    >
+                      {tx("Focus investigated asset")}
+                    </button>
+                    <h3>{tx("Executed tools")}</h3>
+                    {tx(
+                      run.trace.map((t, i) => (
+                        <details key={i}>
+                          <summary>
+                            {tx(i + 1)}. {tx(t.tool)}
+                          </summary>
+                          <pre>{tx(JSON.stringify(t.result, null, 2))}</pre>
+                        </details>
+                      )),
+                    )}
+                    <button
+                      onClick={() =>
+                        download(`heatpilot-agent-${run.runId}.json`, run)
+                      }
+                    >
+                      {tx("Export run evidence")}
+                    </button>
+                  </article>
+                ),
+              )}
+            </>
+          ),
         )}
-        {panel === "sources" && (
-          <>
-            <button className="full" onClick={() => setBimOpen(true)}>
-              Open source BIM library ↗
-            </button>
-            <p className="muted">
-              Optional public geometry reference. Operate the mapped heating
-              equipment through the equipment workbench.
-            </p>
-            <h3>Vision, geometry and identity</h3>
-            <p>
-              {twin.city?.district || visionGeometry.name}. Original
-              architectural and mechanical design, with a city-specific
-              landscape treatment. Local design coordinates, not a surveyed
-              reconstruction.
-            </p>
-            <p className="muted">
-              The twelve connected buildings are aggregate thermal archetypes.
-              Visual floor counts and equipment assemblies are design
-              representations, not measured asset specifications.
-            </p>
-            <h3>Physically based materials</h3>
-            <p>
-              Asphalt, snow, concrete and paving textures by{" "}
-              <a
-                href="https://polyhaven.com/license"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Poly Haven · CC0
-              </a>
-              . Files are served locally; no live asset service is required.
-            </p>
-            <a
-              href="/vision-materials/manifest.json"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Material sources and checksums ↗
-            </a>
-            <h3>Geographic research context</h3>
-            <p>
-              {twin.city?.climate}. {twin.city?.scope}
-            </p>
-            {twin.cityId !== "shanghai" && (
-              <>
-                <p className="muted">
-                  The retained OSM extract informed the earlier geographic
-                  study; it is not the current scene geometry.
-                </p>
-                <a href={geo.url} target="_blank" rel="noreferrer">
-                  © OpenStreetMap contributors · ODbL
-                </a>
-                <p className="muted">
-                  Research extract: {geo.extractTimestamp}.
-                </p>
-              </>
-            )}
-            <a
-              href={twin.city?.source || config.site.source}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {twin.city?.name || "Yinchuan"} published context ↗
-            </a>
-            {twin.city?.technologySource && (
+        {tx(
+          panel === "optimise" && (
+            <>
               <p>
+                {tx(
+                  "Search two 90-minute control blocks against the nonlinear physical model. A fresh rollout verifies the best plan found.",
+                )}
+              </p>
+              <label>
+                {tx("Objective")}
+                <select
+                  value={objective}
+                  onChange={(e) => setObjective(e.target.value)}
+                >
+                  <option value="balanced">
+                    {tx("Balanced comfort + energy")}
+                  </option>
+                  <option value="comfort">{tx("Comfort priority")}</option>
+                  <option value="energy">{tx("Energy priority")}</option>
+                </select>
+              </label>
+              <button
+                className="primary full"
+                disabled={!!busy || timeMode !== "current"}
+                onClick={() => void optimise()}
+              >
+                {tx("Compute & verify schedule")}
+              </button>
+              {tx(
+                optimisation && (
+                  <>
+                    <div className="verification">
+                      <span>
+                        {tx(
+                          optimisation.verification.passed
+                            ? "✓ MODEL GATES PASSED"
+                            : "! NO FEASIBLE PLAN",
+                        )}
+                      </span>
+                      <strong>{tx(optimisation.status)}</strong>
+                      <small>
+                        {tx(optimisation.evaluations)}
+                        {tx(" evaluations · revision")}
+                        {tx(" ")}
+                        {tx(optimisation.revision)}
+                      </small>
+                    </div>
+                    {tx(
+                      stalePlan && (
+                        <p className="warning">
+                          {tx(
+                            "Expired context. Recompute against the current state.",
+                          )}
+                        </p>
+                      ),
+                    )}
+                    <Pair
+                      label={tx("Baseline heat / 3 h")}
+                      value={`${fmt(optimisation.baseline.heatKwh, 1)} kWh`}
+                    />
+                    <Pair
+                      label={tx("Proposed heat / 3 h")}
+                      value={`${fmt(optimisation.bestAttempt.heatKwh, 1)} kWh`}
+                    />
+                    <Pair
+                      label={tx("Lowest trajectory temperature")}
+                      value={`${fmt(optimisation.bestAttempt.minimumC, 2)} °C`}
+                    />
+                    <Pair
+                      label={tx("End minimum temperature")}
+                      value={`${fmt(optimisation.bestAttempt.endMinimumC, 2)} °C`}
+                    />
+                    <Pair
+                      label={tx("Maximum numerical residual")}
+                      value={optimisation.verification.maxResidual.toExponential(
+                        2,
+                      )}
+                    />
+                    <h3>{tx("Computed schedule")}</h3>
+                    {tx(
+                      optimisation.bestAttempt.schedule.map((s) => (
+                        <div className="schedule" key={s.minute}>
+                          <b>
+                            +{tx(s.minute)}
+                            {tx(" min")}
+                          </b>
+                          <span>
+                            {tx(fmt(s.supplyC, 1))}
+                            {tx("°C · ")}
+                            {tx(fmt(s.pumpHz, 1))}
+                            {tx(" Hz")}
+                          </span>
+                          <small>
+                            {tx("Valves ")}
+                            {tx(s.valvesPct.map((v) => fmt(v, 0)).join(" / "))}%
+                          </small>
+                        </div>
+                      )),
+                    )}
+                    <div className="dock-actions">
+                      <button
+                        disabled={!plan || stalePlan || !!busy}
+                        onClick={() => {
+                          setForecastSide("intervention");
+                          setTimeMode("forecast");
+                          setTimeIndex(0);
+                          setPlaying(false);
+                        }}
+                      >
+                        {tx("Preview in district")}
+                      </button>
+                      <button
+                        className="primary"
+                        disabled={
+                          !plan || stalePlan || !!busy || timeMode !== "current"
+                        }
+                        onClick={() => setConfirm(true)}
+                      >
+                        {tx("Approve simulator step…")}
+                      </button>
+                    </div>
+                    <p className="muted">
+                      {tx(optimisation.verification.scope)}
+                      {tx(
+                        ". No field command. No global optimality or savings guarantee.",
+                      )}
+                    </p>
+                  </>
+                ),
+              )}
+            </>
+          ),
+        )}
+        {tx(
+          panel === "connection" && (
+            <>
+              <p className="muted">
+                {tx("Running release ")}
+                {tx(config.release || "older build")}
+                {tx(" · AI")}
+                {tx(" ")}
+                {tx(
+                  config.aiConfigured
+                    ? "provider key configured"
+                    : "OPENROUTER_API_KEY missing",
+                )}
+                {tx(" ")}·{tx(" ")}
+                {tx(
+                  config.accessCodeRequired
+                    ? "optional operator password enabled"
+                    : "no operator password required",
+                )}
+              </p>
+              <div className="verification">
+                <span>
+                  {tx(feed?.status?.toUpperCase() || "NOT CONNECTED")}
+                </span>
+                <strong>{tx("Read-only observation gateway")}</strong>
+                <small>
+                  {tx(
+                    config.telemetryConfigured
+                      ? "Gateway token configured"
+                      : "Set TELEMETRY_INGEST_TOKEN on the server",
+                  )}
+                </small>
+              </div>
+              <p>
+                {tx(
+                  "Measurements remain separate from the uncalibrated simulator. A received value is not proof of a commissioned site connection.",
+                )}
+                {tx(
+                  twin.cityId === "shanghai" &&
+                    " The observation gateway is scoped to the Yinchuan reference; it is not mapped to this fictional Shanghai district.",
+                )}
+              </p>
+              <label>
+                {tx("Operator access code")}
+                <input
+                  type="password"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+              <button
+                disabled={!!busy || !code || twin.cityId === "shanghai"}
+                onClick={() =>
+                  void work("Reading observations", async () =>
+                    setFeed(await api<Feed>("telemetry", {}, code)),
+                  )
+                }
+              >
+                {tx("Read latest observations")}
+              </button>
+              {tx(
+                feed && (
+                  <>
+                    <p className="muted">{tx(feed.scope)}</p>
+                    {tx(
+                      feed.observations.map((r) => (
+                        <div className="observation" key={r.assetId + r.metric}>
+                          <button onClick={() => select(r.assetId)}>
+                            {tx(r.assetId)}
+                          </button>
+                          <strong>
+                            {tx(r.metric)}: {tx(fmt(r.value, 2))} {tx(r.unit)}
+                          </strong>
+                          <small>
+                            {tx(r.stale ? "STALE" : r.quality.toUpperCase())} ·
+                            {tx(" ")}
+                            {tx(Math.round(r.ageSeconds))}
+                            {tx(" s old · ")}
+                            {tx(r.source)}
+                          </small>
+                        </div>
+                      )),
+                    )}
+                    {tx(
+                      !feed.observations.length && (
+                        <p>{tx("No measurements received.")}</p>
+                      ),
+                    )}
+                    <p className="muted">{tx(feed.retention)}</p>
+                  </>
+                ),
+              )}
+              <h3>{tx("Gateway contract")}</h3>
+              <p className="muted">
+                {tx(
+                  "POST /api/telemetry/ingest with X-Telemetry-Token. Explicit site, asset, metric, unit, timestamp, quality and source are required. Latest observations refresh every 10 seconds while this panel is open and authenticated.",
+                )}
+              </p>
+              <h3>{tx("Detailed district geometry")}</h3>
+              <label className="file-button">
+                {tx("Import local self-contained GLB")}
+                <input
+                  type="file"
+                  accept=".glb"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    void work("Checking model", async () => {
+                      if (file.size > 50 * 1024 * 1024)
+                        throw new Error("Maximum model size is 50 MiB");
+                      const bytes = await file.arrayBuffer();
+                      validateGlb(bytes);
+                      setImported(bytes);
+                      setImportName(file.name);
+                    });
+                  }}
+                />
+              </label>
+              {tx(
+                importName && (
+                  <>
+                    <p>{tx(importName)}</p>
+                    <button
+                      onClick={() => {
+                        setImported(null);
+                        setImportName("");
+                      }}
+                    >
+                      {tx("Restore vision district")}
+                    </button>
+                  </>
+                ),
+              )}
+              <p className="muted">
+                {tx(
+                  "Local visual inspection only. Imported model is centred for viewing, not georeferenced or linked to instruments; asset labels are hidden until a surveyed mapping exists.",
+                )}
+              </p>
+            </>
+          ),
+        )}
+        {tx(
+          panel === "sources" && (
+            <>
+              <button className="full" onClick={() => setBimOpen(true)}>
+                {tx("Open source BIM library ↗")}
+              </button>
+              <p className="muted">
+                {tx(
+                  "Optional public geometry reference. Operate the mapped heating equipment through the equipment workbench.",
+                )}
+              </p>
+              <h3>{tx("Vision, geometry and identity")}</h3>
+              <p>
+                {tx(twin.city?.district || visionGeometry.name)}
+                {tx(
+                  ". Original architectural and mechanical design, with a city-specific landscape treatment. Local design coordinates, not a surveyed reconstruction.",
+                )}
+              </p>
+              <p className="muted">
+                {tx(
+                  "The twelve connected buildings are aggregate thermal archetypes. Visual floor counts and equipment assemblies are design representations, not measured asset specifications.",
+                )}
+              </p>
+              <h3>{tx("Physically based materials")}</h3>
+              <p>
+                {tx("Asphalt, snow, concrete and paving textures by")}
+                {tx(" ")}
                 <a
-                  href={twin.city.technologySource}
+                  href="https://polyhaven.com/license"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Shanghai heat-pump field study ↗
+                  {tx("Poly Haven · CC0")}
                 </a>
+                {tx(
+                  ". Files are served locally; no live asset service is required.",
+                )}
               </p>
-            )}
-            <p className="muted">
-              All scenario temperatures, solar inputs, building loads and
-              equipment settings are simulation assumptions—not live city data.
-            </p>
-            <h3>Model scope</h3>
-            {twin.assumptions.map((a) => (
-              <p className="scope-item" key={a}>
-                {a}
+              <a
+                href="/vision-materials/manifest.json"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {tx("Material sources and checksums ↗")}
+              </a>
+              <h3>{tx("Geographic research context")}</h3>
+              <p>
+                {tx(twin.city?.climate)}. {tx(twin.city?.scope)}
               </p>
-            ))}
-            <h3>System profiles</h3>
-            {config.site.profiles.map((p) => (
-              <div className="schedule" key={p.id}>
-                <b>{p.name}</b>
-                <span>{p.system}</span>
-                <small>
-                  {p.enabled
-                    ? p.id === (twin.cityId || "yinchuan")
-                      ? "CURRENT DEMONSTRATOR"
-                      : "AVAILABLE IN CITY SELECTOR"
-                    : "REQUIRES DIFFERENT EQUIPMENT MODELS"}
-                </small>
-              </div>
-            ))}
-            <button
-              className="full"
-              onClick={() =>
-                download("heatpilot-world-evidence.json", {
-                  site: {
-                    ...config.site,
-                    ...twin.city,
-                    id: `${twin.cityId || "yinchuan"}-reference`,
-                  },
-                  registry: config.registry,
-                  state: twin,
-                  selected,
-                  equipment: sceneView === "plant" ? equipment : null,
-                  visionGeometry: {
-                    ...visionGeometry,
-                    name: twin.city?.district,
-                    scope: twin.city?.scope,
-                    geometryRevision: twin.city?.geometryRevision,
-                  },
-                  timeMode,
-                  displayTime: frame.time,
-                  geographicResearch:
-                    twin.cityId === "shanghai"
-                      ? {
-                          source: twin.city?.source,
-                          technologySource: twin.city?.technologySource,
-                          scope:
-                            "Published context only; no Shanghai geographic survey data",
-                        }
-                      : {
-                          scope: geo.scope,
-                          origin: geo.origin,
-                          extractTimestamp: geo.extractTimestamp,
-                        },
-                  optimisation,
-                  run,
-                  limitations: twin.assumptions,
-                })
-              }
-            >
-              Export world evidence
-            </button>
-            <p className="muted">
-              Exports omit access codes and provider keys. Field observations
-              are not included in this public-demonstrator export.
-            </p>
-          </>
+              {tx(
+                twin.cityId !== "shanghai" && (
+                  <>
+                    <p className="muted">
+                      {tx(
+                        "The retained OSM extract informed the earlier geographic study; it is not the current scene geometry.",
+                      )}
+                    </p>
+                    <a href={geo.url} target="_blank" rel="noreferrer">
+                      {tx("© OpenStreetMap contributors · ODbL")}
+                    </a>
+                    <p className="muted">
+                      {tx("Research extract: ")}
+                      {tx(geo.extractTimestamp)}.
+                    </p>
+                  </>
+                ),
+              )}
+              <a
+                href={twin.city?.source || config.site.source}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {tx(twin.city?.name || "Yinchuan")}
+                {tx(" published context ↗")}
+              </a>
+              {tx(
+                twin.city?.technologySource && (
+                  <p>
+                    <a
+                      href={twin.city.technologySource}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {tx("Shanghai heat-pump field study ↗")}
+                    </a>
+                  </p>
+                ),
+              )}
+              <p className="muted">
+                {tx(
+                  "All scenario temperatures, solar inputs, building loads and equipment settings are simulation assumptions—not live city data.",
+                )}
+              </p>
+              <h3>{tx("Model scope")}</h3>
+              {tx(
+                twin.assumptions.map((a) => (
+                  <p className="scope-item" key={a}>
+                    {tx(a)}
+                  </p>
+                )),
+              )}
+              <h3>{tx("System profiles")}</h3>
+              {tx(
+                config.site.profiles.map((p) => (
+                  <div className="schedule" key={p.id}>
+                    <b>{tx(p.name)}</b>
+                    <span>{tx(p.system)}</span>
+                    <small>
+                      {tx(
+                        p.enabled
+                          ? p.id === (twin.cityId || "yinchuan")
+                            ? "CURRENT DEMONSTRATOR"
+                            : "AVAILABLE IN CITY SELECTOR"
+                          : "REQUIRES DIFFERENT EQUIPMENT MODELS",
+                      )}
+                    </small>
+                  </div>
+                )),
+              )}
+              <button
+                className="full"
+                onClick={() =>
+                  download("heatpilot-world-evidence.json", {
+                    site: {
+                      ...config.site,
+                      ...twin.city,
+                      id: `${twin.cityId || "yinchuan"}-reference`,
+                    },
+                    registry: config.registry,
+                    state: twin,
+                    selected,
+                    equipment: sceneView === "plant" ? equipment : null,
+                    visionGeometry: {
+                      ...visionGeometry,
+                      name: twin.city?.district,
+                      scope: twin.city?.scope,
+                      geometryRevision: twin.city?.geometryRevision,
+                    },
+                    timeMode,
+                    displayTime: frame.time,
+                    geographicResearch:
+                      twin.cityId === "shanghai"
+                        ? {
+                            source: twin.city?.source,
+                            technologySource: twin.city?.technologySource,
+                            scope:
+                              "Published context only; no Shanghai geographic survey data",
+                          }
+                        : {
+                            scope: geo.scope,
+                            origin: geo.origin,
+                            extractTimestamp: geo.extractTimestamp,
+                          },
+                    optimisation,
+                    run,
+                    limitations: twin.assumptions,
+                  })
+                }
+              >
+                {tx("Export world evidence")}
+              </button>
+              <p className="muted">
+                {tx(
+                  "Exports omit access codes and provider keys. Field observations are not included in this public-demonstrator export.",
+                )}
+              </p>
+            </>
+          ),
         )}
       </aside>
-      <section className="ops-timeline" aria-label="Shared world timeline">
+      <section
+        className="ops-timeline"
+        aria-label={tx("Shared world timeline")}
+      >
         <div className="timeline-top">
           <div>
-            <span className="eyebrow">SHARED TIME CONTEXT</span>
+            <span className="eyebrow">{tx("SHARED TIME CONTEXT")}</span>
             <strong>
-              {frame.time.slice(0, 10)} <span>{frame.time.slice(11, 16)}</span>
+              {tx(frame.time.slice(0, 10))}{" "}
+              <span>{tx(frame.time.slice(11, 16))}</span>
             </strong>
           </div>
           <div className="segmented">
             <button aria-pressed={timeMode === "current"} onClick={current}>
-              Current simulation
+              {tx("Current simulation")}
             </button>
             <button
               aria-pressed={timeMode === "replay"}
@@ -1835,7 +2081,7 @@ export default function Workspace() {
                 setPlaying(false);
               }}
             >
-              Replay
+              {tx("Replay")}
             </button>
             <button
               aria-pressed={timeMode === "forecast"}
@@ -1847,29 +2093,31 @@ export default function Workspace() {
                 setPlaying(false);
               }}
             >
-              Forecast
+              {tx("Forecast")}
             </button>
           </div>
           <select
-            aria-label="Simulation scenario"
+            aria-label={tx("Simulation scenario")}
             value={twin.scenario}
             disabled={!!busy}
             onChange={(e) => {
               void resetWorld(twin.cityId || "yinchuan", e.target.value);
             }}
           >
-            {Object.entries(scenarioNames).map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
+            {tx(
+              Object.entries(scenarioNames).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {tx(name)}
+                </option>
+              )),
+            )}
           </select>
           <button
             aria-pressed={playing}
             disabled={!!busy || timeMode !== "current"}
             onClick={() => setPlaying((x) => !x)}
           >
-            {playing ? "Ⅱ Pause" : "▷ Auto-step"}
+            {tx(playing ? "Ⅱ Pause" : "▷ Auto-step")}
           </button>
           <button
             disabled={!!busy || timeMode !== "current"}
@@ -1880,22 +2128,27 @@ export default function Workspace() {
               })
             }
           >
-            +30 min
+            {tx("+30 min")}
           </button>
         </div>
         <div className="timeline-plot">
           <div>
-            <span>{building ? selected : "District mean"} / indoor °C</span>
+            <span>
+              {tx(building ? selected : "District mean")}
+              {tx(" / indoor °C")}
+            </span>
             <small>
-              {timeMode === "forecast"
-                ? `${forecastSide === "baseline" ? "CONTINUE UNCHANGED" : "WITH INTERVENTION"} · computed 30-minute samples`
-                : "Recorded simulation · not field telemetry"}
+              {tx(
+                timeMode === "forecast"
+                  ? `${forecastSide === "baseline" ? "CONTINUE UNCHANGED" : "WITH INTERVENTION"} · computed 30-minute samples`
+                  : "Recorded simulation · not field telemetry",
+              )}
             </small>
           </div>
           <svg
             viewBox="0 0 800 75"
             preserveAspectRatio="none"
-            aria-label="Temperature history"
+            aria-label={tx("Temperature history")}
           >
             <path
               d="M0 65H800 M0 35H800 M0 5H800"
@@ -1908,200 +2161,236 @@ export default function Workspace() {
               stroke={timeMode === "forecast" ? "#e9b274" : "#6fddc7"}
               strokeWidth="2"
             />
-            {displaySeries.length === 1 && (
-              <circle
-                cx="10"
-                cy={65 - ((displaySeries[0] - lo) / (hi - lo)) * 55}
-                r="3"
-                fill="#6fddc7"
-              />
+            {tx(
+              displaySeries.length === 1 && (
+                <circle
+                  cx="10"
+                  cy={65 - ((displaySeries[0] - lo) / (hi - lo)) * 55}
+                  r="3"
+                  fill="#6fddc7"
+                />
+              ),
             )}
           </svg>
         </div>
-        {timeMode !== "current" && (
-          <input
-            aria-label="Timeline sample"
-            type="range"
-            min={0}
-            max={Math.max(
-              0,
-              (timeMode === "forecast" ? forecast.length : frames.length) - 1,
-            )}
-            value={timeIndex}
-            onChange={(e) => setTimeIndex(Number(e.target.value))}
-          />
+        {tx(
+          timeMode !== "current" && (
+            <input
+              aria-label={tx("Timeline sample")}
+              type="range"
+              min={0}
+              max={Math.max(
+                0,
+                (timeMode === "forecast" ? forecast.length : frames.length) - 1,
+              )}
+              value={timeIndex}
+              onChange={(e) => setTimeIndex(Number(e.target.value))}
+            />
+          ),
         )}
       </section>
-      {(busy || error) && (
-        <div
-          className={`status-toast ${error ? "error" : ""}`}
-          role={error ? "alert" : "status"}
-        >
-          {busy && <span className="spinner" />}
-          {error || busy}
-          {error && (
-            <button aria-label="Dismiss error" onClick={() => setError("")}>
-              ×
-            </button>
-          )}
-        </div>
-      )}
-      {confirm && (
-        <div className="modal-backdrop">
-          <section
-            className="approval-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="approval-title"
+      {tx(
+        (busy || error) && (
+          <div
+            className={`status-toast ${error ? "error" : ""}`}
+            role={error ? "alert" : "status"}
           >
-            <h2 id="approval-title">Approve simulator change?</h2>
-            <p>
-              Apply the first control block for the next 30 simulated minutes.
-              This does not command any real equipment. The server revalidates
-              the full plan and rejects expired or changed-state approvals.
-            </p>
-            <p className="muted">
-              Plan {plan?.planHash.slice(0, 16)} · revision{" "}
-              {optimisation?.revision}
-            </p>
-            <div className="dock-actions">
-              <button onClick={() => setConfirm(false)}>Cancel</button>
-              <button
-                className="primary"
-                disabled={!!busy || stalePlan || !plan}
-                onClick={() => void applyControls()}
-              >
-                Apply to simulation only
-              </button>
-            </div>
-          </section>
-        </div>
+            {tx(busy && <span className="spinner" />)}
+            {tx(error || busy)}
+            {tx(
+              error && (
+                <button
+                  aria-label={tx("Dismiss error")}
+                  onClick={() => setError("")}
+                >
+                  ×
+                </button>
+              ),
+            )}
+          </div>
+        ),
       )}
-      {bimOpen && (
-        <section
-          className="bim-overlay"
-          role="dialog"
-          aria-label="Contextual BIM inspection"
-        >
-          <header>
-            <div>
-              <div className="eyebrow">{selected} / CONTEXT RETAINED</div>
-              <h2>Engineering reference inspection</h2>
-            </div>
-            <button onClick={() => setBimOpen(false)}>
-              Return to district ×
-            </button>
-          </header>
-          <p className="warning">
-            Public buildingSMART Duplex MEP reference. NOT the selected building
-            or an as-built model of the selected city's heating station. No
-            telemetry is mapped to these components.
-          </p>
-          <div className="bim-tools">
-            <button
-              onClick={() => {
-                setBimAction("fit");
-                setBimFocus((x) => x + 1);
-              }}
+      {tx(
+        confirm && (
+          <div className="modal-backdrop">
+            <section
+              className="approval-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="approval-title"
             >
-              Fit model
-            </button>
-            <button
-              disabled={!bimSelected}
-              onClick={() => {
-                setBimAction("focus");
-                setBimFocus((x) => x + 1);
-              }}
-            >
-              Focus component
-            </button>
-            <button
-              disabled={!bimSelected && !bimIsolated}
-              aria-pressed={!!bimIsolated}
-              onClick={() => setBimIsolated(bimIsolated ? null : bimSelected)}
-            >
-              {bimIsolated ? "Show full assembly" : "Isolate component"}
-            </button>
-            <button
-              aria-pressed={bimMeasure}
-              onClick={() => {
-                setBimMeasure((v) => !v);
-                setBimMeasurement(null);
-              }}
-            >
-              {bimMeasure ? "Stop measuring" : "Measure clearance"}
-            </button>
-            <label>
-              Section
-              <select
-                value={clip}
-                onChange={(e) => setClip(e.target.value as typeof clip)}
-              >
-                <option value="none">Off</option>
-                <option value="x">X</option>
-                <option value="y">Y</option>
-                <option value="z">Z</option>
-              </select>
-            </label>
-            <span>
-              {bimSelected ||
-                "Select a component to inspect its source identity"}
-            </span>
-          </div>
-          {bimMeasure && (
-            <p className="bim-measurement" role="status">
-              {bimMeasurement
-                ? `Picked-point distance: ${fmt(bimMeasurement.distance, 3)} ${bim?.units || "model units"}. Source geometry only.`
-                : "Pick two surfaces in the reference model to measure their distance."}
-            </p>
-          )}
-          <div className="bim-canvas">
-            <Suspense fallback={<p>Loading BIM viewer…</p>}>
-              <EngineeringScene
-                dark
-                mode="bim"
-                bim={bim}
-                network={null}
-                localGlb={null}
-                selected={bimSelected}
-                kind="all"
-                hidden={[]}
-                isolated={bimIsolated}
-                highlight={[]}
-                removed={[]}
-                clipAxis={clip}
-                clipPercent={50}
-                measure={bimMeasure}
-                command={bimCommand}
-                onSelect={setBimSelected}
-                onMeasure={setBimMeasurement}
-                onPose={fixed}
-                onLocalAssets={fixed}
-              />
-            </Suspense>
-          </div>
-          {bimSelected && (
-            <details className="bim-properties">
-              <summary>
-                {bim?.assets.find((a) => a.id === bimSelected)?.name ||
-                  bimSelected}{" "}
-                · source properties
-              </summary>
-              <pre>
-                {JSON.stringify(
-                  bim?.assets.find((a) => a.id === bimSelected),
-                  null,
-                  2,
+              <h2 id="approval-title">{tx("Approve simulator change?")}</h2>
+              <p>
+                {tx(
+                  "Apply the first control block for the next 30 simulated minutes. This does not command any real equipment. The server revalidates the full plan and rejects expired or changed-state approvals.",
                 )}
-              </pre>
-            </details>
-          )}
-          <footer>
-            BSI (2020) “Duplex Apartment Test Files”, buildingSMART
-            International · CC BY 4.0 · Public reference geometry / 926
-            components
-          </footer>
-        </section>
+              </p>
+              <p className="muted">
+                {tx("Plan ")}
+                {tx(plan?.planHash.slice(0, 16))}
+                {tx(" · revision")}
+                {tx(" ")}
+                {tx(optimisation?.revision)}
+              </p>
+              <div className="dock-actions">
+                <button onClick={() => setConfirm(false)}>
+                  {tx("Cancel")}
+                </button>
+                <button
+                  className="primary"
+                  disabled={!!busy || stalePlan || !plan}
+                  onClick={() => void applyControls()}
+                >
+                  {tx("Apply to simulation only")}
+                </button>
+              </div>
+            </section>
+          </div>
+        ),
+      )}
+      {tx(
+        bimOpen && (
+          <section
+            className="bim-overlay"
+            role="dialog"
+            aria-label={tx("Contextual BIM inspection")}
+          >
+            <header>
+              <div>
+                <div className="eyebrow">
+                  {tx(selected)}
+                  {tx(" / CONTEXT RETAINED")}
+                </div>
+                <h2>{tx("Engineering reference inspection")}</h2>
+              </div>
+              <button onClick={() => setBimOpen(false)}>
+                {tx("Return to district ×")}
+              </button>
+            </header>
+            <p className="warning">
+              {tx(
+                "Public buildingSMART Duplex MEP reference. NOT the selected building or an as-built model of the selected city's heating station. No telemetry is mapped to these components.",
+              )}
+            </p>
+            <div className="bim-tools">
+              <button
+                onClick={() => {
+                  setBimAction("fit");
+                  setBimFocus((x) => x + 1);
+                }}
+              >
+                {tx("Fit model")}
+              </button>
+              <button
+                disabled={!bimSelected}
+                onClick={() => {
+                  setBimAction("focus");
+                  setBimFocus((x) => x + 1);
+                }}
+              >
+                {tx("Focus component")}
+              </button>
+              <button
+                disabled={!bimSelected && !bimIsolated}
+                aria-pressed={!!bimIsolated}
+                onClick={() => setBimIsolated(bimIsolated ? null : bimSelected)}
+              >
+                {tx(bimIsolated ? "Show full assembly" : "Isolate component")}
+              </button>
+              <button
+                aria-pressed={bimMeasure}
+                onClick={() => {
+                  setBimMeasure((v) => !v);
+                  setBimMeasurement(null);
+                }}
+              >
+                {tx(bimMeasure ? "Stop measuring" : "Measure clearance")}
+              </button>
+              <label>
+                {tx("Section")}
+                <select
+                  value={clip}
+                  onChange={(e) => setClip(e.target.value as typeof clip)}
+                >
+                  <option value="none">{tx("Off")}</option>
+                  <option value="x">{tx("X")}</option>
+                  <option value="y">{tx("Y")}</option>
+                  <option value="z">{tx("Z")}</option>
+                </select>
+              </label>
+              <span>
+                {tx(
+                  bimSelected ||
+                    "Select a component to inspect its source identity",
+                )}
+              </span>
+            </div>
+            {tx(
+              bimMeasure && (
+                <p className="bim-measurement" role="status">
+                  {tx(
+                    bimMeasurement
+                      ? `Picked-point distance: ${fmt(bimMeasurement.distance, 3)} ${bim?.units || "model units"}. Source geometry only.`
+                      : "Pick two surfaces in the reference model to measure their distance.",
+                  )}
+                </p>
+              ),
+            )}
+            <div className="bim-canvas">
+              <Suspense fallback={<p>{tx("Loading BIM viewer…")}</p>}>
+                <EngineeringScene
+                  dark
+                  mode="bim"
+                  bim={bim}
+                  network={null}
+                  localGlb={null}
+                  selected={bimSelected}
+                  kind="all"
+                  hidden={[]}
+                  isolated={bimIsolated}
+                  highlight={[]}
+                  removed={[]}
+                  clipAxis={clip}
+                  clipPercent={50}
+                  measure={bimMeasure}
+                  command={bimCommand}
+                  onSelect={setBimSelected}
+                  onMeasure={setBimMeasurement}
+                  onPose={fixed}
+                  onLocalAssets={fixed}
+                />
+              </Suspense>
+            </div>
+            {tx(
+              bimSelected && (
+                <details className="bim-properties">
+                  <summary>
+                    {tx(
+                      bim?.assets.find((a) => a.id === bimSelected)?.name ||
+                        bimSelected,
+                    )}
+                    {tx(" ")}
+                    {tx("· source properties")}
+                  </summary>
+                  <pre>
+                    {tx(
+                      JSON.stringify(
+                        bim?.assets.find((a) => a.id === bimSelected),
+                        null,
+                        2,
+                      ),
+                    )}
+                  </pre>
+                </details>
+              ),
+            )}
+            <footer>
+              {tx(
+                "BSI (2020) “Duplex Apartment Test Files”, buildingSMART International · CC BY 4.0 · Public reference geometry / 926 components",
+              )}
+            </footer>
+          </section>
+        ),
       )}
     </main>
   );
