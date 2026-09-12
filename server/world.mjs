@@ -1,19 +1,20 @@
 import { readFileSync } from "node:fs";
 const geometry = JSON.parse(
   readFileSync(
-    new URL("../public/site-assets/yinchuan.json", import.meta.url),
+    new URL("../public/site-assets/vision-district.json", import.meta.url),
     "utf8",
   ),
 );
 export const site = {
   id: "yinchuan-reference",
-  name: "Yinchuan · secondary heating network",
-  candidate: "保伏桥新村A区 — operational reference, not a commissioned site",
+  name: "Yinchuan · winter-city energy district",
+  candidate:
+    "Authored residential vision inspired by Yinchuan's winter heating context",
   mode: "simulation",
   modelVersion: "P1A-coherent-v1.2",
-  geometryRevision: "osm-context-2026-09-12",
+  geometryRevision: "vision-winter-2026-09-13",
   scope:
-    "Public Yinchuan geographic context with synthetic building bindings and network. No as-built association is asserted.",
+    "Authored winter-city district with coherent simulated thermal loads and illustrative heating routes. Not a surveyed reconstruction.",
   source: "https://www.yinchuan.gov.cn/xwzx/mrdt/202511/t20251102_5072056.html",
   profiles: [
     {
@@ -40,7 +41,7 @@ export const registry = [
   {
     id: "ST01",
     kind: "station",
-    name: "Reference heating station",
+    name: "District energy centre",
     parent: null,
   },
   ...["near", "mid", "far"].map((id) => ({
@@ -57,14 +58,15 @@ export const registry = [
   })),
 ];
 for (const asset of registry) {
-  const b = geometry.buildings.find((b) => b.demoAssetId === asset.id);
+  const b = geometry.buildings.find((b) => b.id === asset.id);
   if (b)
     asset.geometry = {
       featureId: b.id,
       localCentreMetres: b.centre,
-      originWgs84: geometry.origin,
-      heightMetres: b.height,
-      heightSource: b.heightSource,
+      coordinateSystem: geometry.coordinateSystem,
+      heightMetres: b.floors * 3.3 + 1,
+      heightSource:
+        "Authored architectural design; aggregate thermal-load area is independent of visual floor area",
       binding:
         "Demonstration association only; not an actual heating-service relationship",
     };
@@ -95,6 +97,14 @@ export function worldContext(snapshot, selected = "ST01") {
     modelVersion: site.modelVersion,
     dataMode: "simulation",
     geometryRevision: site.geometryRevision,
+    mechanicalAssembly:
+      selected === "ST01"
+        ? {
+            equipment: geometry.equipment,
+            modelScope:
+              "One equivalent pump characteristic and shared station headers; no individually simulated pumps or exchanger fouling model",
+          }
+        : null,
     topology: "Three-branch aggregate model, not surveyed pipe connectivity",
     telemetry: "Synthetic; no field calibration",
     limits: snapshot.limits,

@@ -1,0 +1,23 @@
+{
+  "name": "Yinchuan-inspired winter-city vision",
+  "revision": "vision-winter-2026-09-13",
+  "coordinateSystem": "Authored local metres; no georeferencing",
+  "source": "Original modular architectural and mechanical design inspired by supplied winter-city renders",
+  "station": {"id":"ST01","centre":[-83,118]},
+  "buildings": [
+    {"id":"B01","centre":[-88,-65],"floors":7}, {"id":"B02","centre":[-32,-65],"floors":8},
+    {"id":"B03","centre":[32,-65],"floors":6}, {"id":"B04","centre":[88,-65],"floors":7},
+    {"id":"B05","centre":[-88,-5],"floors":8}, {"id":"B06","centre":[-32,-5],"floors":7},
+    {"id":"B07","centre":[32,-5],"floors":7}, {"id":"B08","centre":[88,-5],"floors":8},
+    {"id":"B09","centre":[-88,55],"floors":6}, {"id":"B10","centre":[-32,55],"floors":7},
+    {"id":"B11","centre":[32,55],"floors":8}, {"id":"B12","centre":[88,55],"floors":7}
+  ],
+  "equipment": [
+    {"id":"HX-A","name":"Plate heat exchanger A","role":"Heat transfer","parent":"ST01"},
+    {"id":"HX-B","name":"Plate heat exchanger B","role":"Heat transfer","parent":"ST01"},
+    {"id":"P-01","name":"Circulation pump 01","role":"Visual duty pump","parent":"ST01"},
+    {"id":"P-02","name":"Circulation pump 02","role":"Visual duty pump","parent":"ST01"},
+    {"id":"P-03","name":"Standby pump 03","role":"Visual standby pump","parent":"ST01"},
+    {"id":"MCC","name":"Motor control centre","role":"Drive coordination","parent":"ST01"}
+  ]
+}

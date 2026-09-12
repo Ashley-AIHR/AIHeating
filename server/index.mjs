@@ -1,6 +1,5 @@
 import http from "node:http";
-import { spawn } from "node:child_process";
-import { createInterface } from "node:readline";
+import { Worker } from "node:worker_threads";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -14,19 +13,9 @@ const observations = new ObservationStore();
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(path.join(root, ".env")))
   process.loadEnvFile(path.join(root, ".env"));
-const python =
-  process.env.PYTHON_BIN ||
-  (existsSync(path.join(root, "physical_core/.venv/bin/python"))
-    ? path.join(root, "physical_core/.venv/bin/python")
-    : "python3");
-const worker = spawn(python, ["-u", path.join(root, "server/twin.py")], {
-  stdio: ["pipe", "pipe", "pipe"],
-});
+const worker = new Worker(new URL("./twin-worker.mjs", import.meta.url));
 const pending = new Map();
 let healthy = true;
-worker.stderr.on("data", () =>
-  console.error("Physical worker diagnostic received (details withheld)."),
-);
 const failWorker = () => {
   healthy = false;
   for (const p of pending.values()) {
@@ -37,18 +26,16 @@ const failWorker = () => {
 };
 worker.on("error", failWorker);
 worker.on("exit", failWorker);
-worker.stdin.on("error", failWorker);
-createInterface({ input: worker.stdout }).on("line", (line) => {
+worker.on("message", (msg) => {
   try {
-    const msg = JSON.parse(line),
-      p = pending.get(msg.id);
+    const p = pending.get(msg.id);
     if (!p) return;
     clearTimeout(p.timer);
     pending.delete(msg.id);
     msg.error ? p.reject(new Error(msg.error)) : p.resolve(msg.result);
   } catch {
     failWorker();
-    worker.kill();
+    worker.terminate();
   }
 });
 function rpc(session, method, args = {}) {
@@ -64,11 +51,11 @@ function rpc(session, method, args = {}) {
     const id = randomUUID();
     const timer = setTimeout(() => {
       failWorker();
-      worker.kill();
+      worker.terminate();
       reject(new Error("Physical engine timed out."));
     }, 25000);
     pending.set(id, { resolve, reject, timer });
-    worker.stdin.write(JSON.stringify({ id, session, method, args }) + "\n");
+    worker.postMessage({ id, session, method, args });
   });
 }
 const sources = JSON.parse(
@@ -257,6 +244,8 @@ const server = http.createServer(async (req, res) => {
         ok: healthy,
         service: "Heatpilot",
         physicalEngine: healthy,
+        runtime: "node",
+        physicalWorker: "node:worker_threads",
       });
     if (url.pathname === "/api/config")
       return send(res, 200, {
@@ -471,14 +460,14 @@ const server = http.createServer(async (req, res) => {
   }
 });
 server.requestTimeout = 150000;
-// Prove that Python imports and a real nonlinear step work before accepting traffic.
+// Prove that the native Node worker completes a physical step before accepting traffic.
 await rpc("startup-health", "snapshot");
 server.listen(Number(process.env.PORT || 3000), "0.0.0.0", () =>
   console.log("Heatpilot listening on port " + (process.env.PORT || 3000)),
 );
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
-    worker.kill();
+    worker.terminate();
     server.close();
     setTimeout(() => process.exit(0), 1000).unref();
   });

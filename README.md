@@ -2,23 +2,21 @@
 
 A **dark, integrated spatial heating-operations demonstrator** for a Yinchuan-oriented residential secondary network. One persistent district workspace connects orbitable geographic context, asset selection, alarms, physical-model inspection, replay, forecast, DeepSeek V4 Flash diagnostic/optimisation workflows and operator-approved simulator changes.
 
-The default route is the integrated workspace. Its 18 source OpenStreetMap building footprints and 43 road ways provide actual Yinchuan geographic context, but building heights can be assumed, facade appearance is illustrative and B01–B12 associations/heating routes are explicitly synthetic. **This is not a photorealistic surveyed estate or a commissioned field twin.** The public 926-component BIM opens within the workspace as an unlinked engineering reference. A read-only authenticated observation gateway accepts validated measurements but does not assimilate them into the uncalibrated simulator.
+The default route is an authored winter-city vision inspired by Yinchuan: detailed modular residential architecture, landscaped streets and a cutaway blue-and-steel energy centre, all orbitable within one connected workspace. B01–B12 are coherent simulated thermal loads. The geometry is design imagery made into real interactive geometry, not a surveyed estate. The optional public 926-component BIM remains an unlinked engineering tool, not the visual goal. A read-only authenticated observation gateway accepts validated measurements but does not assimilate them into the simulator.
 
 The standalone engineering tools are preserved at **/engineering** (including the independent OpenDHN benchmark), image-backed reference design at **/reference**, earlier procedural scene at **/operations-classic**, and frozen research dashboard at **/legacy**. Shanghai and Shenzhen are documented alternative energy-system profiles, not enabled aliases of the heating engine. No physical plant control is connected.
 
 ## Run locally
 
-Requirements: Node.js 24.14.1 or newer, Python 3.12, and a modern WebGL-capable browser for orbitable geometry. The image-backed reference workspace does not require WebGL. Asset registers and graph analysis remain available without a working graphics context. IfcOpenShell is only needed for offline asset reproduction, not the deployed app.
+Requirements: **Node.js 24.14.1 or newer** and a modern WebGL-capable browser. The deployed service is entirely Node.js, including physical simulation and optimisation in a worker thread. Python and IfcOpenShell are only optional offline research/reproduction tools.
 
 ```sh
 npm ci
-python3.12 -m venv physical_core/.venv
-physical_core/.venv/bin/python -m pip install -r server/requirements.txt
 npm run build
 npm start
 ```
 
-Open **http://localhost:3000**. The server automatically uses physical_core/.venv/bin/python if present. Set PYTHON_BIN to override. The public HTTP listener binds to 0.0.0.0 and uses PORT, defaulting to 3000.
+Open **http://localhost:3000**. The public HTTP listener binds to 0.0.0.0 and uses PORT, defaulting to 3000. No Python subprocess is launched.
 
 For frontend development, leave npm start running and run npm run dev in a second terminal. Vite proxies /api to port 3000. Do not deploy the Vite development or preview server as the operations backend.
 
@@ -32,7 +30,6 @@ Create an untracked .env file using .env.example as the template, or set environ
 | OPENROUTER_MODEL | Tool-capable model; default deepseek/deepseek-v4-flash-0731 (pinned DeepSeek V4 Flash release) |
 | TELEMETRY_INGEST_TOKEN | Separate gateway secret; permits read-only measurement ingestion, never actuator writes |
 | AI_ACCESS_TOKEN | A separate, strong operator access code protecting paid requests |
-| PYTHON_BIN | Optional Python executable override |
 | PORT | HTTP listener port |
 
 Enter **AI_ACCESS_TOKEN**, not the provider key, in the browser's AI copilot access-code field. The operator code is held in component memory, not localStorage or exported evidence. Never prefix secrets with VITE_. Never put secrets in render.yaml, source files, URLs or Git remotes. Rotate credentials that have been posted in a chat or other shared location.
@@ -43,24 +40,24 @@ Without AI configuration, the physical twin, rule-based investigations, scenario
 
 ## Deploy to Render
 
-Use a **Docker Web Service**, not a Static Site or the former Node/Vite-preview service.
+Use a **Node.js Web Service**, not a Static Site or Vite preview server.
 
 1. Connect this repository and select the branch containing this upgrade.
-2. Choose **Docker** as the service language/runtime. Dockerfile path: **./Dockerfile**; context: repository root.
-3. Leave Docker Command blank: the image already runs **node server/index.mjs**. If a Docker command override is required, that is the command to enter.
+2. Choose **Node** as the service language/runtime; set NODE_VERSION to **24.14.1**.
+3. Build Command: **npm ci && npm run build**. Start Command: **npm start**.
 4. Set OPENROUTER_API_KEY and AI_ACCESS_TOKEN as secret environment variables. Set OPENROUTER_MODEL if using a different tool-capable model.
 5. Set the health-check path to **/api/health**. Render supplies PORT automatically.
 6. Deploy and verify the twin, one +30 min step, the scenario comparison and the AI access-code protection.
 
 The supplied render.yaml describes the same service as a Render Blueprint and generates the separate AI_ACCESS_TOKEN. Read that generated value from the Render environment settings when an authorised operator needs it. Never commit it.
 
-**Migration warning:** the former deployment used npm run preview. This upgrade also needs the Python worker. Do not assume a Git push changes an existing service's runtime or dashboard command. Configure a Docker service for the upgrade, validate it, then migrate the public hostname using Render's supported workflow. Keep the old deployment available until the new one passes its checks. See [Render's Docker documentation](https://render.com/docs/docker).
+**Existing services:** change an old npm run preview start command to npm start. A Git push does not necessarily update dashboard settings. If the existing service uses Docker, create a native Node service or follow Render's supported runtime-migration workflow. The optional Dockerfile also uses Node only. See [Render's Node deployment documentation](https://render.com/docs/deploy-node-express-app).
 
-The Dockerfile builds the client with Node and runs a non-root Node/Python service. The image excludes .env, .git, local dependencies and generated work. State is in memory: refresh within an active session preserves it, but inactivity expiry, service restarts and deployments clear it. The current design is single-instance; horizontal scaling needs external session storage and worker coordination. Free-tier cold starts or resource limits may affect responsiveness.
+State is in memory: refresh within an active session preserves it, but inactivity expiry, service restarts and deployments clear it. The current design is single-instance; horizontal scaling needs external session storage and worker coordination. Free-tier cold starts or resource limits may affect responsiveness. The browser renders the 3D locally; Render does not need a GPU.
 
 ## What is implemented
 
-- Persistent dark operations canvas with actual OSM geographic footprints, explicitly assumed heights, synthetic network overlays, thermal colouring, orbit/pan/zoom, picking and connected-branch selection.
+- Persistent dark operations workspace around an authored winter-city 3D scene, detailed mechanical plant, animated heating routes, thermal overlays, orbit/pan/zoom and connected-asset selection. The source OSM extract remains research context, not the current scene geometry.
 - Unified inspection, alarms, agents, optimisation, source evidence and data-connection tools; BIM opens in context without changing the selected district asset or timeline.
 - Immutable per-session replay snapshots and complete per-building forecast frames, including forecast weather, plant settings and branch state.
 - Bounded two-block numerical pattern-search optimisation over the nonlinear engine, fresh verification rollout, plan hashes and five-minute expiring approval tokens. Only the next 30-minute simulator step can be applied; no global optimality claim.

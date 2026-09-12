@@ -1,11 +1,14 @@
 services:
   - type: web
-    runtime: docker
+    runtime: node
     name: aiheating
     plan: free
-    dockerfilePath: ./Dockerfile
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
+      - key: NODE_VERSION
+        value: 24.14.1
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL

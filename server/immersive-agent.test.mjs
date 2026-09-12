@@ -102,3 +102,52 @@ test("optimisation agent uses actual optimiser tool output, not invented plans",
   assert.equal(solved, 1);
   assert.equal(r.optimisation, result);
 });
+test("mechanical agent receives validated assembly context without invented instrument values", async () => {
+  let received;
+  const result = await investigate({
+    session: "s",
+    args: {
+      revision: 4,
+      assetId: "ST01",
+      equipmentId: "P-03",
+      question: "Inspect standby context",
+    },
+    model: "test",
+    rpc: async (_, method) => (method === "snapshot" ? snapshot : {}),
+    complete: async ({ messages }) => {
+      received = JSON.parse(messages[1].content);
+      return {
+        choices: [
+          {
+            message: {
+              content:
+                "Inspect the shared station evidence; standby switching is not simulated.",
+            },
+          },
+        ],
+      };
+    },
+  });
+  assert.equal(received.context.selectedEquipment.id, "P-03");
+  assert.match(
+    received.context.mechanicalAssembly.modelScope,
+    /equivalent pump/,
+  );
+  assert.equal(result.equipmentId, "P-03");
+  for (const args of [
+    { assetId: "B10", equipmentId: "P-03" },
+    { assetId: "ST01", equipmentId: "invented-pump" },
+  ])
+    await assert.rejects(
+      () =>
+        investigate({
+          session: "s",
+          args: { revision: 4, ...args },
+          model: "test",
+          rpc: async () => snapshot,
+          complete: () =>
+            assert.fail("Provider must not run for invalid context"),
+        }),
+      /equipment/,
+    );
+});

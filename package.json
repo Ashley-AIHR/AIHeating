@@ -3,11 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.14.1"
+  },
   "scripts": {
     "start": "node server/index.mjs",
     "test:operations": "node --test server/*.test.mjs",
     "test:workspace": "node scripts/workspace-browser.mjs",
     "test:immersive": "node scripts/immersive-browser.mjs",
+    "test:vision": "node scripts/vision-visual.mjs",
     "test:engineering": "tsx scripts/engineering-invariants.ts",
     "test:engineering:browser": "node scripts/engineering-browser.mjs",
     "dev": "vite",

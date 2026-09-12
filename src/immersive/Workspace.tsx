@@ -8,6 +8,7 @@ import {
 } from "../operations/types";
 import { validateGlb, type BimModel } from "../engineering/model";
 import CityScene, { type Geography } from "./CityScene";
+import visionGeometry from "../../public/site-assets/vision-district.json";
 import "./immersive.css";
 const EngineeringScene = lazy(() => import("../engineering/EngineeringScene"));
 type Forecast = Candidate["trace"][number] & {
@@ -50,6 +51,7 @@ type Run = {
   model: string;
   revision: number;
   assetId: string;
+  equipmentId?: string | null;
   answer: string;
   totalTokens: number;
   diagnosis: Diagnosis;
@@ -138,6 +140,8 @@ export default function Workspace() {
     [error, setError] = useState(""),
     [playing, setPlaying] = useState(false),
     [confirm, setConfirm] = useState(false),
+    [sceneView, setSceneView] = useState<"district" | "plant">("district"),
+    [equipment, setEquipment] = useState("HX-A"),
     [bimOpen, setBimOpen] = useState(false),
     [bim, setBim] = useState<BimModel | null>(null),
     [bimSelected, setBimSelected] = useState(""),
@@ -148,7 +152,10 @@ export default function Workspace() {
     [importName, setImportName] = useState("");
   const inFlight = useRef(false),
     alive = useRef(true);
-  const bimCommand=useMemo(()=>({id:bimFocus,type:'fit' as const}),[bimFocus]);
+  const bimCommand = useMemo(
+    () => ({ id: bimFocus, type: "fit" as const }),
+    [bimFocus],
+  );
   async function work(label: string, fn: () => Promise<void>) {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -280,6 +287,10 @@ export default function Workspace() {
           {
             role,
             assetId: selected,
+            equipmentId:
+              selected === "ST01" && sceneView === "plant"
+                ? equipment
+                : undefined,
             question,
             objective,
             revision: twin?.revision,
@@ -338,13 +349,13 @@ export default function Workspace() {
           <strong>
             YINCHUAN <span>银川</span>
           </strong>
-          <small>Residential secondary heating · reference demonstrator</small>
+          <small>Winter-city energy intelligence · vision demonstrator</small>
         </div>
         <div className="header-state">
           <span className="mode-badge">
             {timeMode === "current" ? "SIMULATION" : timeMode.toUpperCase()}
           </span>
-          <span className="offline">FIELD NOT COMMISSIONED</span>
+          <span className="offline">SIMULATED DATA</span>
           <button onClick={() => setPanel("connection")}>Connections ↗</button>
         </div>
       </header>
@@ -382,17 +393,44 @@ export default function Workspace() {
           focus={focus}
           layer={layer}
           imported={imported}
+          view={sceneView}
+          onView={setSceneView}
+          onEquipment={setEquipment}
+          equipment={equipment}
+          suspended={bimOpen}
         />
       </section>
       <section className="world-title">
-        <div className="eyebrow">NORTH-WEST CHINA / HEATING OPERATIONS</div>
+        <div className="eyebrow">YINCHUAN / CONNECTED ENERGY DISTRICT</div>
         <h1>
-          Every building.
-          <br />
-          <span>One connected system.</span>
+          {sceneView === "plant"
+            ? "Inside the energy centre."
+            : "The city, in balance."}
         </h1>
-        <p>Observe the network. Test the cause. Preview the consequence.</p>
+        <p>
+          {sceneView === "plant"
+            ? "Mechanical systems. Network intelligence. One operating context."
+            : "A living model of heat, buildings and the decisions that connect them."}
+        </p>
       </section>
+      <div className="view-switch" aria-label="Spatial view">
+        <button
+          aria-pressed={sceneView === "district"}
+          onClick={() => setSceneView("district")}
+        >
+          ◈ District
+        </button>
+        <button
+          aria-pressed={sceneView === "plant"}
+          onClick={() => {
+            setSelected("ST01");
+            setPanel("inspect");
+            setSceneView("plant");
+          }}
+        >
+          ⚙ Energy centre
+        </button>
+      </div>
       <div className="scene-controls">
         <div className="segmented">
           {[
@@ -412,6 +450,7 @@ export default function Workspace() {
         <button
           onClick={() => {
             setSelected("ST01");
+            setSceneView("plant");
             setFocus((x) => x + 1);
           }}
         >
@@ -460,7 +499,7 @@ export default function Workspace() {
         <span>
           {imported
             ? "Local visual model · no georeferencing or asset mapping"
-            : "OSM footprints · assumed heights / schematic heating routes"}
+            : "Authored Yinchuan-inspired district · physically simulated operation"}
         </span>
       </div>
       <aside className="ops-dock" aria-label="Contextual operations panel">
@@ -579,6 +618,48 @@ export default function Workspace() {
             )}
             {!building && !zone && (
               <>
+                {sceneView === "plant" && (
+                  <div className="equipment-card">
+                    <div className="eyebrow">
+                      MECHANICAL ASSEMBLY / {equipment}
+                    </div>
+                    <h3>
+                      {equipment.startsWith("HX")
+                        ? "Plate heat exchanger"
+                        : equipment === "MCC"
+                          ? "Motor control centre"
+                          : equipment === "P-03"
+                            ? "Standby circulation pump"
+                            : "Duty circulation pump"}
+                    </h3>
+                    <div className="equipment-picker">
+                      {["HX-A", "HX-B", "P-01", "P-02", "P-03", "MCC"].map(
+                        (id) => (
+                          <button
+                            key={id}
+                            aria-pressed={equipment === id}
+                            onClick={() => setEquipment(id)}
+                          >
+                            {id}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                    <p>
+                      {equipment.startsWith("HX")
+                        ? "Primary-to-secondary heat transfer. Inspect the common supply and return headers, then preview the effect of a supply-temperature change across every connected building."
+                        : equipment === "MCC"
+                          ? "Variable-frequency drive coordination. Test a pump-speed proposal against branch pressure, transport delay and indoor comfort before simulator approval."
+                          : equipment === "P-03"
+                            ? "Standby unit in the visual design. The numerical model currently represents one equivalent pump characteristic, not individual duty/standby switching."
+                            : "Secondary circulation. The model couples equivalent pump speed to branch resistance, water flow and delayed heat delivery."}
+                    </p>
+                    <small>
+                      Readings below are shared station-model values, not
+                      individual equipment instruments.
+                    </small>
+                  </div>
+                )}
                 <Pair
                   label="Return temperature"
                   value={`${fmt(frame.returnC, 1)} °C`}
@@ -601,13 +682,20 @@ export default function Workspace() {
               <button className="primary" onClick={() => setPanel("agents")}>
                 ✧ Investigate this asset
               </button>
-              <button onClick={() => setBimOpen(true)}>
-                Open reference BIM
+              <button
+                onClick={() => {
+                  setSelected("ST01");
+                  setSceneView(sceneView === "plant" ? "district" : "plant");
+                }}
+              >
+                {sceneView === "plant"
+                  ? "Return to connected district"
+                  : "Explore energy centre"}
               </button>
             </div>
             <p className="muted">
-              Selection links the 3D scene, branch context, timeline and agent
-              run. The public BIM is not an as-built model of this asset.
+              One shared selection links the scene, network, timeline and agent
+              investigation.
             </p>
           </>
         )}
@@ -701,7 +789,9 @@ export default function Workspace() {
               <article className="agent-result">
                 <div className="eyebrow">COMPLETED / {run.role}</div>
                 <h3>
-                  {run.assetId} · revision {run.revision}
+                  {run.assetId}
+                  {run.equipmentId ? ` / ${run.equipmentId}` : ""} · revision{" "}
+                  {run.revision}
                 </h3>
                 {run.revision !== twin.revision && (
                   <p className="warning">
@@ -709,7 +799,15 @@ export default function Workspace() {
                   </p>
                 )}
                 <p className="narrative">{run.answer}</p>
-                <button onClick={() => select(run.assetId)}>
+                <button
+                  onClick={() => {
+                    select(run.assetId);
+                    if (run.equipmentId) {
+                      setEquipment(run.equipmentId);
+                      setSceneView("plant");
+                    }
+                  }}
+                >
                   Focus investigated asset
                 </button>
                 <h3>Executed tools</h3>
@@ -927,7 +1025,7 @@ export default function Workspace() {
                     setImportName("");
                   }}
                 >
-                  Restore geographic context
+                  Restore vision district
                 </button>
               </>
             )}
@@ -940,15 +1038,45 @@ export default function Workspace() {
         )}
         {panel === "sources" && (
           <>
-            <h3>Geography and identity</h3>
-            <p>{geo.scope}</p>
+            <h3>Vision, geometry and identity</h3>
+            <p>
+              {visionGeometry.name}. Original architectural and mechanical
+              design, inspired by the supplied winter-city renders. Local design
+              coordinates, not a surveyed reconstruction.
+            </p>
+            <p className="muted">
+              The twelve connected buildings are aggregate thermal archetypes.
+              Visual floor counts and equipment assemblies are design
+              representations, not measured asset specifications.
+            </p>
+            <h3>Physically based materials</h3>
+            <p>
+              Asphalt, snow, concrete and paving textures by{" "}
+              <a
+                href="https://polyhaven.com/license"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Poly Haven · CC0
+              </a>
+              . Files are served locally; no live asset service is required.
+            </p>
+            <a
+              href="/vision-materials/manifest.json"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Material sources and checksums ↗
+            </a>
+            <h3>Geographic research context</h3>
+            <p className="muted">
+              The retained OSM extract informed the earlier geographic study; it
+              is not the current scene geometry.
+            </p>
             <a href={geo.url} target="_blank" rel="noreferrer">
               © OpenStreetMap contributors · ODbL
             </a>
-            <p className="muted">
-              Source extract: {geo.extractTimestamp}. Facade appearance is
-              illustrative, not surveyed.
-            </p>
+            <p className="muted">Research extract: {geo.extractTimestamp}.</p>
             <a href={config.site.source} target="_blank" rel="noreferrer">
               Yinchuan operational reference ↗
             </a>
@@ -978,9 +1106,11 @@ export default function Workspace() {
                   registry: config.registry,
                   state: twin,
                   selected,
+                  equipment: sceneView === "plant" ? equipment : null,
+                  visionGeometry,
                   timeMode,
                   displayTime: frame.time,
-                  geography: {
+                  geographicResearch: {
                     scope: geo.scope,
                     origin: geo.origin,
                     extractTimestamp: geo.extractTimestamp,

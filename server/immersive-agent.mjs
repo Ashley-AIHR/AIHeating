@@ -26,6 +26,14 @@ export async function investigate({ session, args, rpc, complete, model }) {
   const context = worldContext(snapshot, selected),
     startedAt = new Date().toISOString(),
     runId = randomUUID();
+  if (args.equipmentId) {
+    const equipment = context.mechanicalAssembly?.equipment.find(
+      (e) => e.id === args.equipmentId,
+    );
+    if (!equipment)
+      throw new Error("Unknown equipment or mismatched station context");
+    context.selectedEquipment = equipment;
+  }
   const trace = [],
     events = [];
   const record = (tool, result) => {
@@ -176,6 +184,7 @@ export async function investigate({ session, args, rpc, complete, model }) {
     completedAt: new Date().toISOString(),
     revision: snapshot.revision,
     assetId: selected,
+    equipmentId: context.selectedEquipment?.id || null,
     mode: "simulation",
     ...guardNarrative(answer),
     totalTokens,

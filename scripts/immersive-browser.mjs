@@ -2,13 +2,19 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 const base = process.env.BASE_URL || "http://127.0.0.1:3103";
 const out = process.env.SCREENSHOT_DIR || "../outputs";
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  args: process.platform === "darwin" ? ["--use-angle=metal"] : [],
+});
 const page = await browser.newPage({ viewport: { width: 1680, height: 1080 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
   await page.goto(base);
   await page.locator(".city-scene canvas").waitFor();
+  // Software-rendered browser regression uses the performance setting; visual QA also captures cinematic mode separately.
+  await page
+    .getByRole("button", { name: "Quality: cinematic", exact: true })
+    .click();
   await page.getByRole("status").waitFor({ state: "hidden" });
   await page.locator(".city-scene canvas").focus();
   await page.keyboard.press("ArrowRight");
@@ -21,6 +27,32 @@ try {
   await page.locator(".city-scene canvas").focus();
   await page.keyboard.press("Home");
   await page.screenshot({ path: out + "/integrated-district.png" });
+  const timeBefore = await page.locator(".context-line").textContent();
+  await page
+    .getByRole("button", { name: "⚙ Energy centre", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Select P-02 in 3D", exact: true })
+    .click();
+  assert.match(
+    await page.locator(".equipment-card h3").textContent(),
+    /Duty circulation pump/,
+  );
+  assert.match(
+    await page.locator(".city-labels button.active").textContent(),
+    /P-02/,
+  );
+  assert(
+    (await page.locator(".context-line").textContent()).endsWith(
+      timeBefore.slice(-5),
+    ),
+    "Spatial navigation must preserve simulation time",
+  );
+  await page
+    .locator('.city-scene[data-camera-settled="true"]')
+    .waitFor({ timeout: 60000 });
+  await page.screenshot({ path: out + "/vision-mechanical-tested.png" });
+  await page.getByRole("button", { name: "◈ District", exact: true }).click();
   await page.getByRole("button", { name: "Optimise", exact: true }).click();
   await page.getByRole("button", { name: "Compute & verify schedule" }).click();
   await page.getByText("MODEL GATES PASSED", { exact: false }).waitFor();

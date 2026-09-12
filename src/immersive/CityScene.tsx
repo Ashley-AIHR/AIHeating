@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import type { Twin } from "../operations/types";
+import {
+  createVisionDistrict,
+  districtPlan,
+  stationPosition,
+} from "./vision-assets";
 export type Geography = {
   origin: number[];
   scope: string;
@@ -26,317 +37,430 @@ type Props = {
   focus: number;
   layer: string;
   imported: ArrayBuffer | null;
+  view: "district" | "plant";
+  equipment: string;
+  suspended: boolean;
+  onView: (view: "district" | "plant") => void;
+  onEquipment: (id: string) => void;
 };
 export default function CityScene(props: Props) {
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(props),
-    runtime = useRef<{ update: () => void; focus: () => void } | null>(null);
+    runtime = useRef<{
+      update: () => void;
+      focus: () => void;
+      view: () => void;
+    } | null>(null);
   latest.current = props;
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""),
+    [dusk, setDusk] = useState(false),
+    [highQuality, setHighQuality] = useState(() => window.innerWidth > 760);
+  const lighting = useRef(false),
+    quality = useRef(true);
+  lighting.current = dusk;
+  quality.current = highQuality;
   useEffect(() => {
     const el = host.current!;
-    let renderer: T.WebGLRenderer,
-      raf = 0,
-      dead = false;
+    let renderer: T.WebGLRenderer;
     try {
-      renderer = new T.WebGLRenderer({ antialias: true });
+      renderer = new T.WebGLRenderer({
+        antialias: true,
+        powerPreference: "high-performance",
+      });
     } catch {
       setError(
-        "WebGL is unavailable. Use the asset register and numerical tools.",
+        "WebGL is unavailable. Asset inspection and numerical tools remain available.",
       );
       return;
     }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setClearColor(0x080f1c);
+    let dead = false,
+      raf = 0;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.shadowMap.autoUpdate = false;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.1;
+    renderer.info.autoReset = false;
     renderer.domElement.tabIndex = 0;
     renderer.domElement.setAttribute(
       "aria-label",
-      "Orbitable Yinchuan geographic context. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.",
+      "Orbitable winter-city twin. Drag to orbit; right drag to pan; scroll to zoom; arrow keys orbit; Home resets.",
     );
     el.appendChild(renderer.domElement);
     const scene = new T.Scene();
-    scene.fog = new T.FogExp2(0x080f1c, 0.00023);
-    scene.add(new T.HemisphereLight(0xcde9ff, 0x0c1824, 2.5));
-    const sun = new T.DirectionalLight(0xffedce, 3);
-    sun.position.set(-500, 1000, 200);
-    scene.add(sun);
-    const camera = new T.PerspectiveCamera(42, 1, 1, 15000),
+    scene.background = new T.Color("#c0cfda");
+    scene.fog = new T.FogExp2("#c0cfda", 0.0011);
+    const pmrem = new T.PMREMGenerator(renderer),
+      room = new RoomEnvironment(),
+      environment = pmrem.fromScene(room, 0.035);
+    scene.environment = environment.texture;
+    scene.environmentIntensity = 0.38;
+    room.dispose();
+    pmrem.dispose();
+    const skyLight = new T.HemisphereLight("#bfd5ef", "#625e4d", 0.48);
+    scene.add(skyLight);
+    const sun = new T.DirectionalLight("#ffe8c5", 3.8);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(4096, 4096);
+    sun.shadow.bias = -0.00003;
+    sun.shadow.normalBias = 0.025;
+    sun.shadow.radius = 2;
+    scene.add(sun, sun.target);
+    const camera = new T.PerspectiveCamera(39, 1, 0.2, 4000),
       orbit = new OrbitControls(camera, renderer.domElement);
     orbit.enableDamping = true;
-    orbit.maxPolarAngle = Math.PI * 0.49;
-    orbit.minDistance = 30;
-    orbit.maxDistance = 5000;
-    const activeBuildings = props.geo.buildings.filter((b) => b.demoAssetId);
-    const centre = activeBuildings
-      .reduce(
-        (a, b) => a.add(new T.Vector3(b.centre[0], 0, b.centre[1])),
-        new T.Vector3(),
-      )
-      .divideScalar(activeBuildings.length || 1);
-    const overviewOffset = new T.Vector3(430, 430, 560);
-    camera.position.copy(centre).add(overviewOffset);
-    orbit.target.copy(centre);
-    const ground = new T.Mesh(
-      new T.PlaneGeometry(12000, 12000),
-      new T.MeshStandardMaterial({ color: 0x0c1725, roughness: 1 }),
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -5;
-    scene.add(ground);
-    const grid = new T.GridHelper(5000, 100, 0x213043, 0x132231);
-    grid.position.y = -4;
-    scene.add(grid);
-    const sourceGroup = new T.Group(),
-      network = new T.Group(),
-      labels = document.createElement("div");
+    orbit.dampingFactor = 0.065;
+    orbit.maxPolarAngle = Math.PI * 0.482;
+    orbit.minDistance = 8;
+    orbit.maxDistance = 1000;
+    const model = createVisionDistrict();
+    scene.add(model.root);
+    el.dataset.instances = String(model.stats.instances);
+    const plantLights = [-10, 9].map((x) => {
+      const light = new T.PointLight("#ffdaa5", 0, 36, 2);
+      light.position.copy(stationPosition).add(new T.Vector3(x, 7.5, -3));
+      scene.add(light);
+      return light;
+    });
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const ao = new GTAOPass(scene, camera, 1, 1);
+    ao.updateGtaoMaterial({
+      radius: 1.2,
+      distanceExponent: 2,
+      thickness: 1.4,
+      samples: 8,
+    });
+    ao.blendIntensity = 0.75;
+    composer.addPass(ao);
+    const antialias = new SMAAPass();
+    composer.addPass(antialias);
+    const output = new OutputPass();
+    composer.addPass(output);
+    const overviewTarget = new T.Vector3(-7, 3, 22),
+      overviewOffset = new T.Vector3(160, 145, 225);
+    const destination = {
+      position: overviewTarget.clone().add(overviewOffset),
+      target: overviewTarget.clone(),
+      active: false,
+    };
+    camera.position.copy(destination.position);
+    orbit.target.copy(destination.target);
+    function setLighting(plant: boolean) {
+      const centre = plant ? stationPosition : overviewTarget,
+        extent = plant ? 26 : 210;
+      sun.position.copy(centre).add(new T.Vector3(-110, 125, 95));
+      sun.target.position.copy(centre);
+      const s = sun.shadow.camera;
+      s.left = -extent;
+      s.right = extent;
+      s.top = extent;
+      s.bottom = -extent;
+      s.near = 0.5;
+      s.far = 650;
+      s.updateProjectionMatrix();
+      sun.shadow.needsUpdate = true;
+      renderer.shadowMap.needsUpdate = true;
+    }
+    function go(target: T.Vector3, offset: T.Vector3) {
+      destination.position.copy(target).addScaledVector(offset, Math.max(1, 0.95 / camera.aspect));
+      destination.target.copy(target);
+      destination.active = true;
+    }
+    function changeView() {
+      const plant = latest.current.view === "plant";
+      setLighting(plant);
+      ao.updateGtaoMaterial({ radius: plant ? 0.9 : 2 });
+      if (plant)
+        go(
+          stationPosition.clone().add(new T.Vector3(0, 3, 0)),
+          new T.Vector3(23, 18, 30),
+        );
+      else go(overviewTarget, overviewOffset);
+    }
+    setLighting(false);
+    const labels = document.createElement("div");
     labels.className = "city-labels";
     el.appendChild(labels);
-    scene.add(sourceGroup, network);
-    const meshes: T.Mesh[] = [],
-      markers: { id: string; point: T.Vector3; button: HTMLButtonElement }[] =
-        [],
-      positions = new Map<string, T.Vector3>();
-    const facade = document.createElement("canvas");
-    facade.width = 128;
-    facade.height = 128;
-    const ctx = facade.getContext("2d")!;
-    ctx.fillStyle = "#536576";
-    ctx.fillRect(0, 0, 128, 128);
-    for (let y = 0; y < 4; y++)
-      for (let x = 0; x < 4; x++) {
-        ctx.fillStyle = (x + y) % 3 === 0 ? "#cab785" : "#202f3e";
-        ctx.fillRect(x * 32 + 8, y * 32 + 7, 13, 17);
-        ctx.fillStyle = "#687787";
-        ctx.fillRect(x * 32 + 6, y * 32 + 26, 17, 2);
-      }
-    const texture = new T.CanvasTexture(facade);
-    texture.wrapS = texture.wrapT = T.RepeatWrapping;
-    texture.colorSpace = T.SRGBColorSpace;
-    function badge(id: string, p: T.Vector3) {
+    const markers: {
+      id: string;
+      point: T.Vector3;
+      button: HTMLButtonElement;
+      plant: boolean;
+    }[] = [];
+    const positions = new Map<string, T.Vector3>();
+    function badge(id: string, point: T.Vector3, plant = false, name = "") {
       const button = document.createElement("button");
       button.dataset.asset = id;
       button.setAttribute("aria-label", `Select ${id} in 3D`);
-      button.onclick = () => latest.current.onSelect(id);
+      button.title = name;
+      button.onclick = () => {
+        if (plant) {
+          latest.current.onSelect("ST01");
+          latest.current.onEquipment(id);
+        } else {
+          latest.current.onSelect(id);
+          if (id === "ST01") latest.current.onView("plant");
+        }
+      };
       labels.appendChild(button);
-      markers.push({ id, point: p.clone(), button });
-      positions.set(id, p);
+      markers.push({ id, point, button, plant });
+      positions.set(id, point);
     }
-    for (const b of props.geo.buildings) {
-      const shape = new T.Shape(
-          b.polygon.map((p) => new T.Vector2(p[0], -p[1])),
-        ),
-        g = new T.ExtrudeGeometry(shape, {
-          depth: b.height,
-          bevelEnabled: false,
-        });
-      g.rotateX(-Math.PI / 2);
-      const material = new T.MeshStandardMaterial({
-        color: 0x667e94,
-        roughness: 0.85,
-        metalness: 0.1,
-      });
-      const side = new T.MeshStandardMaterial({
-        color: 0x879daf,
-        map: texture,
-        roughness: 0.85,
-      });
-      // Normalise generated world-space UVs to a visual facade grid; not surveyed fenestration.
-      const uv = g.getAttribute("uv");
-      for (let i = 0; i < uv.count; i++)
-        uv.setXY(i, uv.getX(i) / 24, uv.getY(i) / 12);
-      const mesh = new T.Mesh(g, [material, side]);
-      mesh.userData.assetId = b.demoAssetId;
-      sourceGroup.add(mesh);
-      meshes.push(mesh);
-      const edge = new T.LineSegments(
-        new T.EdgesGeometry(g, 30),
-        new T.LineBasicMaterial({
-          color: 0x748da0,
-          transparent: true,
-          opacity: 0.2,
-        }),
-      );
-      sourceGroup.add(edge);
-      if (b.demoAssetId)
-        badge(
-          b.demoAssetId,
-          new T.Vector3(b.centre[0], b.height + 12, b.centre[1]),
-        );
-    }
-    for (const road of props.geo.roads) {
-      if (road.points.length < 2) continue;
-      const curve = new T.CatmullRomCurve3(
-        road.points.map((p) => new T.Vector3(p[0], -2, p[1])),
-        false,
-        "catmullrom",
-        0,
-      );
-      sourceGroup.add(
-        new T.Mesh(
-          new T.TubeGeometry(
-            curve,
-            Math.min(100, road.points.length * 4),
-            ["primary", "secondary", "tertiary"].includes(road.kind) ? 5 : 2.3,
-            4,
-            false,
-          ),
-          new T.MeshStandardMaterial({ color: 0x293746, roughness: 1 }),
-        ),
-      );
-    }
-    const station = centre.clone().add(new T.Vector3(-220, 12, 100));
-    badge("ST01", station);
-    // Explicit schematic overlays: these are not underground survey coordinates or pipe sizes.
-    const stationGlyph = new T.Mesh(
-      new T.OctahedronGeometry(13),
-      new T.MeshStandardMaterial({ color: 0x67e2d5, emissive: 0x153d45 }),
-    );
-    stationGlyph.position.copy(station);
-    stationGlyph.userData.assetId = "ST01";
-    network.add(stationGlyph);
-    meshes.push(stationGlyph);
-    const routes: { mesh: T.Mesh; zone: string }[] = [];
+    for (const b of districtPlan)
+      badge(b.id, new T.Vector3(b.x, b.floors * 3.3 + 5, b.z));
+    badge("ST01", stationPosition.clone().add(new T.Vector3(0, 9, 0)));
+    for (const item of model.equipment)
+      badge(item.id, item.point.clone().add(stationPosition), true, item.name);
+    const network = new T.Group();
+    scene.add(network);
+    const flowMaterial = new T.MeshStandardMaterial({
+      color: "#ff9440",
+      emissive: "#ff6f12",
+      emissiveIntensity: 0.85,
+      metalness: 0.3,
+      roughness: 0.35,
+    });
+    const returnMaterial = new T.MeshStandardMaterial({
+      color: "#2cbded",
+      emissive: "#008aff",
+      emissiveIntensity: 0.65,
+      metalness: 0.3,
+      roughness: 0.35,
+    });
+    const paths: {
+      curve: T.CatmullRomCurve3;
+      zone: string;
+      reverse: boolean;
+    }[] = [];
     for (const [zone, index] of [
       ["near", 0],
       ["mid", 1],
       ["far", 2],
     ] as const) {
-      const members = props.geo.buildings.filter(
-        (b) =>
-          b.demoAssetId &&
-          Math.floor((Number(b.demoAssetId.slice(1)) - 1) / 4) === index,
-      );
-      if (!members.length) continue;
-      const junction = members
-        .reduce(
-          (a, b) => a.add(new T.Vector3(b.centre[0], 5, b.centre[1])),
-          new T.Vector3(),
-        )
-        .divideScalar(members.length);
-      badge(zone, junction.clone().add(new T.Vector3(0, 28, 0)));
-      for (const target of [
-        junction,
-        ...members.map((b) => new T.Vector3(b.centre[0], 5, b.centre[1])),
-      ])
-        for (const offset of [-3, 3]) {
-          const start = target === junction ? station : junction;
-          const path = [
-            start.clone().setY(4),
-            new T.Vector3(start.x, 4, target.z),
-            target.clone().setY(4),
-          ].map((p) => p.add(new T.Vector3(offset, 0, 0)));
-          const curve = new T.CatmullRomCurve3(path, false, "catmullrom", 0.1),
-            material = new T.MeshStandardMaterial({
-              color: offset < 0 ? 0xf39b5c : 0x389eff,
-              emissive: offset < 0 ? 0x71331b : 0x143d80,
-              emissiveIntensity: 0.8,
-            });
-          const mesh = new T.Mesh(
-            new T.TubeGeometry(curve, 32, 1.7, 6, false),
-            material,
+      const row = districtPlan.filter((_, i) => Math.floor(i / 4) === index),
+        zz = row[0].z + 19;
+      badge(zone, new T.Vector3(-111, 3, zz));
+      for (const reverse of [false, true]) {
+        const offset = reverse ? 1.2 : 0,
+          points = [
+            [-101, 1, 118 + offset],
+            [-113 + offset, 1, 118 + offset],
+            [-113 + offset, 1, zz + offset],
+            [102, 1, zz + offset],
+          ];
+        const curve = new T.CatmullRomCurve3(
+          points.map((v) => new T.Vector3(...v)),
+          false,
+          "catmullrom",
+          0.025,
+        );
+        paths.push({ curve, zone, reverse });
+        const pipe = new T.Mesh(
+          new T.TubeGeometry(curve, 100, 0.3, 8, false),
+          reverse ? returnMaterial : flowMaterial,
+        );
+        pipe.userData.assetId = zone;
+        network.add(pipe);
+        for (const b of row) {
+          const branch = new T.CatmullRomCurve3(
+            [
+              new T.Vector3(b.x + offset, 1, zz + offset),
+              new T.Vector3(b.x + offset, 1, b.z + 10),
+              new T.Vector3(b.x + offset, 2, b.z + 9),
+            ],
+            false,
+            "catmullrom",
+            0.05,
           );
-          mesh.userData.assetId = zone;
+          const mesh = new T.Mesh(
+            new T.TubeGeometry(branch, 12, 0.2, 8, false),
+            reverse ? returnMaterial : flowMaterial,
+          );
+          mesh.userData.assetId = b.id;
           network.add(mesh);
-          meshes.push(mesh);
-          routes.push({ mesh, zone });
         }
+      }
     }
-    const selection = new T.Box3Helper(new T.Box3(), 0x8ff6df);
-    selection.visible = false;
+    const particles = new T.InstancedMesh(
+      new T.SphereGeometry(0.45, 6, 4),
+      new T.MeshBasicMaterial({ color: "#d7fcff" }),
+      72,
+    );
+    network.add(particles);
+    const helper = new T.Object3D(),
+      rings = new T.Group();
+    scene.add(rings);
+    const thermalMeshes = new Map<string, T.Mesh>();
+    for (const b of districtPlan) {
+      const shape = new T.Shape();
+      shape.moveTo(-15, -10);
+      shape.lineTo(15, -10);
+      shape.lineTo(15, 10);
+      shape.lineTo(-15, 10);
+      shape.closePath();
+      const hole = new T.Path();
+      hole.moveTo(-14.4, -9.4);
+      hole.lineTo(-14.4, 9.4);
+      hole.lineTo(14.4, 9.4);
+      hole.lineTo(14.4, -9.4);
+      hole.closePath();
+      shape.holes.push(hole);
+      const mesh = new T.Mesh(
+        new T.ShapeGeometry(shape),
+        new T.MeshBasicMaterial({
+          color: "#fcb365",
+          transparent: true,
+          opacity: 0.9,
+          side: T.DoubleSide,
+        }),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(b.x, 0.46, b.z);
+      rings.add(mesh);
+      thermalMeshes.set(b.id, mesh);
+    }
+    const selection = new T.Box3Helper(new T.Box3(), new T.Color("#63e7d0"));
     scene.add(selection);
-    let importedGroup: T.Group | null = null;
     if (props.imported)
       new GLTFLoader().parse(
         props.imported,
         "",
-        (g) => {
+        (gltf) => {
           if (dead) {
-            g.scene.traverse(disposeObject);
+            dispose(gltf.scene);
             return;
           }
-          importedGroup = g.scene;
-          sourceGroup.visible = false;
+          const loaded = gltf.scene,
+            bounds = new T.Box3().setFromObject(loaded),
+            size = bounds.getSize(new T.Vector3()),
+            centre = bounds.getCenter(new T.Vector3());
+          const scale = 200 / Math.max(size.x, size.y, size.z, 1);
+          loaded.position.set(
+            -centre.x * scale,
+            -bounds.min.y * scale,
+            -centre.z * scale,
+          );
+          loaded.scale.setScalar(scale);
+          scene.add(loaded);
+          model.root.visible = false;
           network.visible = false;
-          selection.visible = false;
-          const box = new T.Box3().setFromObject(g.scene),
-            c = box.getCenter(new T.Vector3()),
-            span = box.getSize(new T.Vector3()).length();
-          g.scene.position.sub(c).add(centre);
-          scene.add(g.scene);
-          camera.position.copy(centre).add(new T.Vector3(span, span, span));
-          orbit.target.copy(centre);
+          labels.style.display = "none";
         },
         () =>
           setError(
-            "The local model could not be parsed. Geographic context remains available.",
+            "Unable to load the local visual model. The vision district remains available.",
           ),
       );
     function update() {
-      const p = latest.current;
-      network.visible = !importedGroup && p.layer !== "buildings";
-      const chosen = meshes.filter((m) => m.userData.assetId === p.selected);
-      selection.visible = !importedGroup && chosen.length > 0;
-      selection.box.makeEmpty();
-      chosen.forEach((m) => selection.box.union(new T.Box3().setFromObject(m)));
-      const selectedZone =
-        p.frame.buildings.find((b) => b.id === p.selected)?.zone || p.selected;
-      routes.forEach((r) => {
-        const mat = r.mesh.material as T.MeshStandardMaterial;
-        mat.emissiveIntensity = r.zone === selectedZone ? 2 : 0.5;
-      });
-      for (const b of props.geo.buildings) {
-        if (!b.demoAssetId) continue;
-        const record = p.frame.buildings.find((x) => x.id === b.demoAssetId),
-          mesh = meshes.find((m) => m.userData.assetId === b.demoAssetId)!;
-        const colour =
-          p.layer === "temperature" && record
-            ? record.quality === "suspect"
-              ? 0xa996ee
-              : record.indoorC < 20
-                ? 0x4b9ed1
-                : record.indoorC > 23
-                  ? 0xda8b62
-                  : 0x76bdb0
-            : 0x70869a;
-        (mesh.material as T.MeshStandardMaterial[]).forEach((m) =>
-          m.color.setHex(colour),
+      const { frame, layer, selected, view } = latest.current;
+      network.visible = !props.imported && layer !== "buildings";
+      rings.visible =
+        !props.imported && layer === "temperature" && view === "district";
+      for (const marker of markers) {
+        const building = frame.buildings.find((b) => b.id === marker.id),
+          zone = frame.zones.find((z) => z.id === marker.id);
+        marker.button.textContent = building
+          ? `${marker.id}  ${building.indoorC.toFixed(1)}°`
+          : zone
+            ? `${marker.id.toUpperCase()} · ${zone.delayMinutes.toFixed(0)} min`
+            : marker.id === "ST01"
+              ? "ST01  ENERGY CENTRE ↗"
+              : marker.id;
+        marker.button.classList.toggle(
+          "active",
+          marker.plant === (view === "plant") &&
+            marker.id === (marker.plant ? latest.current.equipment : selected),
         );
+        marker.button.classList.toggle("plant-label", marker.plant);
       }
-      markers.forEach(({ id, button }) => {
-        const b = p.frame.buildings.find((x) => x.id === id),
-          z = p.frame.zones.find((x) => x.id === id);
-        button.className = id === p.selected ? "active" : "";
-        button.textContent = b
-          ? `${id}  ${b.indoorC.toFixed(1)}°C`
-          : z
-            ? `${id.toUpperCase()} · ${z.delayMinutes.toFixed(0)} min`
-            : "ST01 · HEAT EXCHANGE";
-      });
+      for (const b of frame.buildings) {
+        const m = thermalMeshes.get(b.id);
+        if (m)
+          (m.material as T.MeshBasicMaterial).color.set(
+            b.quality === "suspect"
+              ? "#ec84eb"
+              : b.indoorC < 20
+                ? "#49b7ff"
+                : b.indoorC > 23
+                  ? "#ff954f"
+                  : "#7bd9bb",
+          );
+      }
+      const b = districtPlan.find((b) => b.id === selected);
+      selection.visible = !!b && view === "district" && !props.imported;
+      if (b)
+        selection.box.set(
+          new T.Vector3(b.x - 14.2, 0.45, b.z - 10),
+          new T.Vector3(b.x + 14.2, b.floors * 3.3 + 4, b.z + 10),
+        );
+      if (view === "plant" && !props.imported) {
+        const component = model.equipment.find(
+          (e) => e.id === latest.current.equipment,
+        );
+        if (component) {
+          const p = component.point.clone().add(stationPosition),
+            hx = component.id.startsWith("HX"),
+            mcc = component.id === "MCC";
+          selection.visible = true;
+          selection.box.set(
+            new T.Vector3(
+              p.x - (mcc ? 6 : hx ? 2.3 : 2.2),
+              stationPosition.y + 0.7,
+              p.z - (mcc ? 1.5 : 3),
+            ),
+            new T.Vector3(
+              p.x + (mcc ? 5 : hx ? 2.3 : 2.2),
+              stationPosition.y + (hx ? 6.7 : mcc ? 5.8 : 3.9),
+              p.z + (mcc ? 1 : 3),
+            ),
+          );
+        }
+      }
     }
     function focus() {
-      const p = latest.current;
-      if (p.selected === "ST01" && p.focus === 0) {
-        orbit.target.copy(centre);
-        camera.position.copy(centre).add(overviewOffset);
+      const { selected, view } = latest.current;
+      if (selected === "ST01") {
+        if (view !== "plant") latest.current.onView("plant");
+        else changeView();
         return;
       }
-      const target = positions.get(p.selected) || centre;
-      orbit.target.copy(target);
-      camera.position.copy(target).add(new T.Vector3(180, 170, 240));
+      if (view === "plant") {
+        latest.current.onView("district");
+        return;
+      }
+      const p = positions.get(selected);
+      if (p) go(p.clone().setY(p.y * 0.4), new T.Vector3(62, 52, 82));
     }
-    runtime.current = { update, focus };
+    runtime.current = { update, focus, view: changeView };
     update();
-    let down = [0, 0];
-    const pointerDown = (e: PointerEvent) => {
-      down = [e.clientX, e.clientY];
+    if (latest.current.view === "plant") changeView();
+    const resize = new ResizeObserver(() => {
+      const w = el.clientWidth,
+        h = el.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h);
+      composer.setSize(w, h);
+      const portraitChanged = (camera.aspect < 1) !== (w / h < 1);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      if (portraitChanged) changeView();
+    });
+    resize.observe(el);
+    let pointer = { x: 0, y: 0 };
+    const down = (e: PointerEvent) => {
+      pointer = { x: e.clientX, y: e.clientY };
+      destination.active = false;
     };
-    const pointerUp = (e: PointerEvent) => {
-      if (importedGroup) return;
-      if (Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
-      const rect = renderer.domElement.getBoundingClientRect(),
-        ray = new T.Raycaster();
+    const ray = new T.Raycaster();
+    const up = (e: PointerEvent) => {
+      if (
+        Math.hypot(e.clientX - pointer.x, e.clientY - pointer.y) > 5 ||
+        props.imported
+      )
+        return;
+      const rect = renderer.domElement.getBoundingClientRect();
       ray.setFromCamera(
         new T.Vector2(
           ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -345,92 +469,195 @@ export default function CityScene(props: Props) {
         camera,
       );
       const hit = ray
-        .intersectObjects(meshes)
+        .intersectObjects([model.root, network], true)
         .find(
           (h) =>
-            h.object.userData.assetId &&
-            (h.object.parent !== network || network.visible),
+            h.object.userData.assetId ||
+            (h.instanceId !== undefined &&
+              h.object.userData.ids?.[h.instanceId]),
         );
-      if (hit) latest.current.onSelect(hit.object.userData.assetId);
+      if (hit) {
+        const id =
+          hit.object.userData.assetId ||
+          hit.object.userData.ids[hit.instanceId!];
+        if (model.equipment.some((e) => e.id === id)) {
+          latest.current.onSelect("ST01");
+          latest.current.onEquipment(id);
+          latest.current.onView("plant");
+        } else {
+          latest.current.onSelect(id);
+          if (id === "ST01") latest.current.onView("plant");
+        }
+      }
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === "Home") {
-        orbit.target.copy(centre);
-        camera.position.copy(centre).add(overviewOffset);
         e.preventDefault();
+        changeView();
       } else if (e.key.startsWith("Arrow")) {
-        const v = camera.position.clone().sub(orbit.target);
-        v.applyAxisAngle(
-          new T.Vector3(0, 1, 0),
-          e.key === "ArrowLeft" ? 0.12 : e.key === "ArrowRight" ? -0.12 : 0,
-        );
-        if (e.key === "ArrowUp") v.multiplyScalar(0.9);
-        if (e.key === "ArrowDown") v.multiplyScalar(1.1);
-        camera.position.copy(orbit.target).add(v);
         e.preventDefault();
+        destination.active = false;
+        const offset = camera.position.clone().sub(orbit.target),
+          spherical = new T.Spherical().setFromVector3(offset);
+        spherical.theta +=
+          e.key === "ArrowLeft" ? 0.12 : e.key === "ArrowRight" ? -0.12 : 0;
+        spherical.phi = T.MathUtils.clamp(
+          spherical.phi +
+            (e.key === "ArrowUp" ? -0.08 : e.key === "ArrowDown" ? 0.08 : 0),
+          0.15,
+          1.48,
+        );
+        camera.position
+          .copy(orbit.target)
+          .add(new T.Vector3().setFromSpherical(spherical));
+        orbit.update();
       }
     };
-    renderer.domElement.addEventListener("pointerdown", pointerDown);
-    renderer.domElement.addEventListener("pointerup", pointerUp);
+    renderer.domElement.addEventListener("pointerdown", down);
+    renderer.domElement.addEventListener("pointerup", up);
     renderer.domElement.addEventListener("keydown", key);
-    const resize = new ResizeObserver(() => {
-      const w = el.clientWidth,
-        h = el.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / Math.max(1, h);
-      camera.updateProjectionMatrix();
-    });
-    resize.observe(el);
-    function render() {
-      raf = requestAnimationFrame(render);
+    const clock = new T.Clock();
+    let last = performance.now(),
+      previousDusk: boolean | undefined;
+    function animate() {
+      if (dead) return;
+      raf = requestAnimationFrame(animate);
+      if (latest.current.suspended || document.hidden) return;
+      const t = clock.getElapsedTime(),
+        now = performance.now(),
+        dt = (now - last) / 1000;
+      if (dt < 1 / 30) return;
+      last = now;
+      if (previousDusk !== lighting.current) {
+        previousDusk = lighting.current;
+        const dark = lighting.current;
+        const colour = dark ? "#1a2c48" : "#c0cfda";
+        (scene.background as T.Color).set(colour);
+        (scene.fog as T.FogExp2).color.set(colour);
+        sun.color.set(dark ? "#98bbec" : "#ffe8c5");
+        sun.intensity = dark ? 0.65 : 3.8;
+        skyLight.color.set(dark ? "#517cad" : "#bfd5ef");
+        skyLight.intensity = dark ? 0.58 : 0.48;
+        model.materials.warm.emissiveIntensity = dark ? 2.6 : 0.35;
+        flowMaterial.emissiveIntensity = dark ? 2 : 0.85;
+        returnMaterial.emissiveIntensity = dark ? 1.5 : 0.65;
+        plantLights.forEach((light) => (light.intensity = dark ? 180 : 0));
+      }
+      if (destination.active) {
+        const alpha = 1 - Math.exp(-dt / 0.24);
+        camera.position.lerp(destination.position, alpha);
+        orbit.target.lerp(destination.target, alpha);
+        if (camera.position.distanceTo(destination.position) < 0.05)
+          destination.active = false;
+      }
       orbit.update();
-      for (const m of markers) {
-        const p = m.point.clone().project(camera);
-        m.button.style.transform = `translate(${((p.x + 1) * el.clientWidth) / 2}px,${((-p.y + 1) * el.clientHeight) / 2}px) translate(-50%,-100%)`;
-        m.button.hidden =
-          p.z > 1 ||
-          p.z < -1 ||
-          Math.abs(p.x) > 1.1 ||
-          Math.abs(p.y) > 1.1 ||
-          !!importedGroup;
+      if (network.visible)
+        for (let i = 0; i < 72; i++) {
+          const path = paths[Math.floor(i / 12)],
+            zone = latest.current.frame.zones.find((z) => z.id === path.zone),
+            phase =
+              ((i % 12) / 12 + (t * 0.024 * (zone?.flowM3h || 10)) / 15) % 1;
+          helper.position.copy(
+            path.curve.getPoint(path.reverse ? 1 - phase : phase),
+          );
+          helper.updateMatrix();
+          particles.setMatrixAt(i, helper.matrix);
+        }
+      particles.instanceMatrix.needsUpdate = true;
+      for (const marker of markers) {
+        const point = marker.point.clone().project(camera),
+          visible =
+            point.z < 1 &&
+            point.z > -1 &&
+            marker.plant === (latest.current.view === "plant") &&
+            (el.clientWidth > 600 ||
+              marker.id === latest.current.selected ||
+              marker.plant);
+        marker.button.style.display = visible ? "" : "none";
+        if (visible)
+          marker.button.style.transform = `translate(${(point.x * 0.5 + 0.5) * el.clientWidth}px,${(-point.y * 0.5 + 0.5) * el.clientHeight}px) translate(-50%,-100%)`;
       }
-      renderer.render(scene, camera);
+      renderer.info.reset();
+      ao.enabled = quality.current;
+      composer.render();
+      el.dataset.drawCalls = String(renderer.info.render.calls);
+      el.dataset.triangles = String(renderer.info.render.triangles);
+      el.dataset.cameraSettled = String(!destination.active);
     }
-    render();
-    function disposeObject(o: T.Object3D) {
-      if (o instanceof T.Mesh || o instanceof T.Line) {
-        o.geometry.dispose();
-        for (const m of Array.isArray(o.material) ? o.material : [o.material])
-          m.dispose();
-      }
+    animate();
+    function dispose(root: T.Object3D) {
+      const geometries = new Set<T.BufferGeometry>(),
+        materials = new Set<T.Material>();
+      root.traverse((o) => {
+        if (o instanceof T.Mesh || o instanceof T.LineSegments) {
+          geometries.add(o.geometry);
+          (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) =>
+            materials.add(m),
+          );
+        }
+      });
+      geometries.forEach((g) => g.dispose());
+      materials.forEach((m) => m.dispose());
     }
     return () => {
       dead = true;
       cancelAnimationFrame(raf);
       resize.disconnect();
       orbit.dispose();
-      scene.traverse(disposeObject);
-      texture.dispose();
+      renderer.domElement.removeEventListener("pointerdown", down);
+      renderer.domElement.removeEventListener("pointerup", up);
+      renderer.domElement.removeEventListener("keydown", key);
+      dispose(scene);
+      model.textures.forEach((t) => t.dispose());
+      environment.dispose();
+      sun.shadow.dispose();
+      ao.dispose();
+      output.dispose();
+      antialias.dispose();
+      composer.dispose();
       renderer.dispose();
       renderer.domElement.remove();
       labels.remove();
       runtime.current = null;
     };
-  }, [props.geo, props.imported]);
+  }, [props.imported]);
   useEffect(
     () => runtime.current?.update(),
-    [props.frame, props.selected, props.layer],
+    [props.frame, props.selected, props.layer, props.view, props.equipment],
   );
   useEffect(() => {
     if (props.focus) runtime.current?.focus();
   }, [props.focus]);
+  useEffect(() => runtime.current?.view(), [props.view]);
   return (
-    <div className="city-scene" ref={host}>
+    <div
+      ref={host}
+      className={`city-scene ${props.view === "plant" ? "plant-view" : ""}`}
+    >
       {error && (
         <div className="scene-error" role="alert">
           {error}
         </div>
       )}
+      <div className="render-settings">
+        <button
+          onClick={() => setDusk(!dusk)}
+          aria-pressed={dusk}
+          title="Art-directed lighting, independent of the simulation clock"
+        >
+          {dusk ? "☾ Blue hour" : "☀ Winter daylight"}
+        </button>
+        <button
+          onClick={() => setHighQuality(!highQuality)}
+          aria-pressed={highQuality}
+        >
+          {highQuality ? "Quality: cinematic" : "Quality: performance"}
+        </button>
+      </div>
+      <div className="orbit-hint">
+        DRAG TO ORBIT <span>·</span> SCROLL TO EXPLORE <span>·</span> CLICK TO
+        INSPECT
+      </div>
     </div>
   );
 }
