@@ -39,18 +39,41 @@ try {
   await page.goto(base);
   await page.locator(".city-scene canvas").waitFor();
   await page.locator(".status-toast").waitFor({ state: "hidden" });
+  await page
+    .getByRole("combobox", { name: "City district" })
+    .selectOption("beijing");
+  await page.locator('.city-scene[data-city="beijing"]').waitFor();
+  await page.locator(".status-toast").waitFor({ state: "hidden" });
   const cityCanvas = await page.locator(".city-scene canvas").elementHandle();
   const state = async () =>
     (await page.request.post(base + "/api/state", { data: {} })).json();
   const before = await state();
-  const originalStyle = await page
-    .locator(".immersive")
-    .evaluate((el) => ({
-      font: getComputedStyle(el).fontSize,
-      colour: getComputedStyle(el).color,
-    }));
+  for (const label of ["Assets", "Alarms", "Agents"]) {
+    await page.getByRole("button", { name: label, exact: true }).click();
+    await page
+      .getByRole("button", { name: "Expand to full screen", exact: true })
+      .click();
+    const dock = page.getByRole("dialog", {
+      name: "Contextual operations panel",
+    });
+    const box = await dock.boundingBox();
+    assert(
+      box.width >= 1679 && box.height >= 1079,
+      "Operations panel fills viewport",
+    );
+    assert.equal(await cityCanvas.evaluate((el) => el.isConnected), true);
+    await page.screenshot({
+      path: `../outputs/beijing-${label.toLowerCase()}-fullscreen.png`,
+    });
+    await page.keyboard.press("Escape");
+    assert.equal(await page.locator(".ops-dock.is-expanded").count(), 0);
+  }
+  const originalStyle = await page.locator(".immersive").evaluate((el) => ({
+    font: getComputedStyle(el).fontSize,
+    colour: getComputedStyle(el).color,
+  }));
   await page
-    .getByRole("button", { name: "BIM work studio", exact: true })
+    .getByRole("button", { name: "Open connected BIM Studio", exact: true })
     .first()
     .click();
   const studio = page.getByRole("dialog", {
@@ -84,20 +107,21 @@ try {
     .selectOption("x");
   await studio.getByRole("slider", { name: "Section position" }).fill("35");
   await studio
+    .getByRole("button", { name: "Link component to this item", exact: true })
+    .click();
+  await studio
     .getByRole("button", { name: "Return to district ×", exact: true })
     .click();
   assert.equal(await cityCanvas.evaluate((el) => el.isConnected), true);
   assert.deepEqual(
-    await page
-      .locator(".immersive")
-      .evaluate((el) => ({
-        font: getComputedStyle(el).fontSize,
-        colour: getComputedStyle(el).color,
-      })),
+    await page.locator(".immersive").evaluate((el) => ({
+      font: getComputedStyle(el).fontSize,
+      colour: getComputedStyle(el).color,
+    })),
     originalStyle,
   );
   await page
-    .getByRole("button", { name: "BIM work studio", exact: true })
+    .getByRole("button", { name: "Open connected BIM Studio", exact: true })
     .first()
     .click();
   assert.equal(
@@ -117,6 +141,47 @@ try {
     .getByRole("button", { name: "B01", exact: true })
     .click();
   assert.match(await studio.locator(".studio-context").textContent(), /B01/);
+  await studio
+    .getByText("No component linked to this item", { exact: true })
+    .waitFor();
+  assert(
+    await studio
+      .getByRole("button", {
+        name: "Investigate with BIM evidence",
+        exact: true,
+      })
+      .isDisabled(),
+  );
+  await studio
+    .getByRole("status")
+    .filter({ hasText: "926 mesh objects" })
+    .waitFor({ timeout: 60000 });
+  await studio
+    .getByRole("textbox", { name: "Search assets", exact: true })
+    .fill("Inline Pump");
+  await studio.locator(".eng-asset-list button").first().click();
+  await studio
+    .getByRole("button", { name: "Review notes", exact: false })
+    .click();
+  assert.equal(
+    await studio
+      .locator(".eng-app")
+      .getByText("Check maintenance access before assuming a pump defect.", {
+        exact: true,
+      })
+      .count(),
+    0,
+    "B10 notes cannot leak into B01",
+  );
+  await studio
+    .locator(".eng-note textarea")
+    .fill("B01 reference review only; verify asset mapping.");
+  await studio
+    .getByRole("button", { name: "Add review note", exact: true })
+    .click();
+  await studio
+    .getByRole("button", { name: "Link component to this item", exact: true })
+    .click();
   if (!process.env.BASE_URL) {
     const request = page.waitForRequest((r) =>
       r.url().endsWith("/api/investigation"),
@@ -130,7 +195,9 @@ try {
     const args = (await request).postDataJSON();
     assert.equal(args.assetId, "B01");
     assert.equal(args.engineeringReview.componentId, selected);
-    assert.match(args.engineeringReview.notes[0], /maintenance access/);
+    assert.match(args.engineeringReview.notes[0], /B01 reference/);
+    assert.equal(args.engineeringReview.item.assetId, "B01");
+    assert.equal(args.engineeringReview.item.cityId, before.cityId);
     await studio
       .getByText("Validating BIM review and circuit context · completed", {
         exact: true,
@@ -175,8 +242,29 @@ try {
       before.flowM3h,
       "BIM-originated plan must change actual simulator flow",
     );
+    const followup = page.waitForRequest((r) =>
+      r.url().endsWith("/api/investigation"),
+    );
     await page
-      .getByRole("button", { name: "BIM work studio", exact: true })
+      .getByRole("button", { name: "Run diagnostic agent", exact: true })
+      .click();
+    const followupArgs = (await followup).postDataJSON();
+    assert.equal(
+      followupArgs.engineeringReview.item.assetId,
+      "B01",
+      "Main agent includes the selected item's linked BIM evidence",
+    );
+    await page
+      .getByRole("button", { name: "Run diagnostic agent", exact: true })
+      .waitFor();
+    await page.waitForFunction(
+      () =>
+        ![...document.querySelectorAll("button")].find(
+          (b) => b.textContent === "Run diagnostic agent",
+        )?.disabled,
+    );
+    await page
+      .getByRole("button", { name: "Open connected BIM Studio", exact: true })
       .first()
       .click();
   }
@@ -215,6 +303,26 @@ try {
     .getByRole("button", { name: "在三维中操作所选回路", exact: true })
     .click();
   await page.locator(".direct-control").waitFor();
+  await page.getByRole("button", { name: "资产", exact: true }).click();
+  await page.getByRole("button", { name: "全屏展开", exact: true }).click();
+  const full = page.locator(".ops-dock.is-expanded");
+  assert(
+    await full.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    "Mobile fullscreen has no horizontal overflow",
+  );
+  await page
+    .getByRole("button", { name: /打开此资产 BIM/ })
+    .first()
+    .click();
+  await chinese.waitFor();
+  await page.keyboard.press("Escape");
+  await chinese.waitFor({ state: "hidden" });
+  assert.equal(
+    await full.count(),
+    1,
+    "Closing nested item BIM retains fullscreen asset view",
+  );
+  await page.getByRole("button", { name: "还原面板", exact: true }).click();
   assert.equal(await cityCanvas.evaluate((el) => el.isConnected), true);
   assert.deepEqual(errors, []);
   console.log(

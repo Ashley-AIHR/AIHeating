@@ -938,7 +938,7 @@ export default function CityScene(props: Props) {
             "Inspect source BIM with the selected asset, heat supply chain and agent context",
           )}
         >
-          ▧ {tx("BIM Studio")}
+          ▧ BIM · {props.view === "plant" ? props.equipment : props.selected}
         </button>
         <button onClick={() => setReferenceOpen(true)}>
           {tx("City vision")}

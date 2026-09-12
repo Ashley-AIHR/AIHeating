@@ -1175,6 +1175,69 @@ button:focus-visible {
 .cool {
   background: #509fff;
 }
+.dock-expand {
+  float: right;
+  margin: 0 0 10px 12px;
+  padding: 8px 10px;
+  border: 1px solid #42617a;
+  border-radius: 7px;
+  background: #183043;
+  color: #dcecf5;
+  cursor: pointer;
+}
+.item-bim-card {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #365366;
+  border-radius: 10px;
+  background: #122534;
+  overflow-wrap: anywhere;
+}
+.item-bim-card p {
+  margin: 0;
+  font-family: monospace;
+}
+.item-bim-card small {
+  color: #a5bdcd;
+}
+.finding-item {
+  margin-bottom: 14px;
+}
+.finding-item .finding {
+  margin-bottom: 4px;
+}
+.finding-bim {
+  padding: 8px 12px;
+  border: 1px solid #365366;
+  border-radius: 6px;
+  background: #183043;
+  color: #dcecf5;
+  cursor: pointer;
+}
+.immersive .ops-dock.is-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  width: 100%;
+  height: 100dvh;
+  box-sizing: border-box;
+  padding: 32px max(24px, calc((100vw - 1080px) / 2));
+  background: #0c1724;
+  border: 0;
+  overflow-y: auto;
+}
+.immersive .ops-dock.is-expanded .dock-heading {
+  position: sticky;
+  top: -32px;
+  padding-top: 22px;
+  z-index: 2;
+  background: #0c1724;
+}
+.immersive .ops-dock.is-expanded .dock-heading h2 {
+  max-width: 80%;
+}
 .ops-dock {
   position: absolute;
   right: 0;

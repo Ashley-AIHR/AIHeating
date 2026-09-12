@@ -47,16 +47,19 @@ export default function EngineeringWorkspace({
   onReview,
   integration,
   operatingContext,
+  initialReview,
 }: {
   active?: boolean;
   onClose?: () => void;
   onReview?: (review: EngineeringReview) => void;
   integration?: ReactNode;
+  initialReview?: EngineeringReview;
   operatingContext?: {
     cityId?: string;
     contextId?: string;
     revision: number;
     assetId: string;
+    equipmentId?: string;
   };
 } = {}) {
   const locale = useLocale();
@@ -119,8 +122,24 @@ export default function EngineeringWorkspace({
         n: Network = await b.json();
       setBim(m);
       setNetwork(n);
+      const restored =
+        initialReview && initialReview.source !== "local-glb"
+          ? initialReview
+          : undefined;
+      if (restored) {
+        setMode(restored.source === "network-benchmark" ? "network" : "bim");
+        setMeasurements(restored.measurements);
+        setIssues(
+          restored.notes.map((note) => ({
+            asset: restored.componentId,
+            note,
+            source: restored.sourceHash,
+          })),
+        );
+      }
       setSelected(
-        m.assets.find((x) => x.kind === "IfcFlowMovingDevice")?.id ??
+        restored?.componentId ??
+          m.assets.find((x) => x.kind === "IfcFlowMovingDevice")?.id ??
           m.assets[0]?.id ??
           "",
       );
@@ -346,7 +365,11 @@ export default function EngineeringWorkspace({
           {tx("h")}
           <span>
             {tx("HeatPilot")}
-            <small>{tx("BIM WORK STUDIO")}</small>
+            <small>
+              {operatingContext
+                ? `${tx("Item BIM reference")} · ${operatingContext.equipmentId || operatingContext.assetId}`
+                : tx("BIM WORK STUDIO")}
+            </small>
           </span>
         </a>
         <nav aria-label={tx("Engineering datasets")}>

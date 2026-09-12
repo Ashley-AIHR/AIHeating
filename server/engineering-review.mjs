@@ -17,6 +17,17 @@ export function engineeringEvidence(input, context) {
   if (input == null) return null;
   if (!input || typeof input !== "object" || Array.isArray(input))
     throw new Error("Invalid engineering review");
+  if (
+    input.item &&
+    (input.item.cityId !== context.site.city.id ||
+      input.item.assetId !== context.selected.id ||
+      input.item.contextId !== context.state.contextId ||
+      (input.item.equipmentId || null) !==
+        (context.selectedEquipment?.id || null))
+  )
+    throw new Error(
+      "Engineering reference belongs to a different item or simulation context",
+    );
   const fail = () => {
     throw new Error("Invalid engineering review source or component");
   };
@@ -88,6 +99,15 @@ export function engineeringEvidence(input, context) {
   });
   return {
     source: input.source,
+    referenceAssociation: input.item
+      ? {
+          cityId: input.item.cityId,
+          contextId: input.item.contextId,
+          assetId: input.item.assetId,
+          equipmentId: input.item.equipmentId || null,
+          status: "Operator-linked reference, not verified asset mapping",
+        }
+      : null,
     component,
     measurements,
     operatorNotes: input.notes,

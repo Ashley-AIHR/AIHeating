@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import EngineeringWorkspace from "./EngineeringWorkspace";
 import type { EngineeringReview } from "./review";
 import type { Twin } from "../operations/types";
@@ -12,6 +12,10 @@ type Props = {
   open: boolean;
   twin: Twin;
   selected: string;
+  item: NonNullable<EngineeringReview["item"]>;
+  itemKey: string;
+  linkedReview?: EngineeringReview;
+  onLink: (review: EngineeringReview) => void;
   busy: boolean;
   canRun: boolean;
   mission: Mission | null;
@@ -25,7 +29,15 @@ type Props = {
 export default function ConnectedStudio(p: Props) {
   useLocale();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [review, setReview] = useState<EngineeringReview | null>(null);
+  const [draft, setDraft] = useState<{
+    key: string;
+    review: EngineeringReview;
+  } | null>(null);
+  const review = draft?.key === p.itemKey ? draft.review : null;
+  const onReview = useCallback(
+    (value: EngineeringReview) => setDraft({ key: p.itemKey, review: value }),
+    [p.itemKey],
+  );
   useEffect(() => {
     if (p.open && !dialog.current?.open) dialog.current?.showModal();
     else if (!p.open) dialog.current?.close();
@@ -58,14 +70,17 @@ export default function ConnectedStudio(p: Props) {
       }}
     >
       <EngineeringWorkspace
+        key={p.itemKey}
         active={p.open}
         onClose={p.onClose}
-        onReview={setReview}
+        onReview={onReview}
+        initialReview={p.linkedReview}
         operatingContext={{
           cityId: p.twin.cityId,
           contextId: p.twin.contextId,
           revision: p.twin.revision,
           assetId: p.selected,
+          equipmentId: p.item.equipmentId,
         }}
         integration={
           <section
@@ -75,7 +90,8 @@ export default function ConnectedStudio(p: Props) {
             <div className="studio-context">
               <small>{tx("SHARED OPERATING CONTEXT")}</small>
               <strong>
-                {tx(p.twin.city?.name || "Yinchuan")} · {p.selected} ·{" "}
+                {tx(p.twin.city?.name || "Yinchuan")} · {p.selected}
+                {p.item.equipmentId ? ` / ${p.item.equipmentId}` : ""} ·{" "}
                 {tx("Revision")} {p.twin.revision}
               </strong>
               <span>
@@ -118,6 +134,37 @@ export default function ConnectedStudio(p: Props) {
                   "Selection follows the district supply chain. BIM picks remain separate reference identities; geometry alone cannot establish a hydraulic connection.",
                 )}
               </p>
+              <section
+                className="item-bim-card"
+                aria-label={tx("Item BIM reference")}
+              >
+                <strong>
+                  {tx("Item BIM reference")} ·{" "}
+                  {p.item.equipmentId || p.selected}
+                </strong>
+                <p>
+                  {p.linkedReview?.componentId ||
+                    tx("No component linked to this item")}
+                </p>
+                <small>
+                  {tx(
+                    "Session reference only · not a verified equipment mapping",
+                  )}
+                </small>
+                <button
+                  className="eng-outline"
+                  disabled={
+                    p.busy || !review?.sourceHash || !review.componentId
+                  }
+                  onClick={() => review && p.onLink(review)}
+                >
+                  {tx(
+                    p.linkedReview
+                      ? "Update linked component and evidence"
+                      : "Link component to this item",
+                  )}
+                </button>
+              </section>
               <button
                 className="eng-outline"
                 disabled={p.busy}
@@ -138,18 +185,20 @@ export default function ConnectedStudio(p: Props) {
               <div className="studio-agent-actions">
                 <button
                   className="eng-primary"
-                  disabled={p.busy || !p.canRun || !review?.sourceHash}
+                  disabled={p.busy || !p.canRun || !p.linkedReview?.sourceHash}
                   onClick={() =>
-                    review && p.onInvestigate("diagnostic", review)
+                    p.linkedReview &&
+                    p.onInvestigate("diagnostic", p.linkedReview)
                   }
                 >
                   {tx("Investigate with BIM evidence")}
                 </button>
                 <button
                   className="eng-outline"
-                  disabled={p.busy || !p.canRun || !review?.sourceHash}
+                  disabled={p.busy || !p.canRun || !p.linkedReview?.sourceHash}
                   onClick={() =>
-                    review && p.onInvestigate("optimisation", review)
+                    p.linkedReview &&
+                    p.onInvestigate("optimisation", p.linkedReview)
                   }
                 >
                   {tx("Plan supply-chain intervention")}

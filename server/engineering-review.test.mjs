@@ -26,6 +26,56 @@ const review = {
   measurements: [{ a: [0, 0, 0], b: [3, 4, 0], distance: 999 }],
   notes: ["Check maintenance access"],
 };
+test("Item reference rejects cross-city, cross-asset, cross-session and cross-equipment reuse", () => {
+  const item = {
+    cityId: "shanghai",
+    assetId: "B10",
+    contextId: snapshot.contextId,
+  };
+  assert.equal(
+    engineeringEvidence({ ...review, item }, context).referenceAssociation
+      .assetId,
+    "B10",
+  );
+  for (const mismatch of [
+    { cityId: "beijing" },
+    { assetId: "B01" },
+    { contextId: "other-session" },
+    { equipmentId: "P01" },
+  ]) {
+    assert.throws(
+      () =>
+        engineeringEvidence(
+          { ...review, item: { ...item, ...mismatch } },
+          context,
+        ),
+      /different item/,
+    );
+  }
+});
+test("Mechanical reference is scoped to the selected station equipment", () => {
+  const station = worldContext(
+    { ...snapshot, contextId: "equipment-session" },
+    "ST01",
+  );
+  station.selectedEquipment = station.mechanicalAssembly.equipment[0];
+  const item = {
+    cityId: "shanghai",
+    contextId: "equipment-session",
+    assetId: "ST01",
+    equipmentId: station.selectedEquipment.id,
+  };
+  assert.equal(
+    engineeringEvidence({ ...review, item }, station).referenceAssociation
+      .equipmentId,
+    item.equipmentId,
+  );
+  station.selectedEquipment = station.mechanicalAssembly.equipment[1];
+  assert.throws(
+    () => engineeringEvidence({ ...review, item }, station),
+    /different item/,
+  );
+});
 test("BIM evidence resolves source identity and recomputes distance without inventing bindings", () => {
   const result = engineeringEvidence(review, context);
   assert.equal(result.measurements[0].distance, 5);

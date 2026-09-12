@@ -194,6 +194,63 @@ export default function Workspace() {
   const inFlight = useRef(false),
     alive = useRef(true);
   const agentAbort = useRef<AbortController | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const dock = useRef<HTMLElement>(null);
+  const [itemReviews, setItemReviews] = useState<
+    Record<string, EngineeringReview>
+  >({});
+  const item = {
+    cityId: twin?.cityId || "yinchuan",
+    contextId: twin?.contextId || "",
+    assetId: selected,
+    equipmentId:
+      selected === "ST01" && sceneView === "plant" ? equipment : undefined,
+  };
+  const itemKey = JSON.stringify(item);
+  const linkedReview = itemReviews[itemKey];
+  useEffect(() => {
+    if (!expanded || !dock.current) return;
+    const el = dock.current;
+    const previous = document.activeElement as HTMLElement | null;
+    const siblings = [...(el.parentElement?.children || [])].filter(
+      (n): n is HTMLElement => n instanceof HTMLElement && n !== el,
+    );
+    const oldInert = siblings.map((n) => n.inert);
+    siblings.forEach((n) => {
+      n.inert = true;
+    });
+    el.querySelector<HTMLButtonElement>(".dock-expand")?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (bimOpen) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setExpanded(false);
+      }
+      if (e.key !== "Tab") return;
+      const controls = [
+        ...el.querySelectorAll<HTMLElement>(
+          'button, input, select, textarea, a[href], [tabindex="0"]',
+        ),
+      ].filter((n) => !n.hasAttribute("disabled") && n.getClientRects().length);
+      const first = controls[0],
+        last = controls[controls.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", key);
+    return () => {
+      siblings.forEach((n, i) => {
+        n.inert = oldInert[i];
+      });
+      document.removeEventListener("keydown", key);
+      previous?.focus();
+    };
+  }, [expanded, bimOpen]);
   function openStudio() {
     setBimVisited(true);
     setBimOpen(true);
@@ -475,7 +532,7 @@ export default function Workspace() {
                     ? equipment
                     : undefined,
                 question: brief,
-                engineeringReview,
+                engineeringReview: engineeringReview || linkedReview,
                 objective,
                 revision: origin.revision,
                 contextId: origin.contextId,
@@ -713,6 +770,7 @@ export default function Workspace() {
     );
   }
   function openControls() {
+    setExpanded(false);
     setCyclesRemaining(0);
     setPlaying(false);
     setPreviewPlaying(false);
@@ -855,10 +913,6 @@ export default function Workspace() {
             </button>
           )),
         )}
-        <button aria-label={tx("BIM work studio")} onClick={openStudio}>
-          <b aria-hidden="true">▧</b>
-          {tx("BIM Studio")}
-        </button>
         <div className="rail-bottom">
           {tx("3D")}
           <br />
@@ -881,7 +935,7 @@ export default function Workspace() {
           onView={setSceneView}
           onEquipment={setEquipment}
           equipment={equipment}
-          suspended={bimOpen}
+          suspended={bimOpen || expanded}
           onOpenBim={openStudio}
           affected={mission?.affected || []}
           comparison={baselineFrame}
@@ -1095,10 +1149,20 @@ export default function Workspace() {
         </span>
       </div>
       <aside
-        className="ops-dock"
+        ref={dock}
+        className={`ops-dock${expanded ? " is-expanded" : ""}`}
+        role={expanded ? "dialog" : undefined}
+        aria-modal={expanded || undefined}
         aria-label={tx("Contextual operations panel")}
       >
         <div className="dock-heading">
+          <button
+            className="dock-expand"
+            aria-expanded={expanded}
+            onClick={() => setExpanded(!expanded)}
+          >
+            {tx(expanded ? "Restore panel" : "Expand to full screen")}
+          </button>
           <div className="eyebrow">
             {tx(panel === "inspect" ? "ASSET CONTEXT" : "OPERATIONS TOOL")}
           </div>
@@ -1328,7 +1392,9 @@ export default function Workspace() {
                 ),
               )}
               <div className="dock-actions">
-                <button onClick={openStudio}>{tx("BIM work studio")}</button>
+                <button onClick={openStudio}>
+                  {tx("Open item BIM")} · {item.equipmentId || selected}
+                </button>
                 <button className="primary" onClick={() => setPanel("agents")}>
                   {tx("✧ Investigate this asset")}
                 </button>
@@ -1345,6 +1411,37 @@ export default function Workspace() {
                   )}
                 </button>
               </div>
+              <section
+                className="item-bim-card"
+                aria-label={tx("Item BIM reference")}
+              >
+                <strong>
+                  {tx("Item BIM reference")} · {item.equipmentId || selected}
+                </strong>
+                <p>
+                  {linkedReview
+                    ? linkedReview.componentId
+                    : tx("No component linked to this item")}
+                </p>
+                <small>
+                  {tx(
+                    "Session reference only · not a verified equipment mapping",
+                  )}
+                </small>
+                {linkedReview && (
+                  <button
+                    onClick={() =>
+                      setItemReviews((all) => {
+                        const next = { ...all };
+                        delete next[itemKey];
+                        return next;
+                      })
+                    }
+                  >
+                    {tx("Unlink reference")}
+                  </button>
+                )}
+              </section>
               <p className="muted">
                 {tx(
                   "One shared selection links the scene, network, timeline and agent investigation.",
@@ -1365,18 +1462,29 @@ export default function Workspace() {
               </p>
               {tx(
                 diagnosis?.findings.map((f) => (
-                  <button
-                    className={`finding ${f.severity}`}
-                    key={f.id}
-                    onClick={() => select(f.asset)}
-                  >
-                    <span>
-                      {tx(f.asset)} / {tx(f.severity)}
-                    </span>
-                    <strong>{tx(f.title)}</strong>
-                    <p>{tx(f.evidence)}</p>
-                    <small>{tx(f.certainty)}</small>
-                  </button>
+                  <div key={f.id} className="finding-item">
+                    <button
+                      className={`finding ${f.severity}`}
+                      onClick={() => select(f.asset)}
+                    >
+                      <span>
+                        {tx(f.asset)} / {tx(f.severity)}
+                      </span>
+                      <strong>{tx(f.title)}</strong>
+                      <p>{tx(f.evidence)}</p>
+                      <small>{tx(f.certainty)}</small>
+                    </button>
+                    <button
+                      className="finding-bim"
+                      onClick={() => {
+                        select(f.asset);
+                        setSceneView(f.asset === "ST01" ? "plant" : "district");
+                        openStudio();
+                      }}
+                    >
+                      {tx("Open item BIM")} · {f.asset}
+                    </button>
+                  </div>
                 )),
               )}
               {tx(
@@ -1390,6 +1498,16 @@ export default function Workspace() {
         {tx(
           panel === "agents" && (
             <>
+              {linkedReview && (
+                <section className="item-bim-card">
+                  <strong>
+                    {tx("Linked BIM evidence included")} ·{" "}
+                    {item.equipmentId || selected}
+                  </strong>
+                  <small>{linkedReview.componentId}</small>
+                  <button onClick={openStudio}>{tx("Open item BIM")}</button>
+                </section>
+              )}
               <MissionControl
                 mission={mission}
                 optimisation={optimisation}
@@ -2267,6 +2385,15 @@ export default function Workspace() {
             open={bimOpen}
             twin={twin}
             selected={selected}
+            item={item}
+            itemKey={itemKey}
+            linkedReview={linkedReview}
+            onLink={(review) =>
+              setItemReviews((all) => ({
+                ...all,
+                [itemKey]: { ...review, item },
+              }))
+            }
             busy={!!busy}
             canRun={!!config?.aiConfigured}
             mission={mission}
@@ -2290,6 +2417,7 @@ export default function Workspace() {
             }
             onOperate={() => {
               setBimOpen(false);
+              setExpanded(false);
               openControls();
             }}
             onPlan={() => {
