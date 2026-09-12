@@ -7,6 +7,9 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { numericalEvidence, guardNarrative } from "./agent-evidence.mjs";
+import { site, registry, worldContext, ObservationStore } from "./world.mjs";
+import { investigate } from "./immersive-agent.mjs";
+const observations = new ObservationStore();
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(path.join(root, ".env")))
@@ -71,7 +74,7 @@ function rpc(session, method, args = {}) {
 const sources = JSON.parse(
   await readFile(path.join(root, "server/sources.json"), "utf8"),
 );
-const model = process.env.OPENROUTER_MODEL || "google/gemini-2.5-flash";
+const model = process.env.OPENROUTER_MODEL || "deepseek/deepseek-v4-flash-0731";
 const locked = new Set();
 let activeAgents = 0,
   hourlyCalls = 0,
@@ -243,7 +246,7 @@ const server = http.createServer(async (req, res) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
   );
   let session,
     acquired = false;
@@ -263,6 +266,9 @@ const server = http.createServer(async (req, res) => {
         accessCodeRequired: true,
         scenarios: ["imbalance", "warming", "cold", "sensor", "window"],
         sources,
+        site,
+        registry,
+        telemetryConfigured: !!process.env.TELEMETRY_INGEST_TOKEN,
       });
     if (url.pathname.startsWith("/api/")) {
       if (req.method !== "POST")
@@ -274,6 +280,28 @@ const server = http.createServer(async (req, res) => {
         return send(res, 403, { error: "Cross-origin request denied." });
       if (!req.headers["content-type"]?.startsWith("application/json"))
         return send(res, 415, { error: "Expected application/json." });
+      if (url.pathname === "/api/telemetry/ingest") {
+        if (
+          !equalSecret(
+            req.headers["x-telemetry-token"],
+            process.env.TELEMETRY_INGEST_TOKEN,
+          )
+        )
+          return send(res, 401, { error: "Gateway authentication required" });
+        return send(res, 200, observations.ingest(await body(req)));
+      }
+      if (url.pathname === "/api/telemetry") {
+        if (
+          !equalSecret(
+            req.headers["x-ai-access-code"],
+            process.env.AI_ACCESS_TOKEN,
+          )
+        )
+          return send(res, 401, {
+            error: "Operator access code required to read observations",
+          });
+        return send(res, 200, observations.snapshot());
+      }
       const method = {
         "/api/state": "snapshot",
         "/api/reset": "reset",
@@ -282,6 +310,10 @@ const server = http.createServer(async (req, res) => {
         "/api/compare": "compare",
         "/api/apply": "apply",
         "/api/agent": "agent",
+        "/api/investigation": "investigation",
+        "/api/world": "world",
+        "/api/replay": "replay",
+        "/api/optimise": "optimise",
       }[url.pathname];
       if (!method) return send(res, 404, { error: "Unknown endpoint." });
       const args = await body(req);
@@ -300,7 +332,13 @@ const server = http.createServer(async (req, res) => {
         });
       locked.add(session);
       acquired = true;
-      if (method === "agent") {
+      if (method === "world")
+        return send(
+          res,
+          200,
+          worldContext(await rpc(session, "snapshot"), args.assetId || "ST01"),
+        );
+      if (method === "agent" || method === "investigation") {
         if (!process.env.OPENROUTER_API_KEY || !process.env.AI_ACCESS_TOKEN)
           return send(res, 503, {
             error:
@@ -336,6 +374,37 @@ const server = http.createServer(async (req, res) => {
         activeAgents++;
         hourlyCalls++;
         try {
+          if (method === "investigation")
+            return send(
+              res,
+              200,
+              await investigate({
+                session,
+                args,
+                rpc,
+                model,
+                complete: async (payload) => {
+                  const response = await fetch(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                        "Content-Type": "application/json",
+                        "X-Title": "HeatPilot immersive agents",
+                      },
+                      body: JSON.stringify(payload),
+                      signal: AbortSignal.timeout(35000),
+                    },
+                  );
+                  if (!response.ok)
+                    throw new Error(
+                      `AI provider returned HTTP ${response.status}`,
+                    );
+                  return response.json();
+                },
+              }),
+            );
           return send(
             res,
             200,

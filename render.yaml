@@ -9,6 +9,8 @@ services:
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL
-        value: google/gemini-2.5-flash
+        value: deepseek/deepseek-v4-flash-0731
       - key: AI_ACCESS_TOKEN
+        generateValue: true
+      - key: TELEMETRY_INGEST_TOKEN
         generateValue: true

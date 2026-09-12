@@ -10,6 +10,7 @@ before(async () => {
       ...process.env,
       PORT: "3099",
       OPENROUTER_API_KEY: "",
+      OPENROUTER_MODEL: "",
       AI_ACCESS_TOKEN: "",
       NODE_ENV: "test",
     },
@@ -65,6 +66,7 @@ test("static production app and legacy route are served, internal files are not"
 test("configuration exposes capabilities, not secrets", async () => {
   const value = await (await fetch(base + "/api/config")).json();
   assert.equal(value.aiConfigured, false);
+  assert.equal(value.model, "deepseek/deepseek-v4-flash-0731");
   assert.equal(value.sources.length, 9);
   assert(!JSON.stringify(value).includes("sk-or-"));
 });

@@ -1,12 +1,14 @@
 # Heatpilot / AIHeating
 
-A 3D, physics-backed research twin for **Chinese residential district heating with a secondary network**. Includes a server-side OpenRouter investigation agent, bounded numerical comparisons and explicit operator approval for simulation changes.
+A **dark, integrated spatial heating-operations demonstrator** for a Yinchuan-oriented residential secondary network. One persistent district workspace connects orbitable geographic context, asset selection, alarms, physical-model inspection, replay, forecast, DeepSeek V4 Flash diagnostic/optimisation workflows and operator-approved simulator changes.
 
-This is a synthetic research prototype, not a live SCADA system or an autonomous plant controller. The original frozen research dashboard remains available at **/legacy**.
+The default route is the integrated workspace. Its 18 source OpenStreetMap building footprints and 43 road ways provide actual Yinchuan geographic context, but building heights can be assumed, facade appearance is illustrative and B01–B12 associations/heating routes are explicitly synthetic. **This is not a photorealistic surveyed estate or a commissioned field twin.** The public 926-component BIM opens within the workspace as an unlinked engineering reference. A read-only authenticated observation gateway accepts validated measurements but does not assimilate them into the uncalibrated simulator.
+
+The standalone engineering tools are preserved at **/engineering** (including the independent OpenDHN benchmark), image-backed reference design at **/reference**, earlier procedural scene at **/operations-classic**, and frozen research dashboard at **/legacy**. Shanghai and Shenzhen are documented alternative energy-system profiles, not enabled aliases of the heating engine. No physical plant control is connected.
 
 ## Run locally
 
-Requirements: Node.js 24.14.1 or newer, Python 3.12, and a WebGL-capable browser for the 3D view. The asset list and numerical tools remain usable if WebGL is unavailable.
+Requirements: Node.js 24.14.1 or newer, Python 3.12, and a modern WebGL-capable browser for orbitable geometry. The image-backed reference workspace does not require WebGL. Asset registers and graph analysis remain available without a working graphics context. IfcOpenShell is only needed for offline asset reproduction, not the deployed app.
 
 ```sh
 npm ci
@@ -27,12 +29,15 @@ Create an untracked .env file using .env.example as the template, or set environ
 | Variable | Purpose |
 |---|---|
 | OPENROUTER_API_KEY | Provider key, server only |
-| OPENROUTER_MODEL | Tool-capable model; default google/gemini-2.5-flash |
+| OPENROUTER_MODEL | Tool-capable model; default deepseek/deepseek-v4-flash-0731 (pinned DeepSeek V4 Flash release) |
+| TELEMETRY_INGEST_TOKEN | Separate gateway secret; permits read-only measurement ingestion, never actuator writes |
 | AI_ACCESS_TOKEN | A separate, strong operator access code protecting paid requests |
 | PYTHON_BIN | Optional Python executable override |
 | PORT | HTTP listener port |
 
 Enter **AI_ACCESS_TOKEN**, not the provider key, in the browser's AI copilot access-code field. The operator code is held in component memory, not localStorage or exported evidence. Never prefix secrets with VITE_. Never put secrets in render.yaml, source files, URLs or Git remotes. Rotate credentials that have been posted in a chat or other shared location.
+
+Existing `.env` or Render environment values override the default. To migrate an existing deployment, explicitly set `OPENROUTER_MODEL=deepseek/deepseek-v4-flash-0731` and restart/redeploy. A bounded live DeepSeek diagnostic tool-call test passed on 13 September 2026; provider availability and routing can change. The earlier Gemini validation record is historical. See `docs/integrated-system.md` for delivered capabilities, validation and remaining field-commissioning requirements; `docs/immersive-agents.md` retains the broader architecture direction.
 
 Without AI configuration, the physical twin, rule-based investigations, scenario comparisons and evidence export still work. The UI clearly reports that AI is unavailable; it does not substitute a fabricated AI answer. Provider questions and synthetic tool results leave the server for OpenRouter and the selected model provider. Do not enter confidential plant or resident data.
 
@@ -55,7 +60,21 @@ The Dockerfile builds the client with Node and runs a non-root Node/Python servi
 
 ## What is implemented
 
-- Selectable Three.js estate with thermal, flow and sensor layers, camera controls and a keyboard-accessible building list.
+- Persistent dark operations canvas with actual OSM geographic footprints, explicitly assumed heights, synthetic network overlays, thermal colouring, orbit/pan/zoom, picking and connected-branch selection.
+- Unified inspection, alarms, agents, optimisation, source evidence and data-connection tools; BIM opens in context without changing the selected district asset or timeline.
+- Immutable per-session replay snapshots and complete per-building forecast frames, including forecast weather, plant settings and branch state.
+- Bounded two-block numerical pattern-search optimisation over the nonlinear engine, fresh verification rollout, plan hashes and five-minute expiring approval tokens. Only the next 30-minute simulator step can be applied; no global optimality claim.
+- DeepSeek diagnostic and optimisation workflows with authoritative world context, allowlisted numerical tools, recorded tool evidence and validated scene-focus targets. No LLM actuator, and numerical tools remain available without AI.
+- Authenticated measurement ingestion with asset/metric/unit/time/quality checks, atomic batch rejection and stale-data reporting. Separate from simulation; latest-value memory storage only.
+- Desktop/mobile browser workflow tests, mocked provider orchestration tests, physical optimiser/replay tests and an opt-in live provider smoke test.
+
+- Imported IFC-to-GLB geometry with persistent GlobalIds, source property sets, class filtering, full orbit/pan/zoom, focus, visibility and isolation.
+- X/Y/Z section planes, real raycast surface measurements, saved viewpoints, source-bound review notes and JSON review export. Measurements describe tessellated geometry, not certified clearances.
+- OpenDHN pipe inspection, source-length-weighted path tracing and multi-edge outage connectivity screening; no invented elevation, valve states, live flow or temperatures.
+- Local self-contained GLB import, up to 50 MiB, with external URI/compression guards. Source files are parsed in the browser, not uploaded.
+- Linked District and Mechanical reference imagery, twelve building hotspots, five mechanical asset groups, temperature/flow/identity overlays, zoom/pan and keyboard-accessible asset selection.
+- Shared simulation clock and building context across views; station-to-branch navigation; individual heat exchangers and cabinets explicitly labelled as unmodelled reference geometry.
+- Responsive light/navy operator workspace, actual simulated history, interventions, AI investigation and evidence export. The previous Three.js scene is preserved at /operations-classic.
 - Five synthetic scenarios: hydraulic imbalance, sunrise demand drop, cold front, sensor bias and local ventilation loss.
 - Existing P1A nonlinear hydraulic/thermal engine; 5-minute physical substeps and 30-minute operator steps.
 - Five-candidate, three-hour what-if comparison with explicit model-floor rejection and bounded control changes.
@@ -66,7 +85,9 @@ The Dockerfile builds the client with Node and runs a non-root Node/Python servi
 
 ## Engineering limits
 
-All site geometry and telemetry are synthetic. The scene is not a surveyed GIS/BIM model. Branch parameters determine transport delay; the displayed pipe lengths do not. Animated particles convey flow direction and relative branch flow, not calibrated travel time.
+The default mechanical view is a public MEP coordination model, not fabrication CAD and not the generated image reconstructed as geometry. Its source has no explicit IFC port connections: the inspector reports this rather than inferring hydraulic connectivity. OpenDHN provides anonymised plan coordinates with zero elevations; rendered cylinders are selectable topology glyphs with exaggerated widths. It is kept separate from the Chinese synthetic model. See [Orbitable engineering workspace](docs/orbitable-engineering.md) for attribution, reproduction and validation.
+
+All site imagery, classic geometry and telemetry are synthetic. Neither scene is a surveyed GIS/BIM model. The default imagery is raster artwork, with illustrative asset anchors and pipe colours. Zoom does not expose new geometry. Branch parameters determine transport delay; displayed pipe lengths do not. Mechanical equipment is not independently simulated: pump and header readings are aggregate station-boundary values. See [Reference workspace implementation and asset provenance](docs/reference-workspace.md).
 
 There are twelve aggregate buildings, not apartment-level observations. Supply transport is adiabatic; return delay and pipe heat loss are not modelled. Heat kWh refers to integrated heat delivered to buildings, not purchased station energy. The model is not field-calibrated, and prediction uncertainty is not quantified.
 
@@ -78,8 +99,14 @@ The source register is curated, not live web retrieval. The model cannot control
 
 | Layer | Implementation |
 |---|---|
-| Operations UI | src/operations/OperationsApp.tsx and operations.css |
-| 3D scene | src/operations/DistrictScene.tsx; lazily loaded Three.js |
+| Default engineering workspace | src/engineering/EngineeringWorkspace.tsx and engineering.css |
+| Orbitable engineering viewport | src/engineering/EngineeringScene.tsx; Three.js/OrbitControls/GLTFLoader |
+| Graph analysis and import validation | src/engineering/model.ts |
+| Public engineering assets | public/engineering-assets; credited IFC-derived GLB/metadata and OpenDHN graph |
+| Image-backed simulation workspace | src/operations/TwinWorkspace.tsx and workspace.css at /reference |
+| Reference imagery and hotspots | src/operations/ReferenceScene.tsx and assets/*.png |
+| Preserved classic workspace | src/operations/OperationsApp.tsx and operations.css at /operations-classic |
+| Classic 3D scene | src/operations/DistrictScene.tsx; lazily loaded Three.js |
 | HTTP and AI boundary | server/index.mjs; built-in Node HTTP server |
 | Numeric result presentation | server/agent-evidence.mjs |
 | Stateful simulation adapter | server/twin.py; JSON-lines worker protocol |
@@ -95,6 +122,7 @@ The server has same-origin checks, HttpOnly cookies, bounded requests and worker
 npm run build
 npm test
 npm run test:operations
+npm run test:engineering
 physical_core/.venv/bin/python -m unittest discover -s server -p 'test_*.py' -v
 ```
 
@@ -102,10 +130,11 @@ Browser verification, with npm start running:
 
 ```sh
 npx playwright install chromium
-node scripts/operations-browser.mjs
+BASE_URL=http://127.0.0.1:3000 npm run test:workspace
+BASE_URL=http://127.0.0.1:3000 npm run test:engineering:browser
 ```
 
-Set SCREENSHOT_DIR to choose the screenshot directory. PLAYWRIGHT_CHROMIUM_EXECUTABLE can point to an existing compatible Chromium executable. The browser suite checks selection, layers, camera changes, stepping, scenarios, comparison, approval, sensor diagnostics, source links, mobile layout and legacy loading.
+Set SCREENSHOT_DIR to choose the screenshot directory. PLAYWRIGHT_CHROMIUM_EXECUTABLE can point to an existing compatible Chromium executable. BASE_URL defaults to http://127.0.0.1:3100 to support an isolated test service. The browser suite checks both reference views, selection, layers, zoom, stepping, scenarios, comparison, approval, sensor diagnostics, source links, evidence export, mobile layout, image failure and preserved routes. It does not make paid AI calls.
 
 The following is an **opt-in paid integration check** using the secrets in a local .env file:
 

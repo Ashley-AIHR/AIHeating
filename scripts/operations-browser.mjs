@@ -17,7 +17,9 @@ page.on("console", (m) => {
   if (m.type() === "error" && !m.text().includes("favicon"))
     errors.push(m.text());
 });
-await page.goto("http://127.0.0.1:3000");
+await page.goto(
+  (process.env.BASE_URL || "http://127.0.0.1:3000") + "/operations-classic",
+);
 await page
   .getByRole("heading", { name: "Every building. One connected network." })
   .waitFor();
@@ -155,7 +157,7 @@ await page
   .waitFor();
 await page.locator(".asset-strip button").first().click();
 await page.getByRole("heading", { name: "Building 01", exact: true }).waitFor();
-await page.goto("http://127.0.0.1:3000/legacy");
+await page.goto((process.env.BASE_URL || "http://127.0.0.1:3000") + "/legacy");
 await page.waitForTimeout(500);
 assert(
   (await page.locator("body").innerText()).length > 500,

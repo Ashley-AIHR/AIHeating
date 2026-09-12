@@ -14,6 +14,7 @@ WORKDIR /app
 COPY server/requirements.txt ./server/requirements.txt
 RUN pip install --no-cache-dir -r server/requirements.txt
 COPY server ./server
+COPY --from=frontend /app/public/site-assets ./public/site-assets
 COPY physical_core/src ./physical_core/src
 COPY --from=frontend /app/dist ./dist
 ENV NODE_ENV=production PYTHON_BIN=python3 PORT=10000 OPENBLAS_NUM_THREADS=1

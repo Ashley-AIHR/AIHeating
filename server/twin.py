@@ -48,7 +48,7 @@ def new_session(scenario='imbalance'):
         temps = {f'B{i+1:02}': 21 + (i % 4) * 0.15 for i in range(12)}
     c = Controls(52, 45, (0.78, 0.58, 0.35) if scenario == 'imbalance' else (0.60, 0.65, 0.85))
     s = {'scenario': scenario, 'engine': SimulationEngine(p, c, temps), 'history': [],
-         'events': [], 'revision': 0, 'candidates': {}, 'touched': time.time(),
+         'events': [], 'revision': 0, 'candidates': {}, 'frames': [], 'touched': time.time(),
          'windows': {'B03': 0.45} if scenario == 'window' else {}}
     # Six physical substeps produce a valid first frame at the 30-minute boundary.
     advance(s, 6)
@@ -74,6 +74,8 @@ def _advance(s, steps, controls=None):
     s['revision'] += 1
     s['candidates'] = {}
     record = snapshot(s, history=False)
+    s.setdefault('frames', []).append(record)
+    s['frames'] = s['frames'][-48:]
     s['history'].append({'time': record['time'][11:16], 'elapsedMinutes': record['elapsedMinutes'],
         'supplyC': record['supplyC'], 'returnC': record['returnC'], 'loadKw': record['loadKw'],
         'heatKw': record['heatKw'], 'minimumC': min(b['indoorC'] for b in record['buildings']),
@@ -168,15 +170,20 @@ def candidate_controls(s, args):
     return candidate
 
 
-def rollout(s, controls, hours=3):
+def rollout(s, controls, hours=3, second=None):
     e = deepcopy(s['engine'])
     initial_heat, initial_pump = e.heat_energy_j, e.pump_energy_j
     trace = []
     min_c = min(e.temperatures.values())
     overheated, count, discomfort = 0, 0, 0
+    residual, pressure = 0.0, 0.0
     for i in range(int(hours * 12)):
         # The issued synthetic weather path is the same for every candidate.
-        f = e.step(weather(s, i * 300), controls if i == 0 else None, s['windows'])
+        change = controls if i == 0 else second if i == 18 else None
+        f = e.step(weather(s, i * 300), change, s['windows'])
+        residual = max(residual, f.hydraulics.solver.normalized_residual,
+                       f.heat_balance_residual, f.pipe_heat_balance_residual, f.building_heat_balance_residual)
+        pressure = max(pressure, f.hydraulics.available_pressure_pa / 1000)
         temps = [b.indoor_temperature_c for b in f.buildings.values()]
         min_c = min(min_c, *temps)
         overheated += sum(t > 23 for t in temps)
@@ -184,7 +191,11 @@ def rollout(s, controls, hours=3):
         discomfort += sum(max(20-t, 0)**2 + max(t-22, 0)**2 for t in temps) / 12
         if (i+1) % 6 == 0:
             trace.append({'minutes': (i+1)*5, 'minimumC': min(temps), 'meanC': mean(temps),
-                          'heatKw': f.actual_heat_w / 1000, 'returnC': f.station_return_c})
+                          'state': snapshot({**s, 'engine': e, 'frame': f}, history=False),
+                          'heatKw': f.actual_heat_w / 1000, 'returnC': f.station_return_c,
+                          'buildings': {key: {'indoorC': b.indoor_temperature_c,
+                              'heatKw': b.heating_power_w / 1000,
+                              'returnC': b.radiator_return_temperature_c} for key, b in f.buildings.items()}})
     heat = (e.heat_energy_j - initial_heat) / 3.6e6
     pump = (e.pump_energy_j - initial_pump) / 3.6e6
     return {'heatKwh': heat, 'pumpKwh': pump, 'minimumC': min_c,
@@ -193,7 +204,8 @@ def rollout(s, controls, hours=3):
         'verification': 'Passed 18°C simulation floor' if min_c >= 18 else 'Rejected: 18°C simulation floor violated',
         'controls': {'supplyC': controls.supply_c, 'pumpHz': controls.frequency_hz,
                      'valvesPct': [v*100 for v in controls.valves]},
-        'method': 'P1A nonlinear rollout · fixed candidate · 3 h · not P6 MPC', 'hours': hours}
+        'maxResidual': residual, 'maxPressureKpa': pressure,
+        'method': 'P1A nonlinear rollout · 3 h · not P6 MPC', 'hours': hours}
 
 
 def compare(s):
@@ -239,6 +251,11 @@ def dispatch(session_id, method, args):
         return snapshot(sessions[session_id])
     if method == 'snapshot':
         return snapshot(s)
+    if method == 'replay':
+        return {'frames': s.get('frames', []), 'revision': s['revision'], 'mode': 'simulation replay'}
+    if method == 'optimise':
+        from optimiser import optimise
+        return optimise(s, args)
     if method == 'advance':
         if s['engine'].elapsed_s >= 24*3600:
             raise ValueError('24-hour demonstration complete; reset to start again')
@@ -252,12 +269,15 @@ def dispatch(session_id, method, args):
         return rollout(s, candidate_controls(s, args))
     if method == 'apply':
         proposal = s['candidates'].get(args.get('candidateId'))
-        if not proposal or proposal['revision'] != s['revision']:
+        if not proposal or proposal['revision'] != s['revision'] or time.time() > proposal.get('expires', float('inf')):
             raise ValueError('Recommendation expired; compare again against the current state')
         controls = candidate_controls(s, proposal['controls'])
-        check = rollout(s, controls)
+        second = Controls(**proposal['second']) if proposal.get('second') else None
+        check = rollout(s, controls, second=second)
         if not check['verified']:
             raise ValueError('Trajectory did not pass the simulation floor')
+        if proposal.get('optimised') and (check['maxResidual'] > 1e-6 or check['maxPressureKpa'] > 250):
+            raise ValueError('Independent numerical verification failed')
         advance(s, 6, controls)
         s['events'].append({'time': s['frame'].simulation_time, 'title': 'Operator applied simulated controls',
             'detail': f"Supply {controls.supply_c:.1f}°C · pump {controls.frequency_hz:.1f} Hz · verified 3-hour model rollout"})
