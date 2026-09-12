@@ -473,9 +473,46 @@
   border-color: #efa76e;
 }
 .mission-events {
+  max-height: 280px;
+  overflow: auto;
   font-size: 10px;
   line-height: 1.7;
   color: #9eb6c6;
+}
+.mission-events section {
+  min-width: 0;
+  flex: 1;
+}
+.mission-events small,
+.mission-events strong {
+  display: block;
+}
+.mission-events pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 10px;
+  background: #0b1a25;
+  padding: 8px;
+}
+.agent-live-output {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid #3f6e72;
+  border-radius: 8px;
+  background: #0d2530;
+}
+.agent-live-output > small {
+  color: #9dcec6;
+  font-size: 9px;
+}
+.agent-live-output p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow: auto;
+  line-height: 1.7;
 }
 .mission-events > div {
   display: flex;

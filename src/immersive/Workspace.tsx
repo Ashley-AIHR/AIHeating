@@ -62,6 +62,8 @@ export type Optimisation = {
   limitations: string[];
 };
 type Run = {
+  completionStatus?: "complete" | "partial";
+  warning?: string;
   runId: string;
   role: string;
   model: string;
@@ -185,6 +187,7 @@ export default function Workspace() {
     [bimAction, setBimAction] = useState<"fit" | "focus">("fit");
   const inFlight = useRef(false),
     alive = useRef(true);
+  const agentAbort = useRef<AbortController | null>(null);
   const bimCommand = useMemo(
     () => ({ id: bimFocus, type: bimAction }),
     [bimFocus, bimAction],
@@ -233,6 +236,7 @@ export default function Workspace() {
     });
     return () => {
       alive.current = false;
+      agentAbort.current?.abort();
     };
   }, []);
   useEffect(() => {
@@ -386,33 +390,7 @@ export default function Workspace() {
     });
   }
   async function investigate(role: string) {
-    if (role === "optimisation") return startMission(true);
-    setCyclesRemaining(0);
-    await work(
-      `${role === "diagnostic" ? "Diagnostic" : "Optimisation"} agent is using numerical tools`,
-      async () => {
-        setPlaying(false);
-        const r = await api<Run>(
-          "investigation",
-          {
-            role,
-            assetId: selected,
-            equipmentId:
-              selected === "ST01" && sceneView === "plant"
-                ? equipment
-                : undefined,
-            question,
-            objective,
-            revision: twin?.revision,
-            mode: "simulation",
-          },
-          code,
-        );
-        setRun(r);
-        if (r.optimisation) setOptimisation(r.optimisation);
-        setPanel("agents");
-      },
-    );
+    return startMission(true, false, question, role);
   }
   function preview(side: "intervention" | "baseline", play = false) {
     setPlaying(false);
@@ -426,6 +404,7 @@ export default function Workspace() {
     useAgent: boolean,
     continuing = false,
     brief = question,
+    role = "optimisation",
   ) {
     if (!twin) return;
     if (!continuing) setCyclesRemaining(0);
@@ -471,16 +450,23 @@ export default function Workspace() {
             (m) =>
               m && {
                 ...m,
-                events: [...m.events, e],
+                events: e.kind === "text" ? m.events : [...m.events, e],
+                draft:
+                  e.kind === "text"
+                    ? ((m.draftRound === e.round ? m.draft : "") || "") + e.text
+                    : m.draft,
+                draftRound: e.kind === "text" ? e.round : m.draftRound,
                 message: toolNames[e.tool] || e.tool,
               },
           );
         try {
           let o: Optimisation | null;
+          let partialWarning: string | undefined;
           if (useAgent) {
+            agentAbort.current = new AbortController();
             const r = await streamInvestigation<Run>(
               {
-                role: "optimisation",
+                role,
                 assetId,
                 equipmentId:
                   assetId === "ST01" && sceneView === "plant"
@@ -493,8 +479,16 @@ export default function Workspace() {
               },
               code,
               event,
+              agentAbort.current.signal,
             );
             setRun(r);
+            setMission((m) => m && { ...m, draft: r.answer });
+            if (r.completionStatus === "partial") {
+              partialWarning =
+                r.warning ||
+                "AI explanation incomplete; completed tools preserved";
+              setCyclesRemaining(0);
+            }
             o = r.optimisation;
             // Apply only validated, known highlight targets; never move the camera after a late response.
             const targets = r.sceneActions
@@ -530,7 +524,16 @@ export default function Workspace() {
             });
           }
           setOptimisation(o);
-          if (o?.recommendation && o.verification.passed) {
+          if (partialWarning) {
+            setMission(
+              (m) =>
+                m && {
+                  ...m,
+                  phase: "blocked",
+                  message: `${partialWarning}. Tool evidence retained; automatic application stopped.`,
+                },
+            );
+          } else if (o?.recommendation && o.verification.passed) {
             setMission(
               (m) =>
                 m && {
@@ -556,7 +559,9 @@ export default function Workspace() {
                   phase: "blocked",
                   message: o
                     ? "No feasible intervention found. Review the model evidence."
-                    : "No control plan proposed. Review the investigation findings.",
+                    : role === "diagnostic"
+                      ? "Diagnostic investigation complete. Review its explanation and tool evidence."
+                      : "No control plan proposed. Review the investigation findings.",
                 },
             );
         } catch (e) {
@@ -569,6 +574,8 @@ export default function Workspace() {
               },
           );
           throw e;
+        } finally {
+          agentAbort.current = null;
         }
       },
     );
@@ -1245,7 +1252,12 @@ export default function Workspace() {
                 setCyclesRemaining(3);
                 void startMission(true, true);
               }}
-              onStop={() => setCyclesRemaining(0)}
+              onStop={() => {
+                setCyclesRemaining(0);
+                agentAbort.current?.abort(
+                  new Error("Investigation stopped by operator"),
+                );
+              }}
             />
             <label>
               Mission objective
@@ -1328,7 +1340,13 @@ export default function Workspace() {
             </p>
             {run && (
               <article className="agent-result">
-                <div className="eyebrow">COMPLETED / {run.role}</div>
+                <div className="eyebrow">
+                  {run.completionStatus === "partial"
+                    ? "PARTIAL · EVIDENCE RETAINED"
+                    : "COMPLETED"}{" "}
+                  / {run.role}
+                </div>
+                {run.warning && <p className="warning">{run.warning}</p>}
                 <h3>
                   {run.assetId}
                   {run.equipmentId ? ` / ${run.equipmentId}` : ""} · revision{" "}

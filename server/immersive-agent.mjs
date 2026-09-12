@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { guardNarrative } from "./agent-evidence.mjs";
 import { worldContext, registry } from "./world.mjs";
+import { compactEvidence } from "./agent-context.mjs";
 const schema = (name, description, properties = {}) => ({
   type: "function",
   function: {
@@ -16,6 +17,7 @@ export async function investigate({
   complete,
   model,
   onEvent = () => {},
+  signal,
 }) {
   const role = args.role || "diagnostic";
   if (!["diagnostic", "optimisation"].includes(role))
@@ -43,20 +45,23 @@ export async function investigate({
   }
   const trace = [],
     events = [];
-  const progress = (tool, status) => {
+  const progress = (tool, status, detail = {}) => {
     const event = {
       tool,
       at: new Date().toISOString(),
       status,
       assetId: selected,
       revision: snapshot.revision,
+      ...detail,
     };
-    events.push(event);
+    if (event.kind !== "text") events.push(event);
     onEvent(event);
   };
   const record = (tool, result) => {
     trace.push({ tool, result });
-    progress(tool, result?.error ? "failed" : "completed");
+    progress(tool, result?.error ? "failed" : "completed", {
+      result: compactEvidence(result),
+    });
     return result;
   };
   progress("diagnose_building", "running");
@@ -119,7 +124,7 @@ export async function investigate({
       role: "user",
       content: JSON.stringify({
         question: args.question,
-        context,
+        context: compactEvidence(context),
         diagnosis,
         optimisation,
       }),
@@ -132,30 +137,80 @@ export async function investigate({
       " Direct the mission through your tools: inspect the affected system, test a useful alternative, then call optimise_network to prepare a verified intervention if appropriate. The client will preview the returned numerical trajectory in the city. If the evidence calls for no control intervention, explain why and leave the plan absent.";
   let totalTokens = 0,
     answer = "",
-    calls = 0;
+    calls = 0,
+    warning = null;
   for (let round = 0; round < 4; round++) {
-    progress("agent_decision", "running");
-    const data = await complete({
-      model,
-      messages,
-      tools,
-      tool_choice: round === 3 ? "none" : round === 0 ? "required" : "auto",
-      max_tokens: 6000,
-      temperature: 0.2,
-      provider: { require_parameters: true },
-    });
+    if (signal?.aborted) {
+      warning = "Investigation cancelled or its total time limit was reached";
+      break;
+    }
+    progress("agent_decision", "running", { round });
+    let data,
+      roundDraft = "";
+    try {
+      data = await complete(
+        {
+          model,
+          messages,
+          tools,
+          tool_choice: round === 3 ? "none" : round === 0 ? "required" : "auto",
+          max_tokens: 3500,
+          reasoning: { effort: "low", exclude: true },
+          temperature: 0.2,
+          provider: { require_parameters: true },
+        },
+        {
+          onDelta: (delta) => {
+            if (delta.kind === "text") roundDraft += delta.text || "";
+            progress("agent_output", "running", { round, ...delta });
+          },
+        },
+      );
+    } catch (error) {
+      answer = roundDraft;
+      warning = error.message || "AI provider interrupted the response";
+      progress("agent_decision", "failed", { round, message: warning });
+      break;
+    }
     progress("agent_decision", "completed");
     const msg = data.choices?.[0]?.message;
     totalTokens += data.usage?.total_tokens || 0;
-    if (!msg) throw new Error("Provider returned no message");
-    if (!msg.tool_calls?.length) {
-      answer = msg.content || "";
+    if (!msg) {
+      warning = "Provider returned no message";
       break;
     }
-    if (round === 3 || calls + msg.tool_calls.length > 8)
-      throw new Error("Agent exceeded tool budget");
+    if (!msg.tool_calls?.length) {
+      answer = msg.content || "";
+      if (!answer.trim() && round < 3) {
+        progress("agent_recovery", "running", {
+          message:
+            "No public explanation returned; requesting a concise final answer",
+          round,
+        });
+        messages.push({
+          role: "user",
+          content:
+            "Return a short public explanation now, based only on completed tool evidence. Do not call more tools.",
+        });
+        // One bounded final-answer attempt; do not repeat completed tools.
+        round = 2;
+        continue;
+      }
+      if (data.choices[0].finish_reason === "length")
+        warning =
+          "Provider reached its output budget; explanation may be incomplete";
+      break;
+    }
+    if (round === 3 || calls + msg.tool_calls.length > 8) {
+      warning = "Agent reached its bounded tool budget";
+      break;
+    }
     messages.push(msg);
     for (const call of msg.tool_calls) {
+      if (signal?.aborted) {
+        warning = "Investigation cancelled or its total time limit was reached";
+        break;
+      }
       calls++;
       const name = call.function?.name;
       let result;
@@ -171,7 +226,7 @@ export async function investigate({
           )
         )
           throw new Error("Unknown argument");
-        progress(name, "running");
+        progress(name, "running", { arguments: p, callId: call.id });
         if (name === "inspect_world") result = context;
         else if (name === "optimise_network") {
           if (
@@ -200,14 +255,15 @@ export async function investigate({
       messages.push({
         role: "tool",
         tool_call_id: call.id,
-        content: JSON.stringify(result),
+        content: JSON.stringify(compactEvidence(result)),
       });
     }
   }
-  if (!answer.trim())
-    throw new Error(
-      "Provider returned no completed explanation; numerical tools remain available",
-    );
+  if (!answer.trim()) {
+    warning ||= "Provider returned no completed public explanation";
+    answer =
+      "The AI explanation is incomplete. Completed numerical evidence has been preserved below. No controls were applied. Review the tool results before retrying.";
+  }
   return {
     runId,
     role,
@@ -218,6 +274,8 @@ export async function investigate({
     assetId: selected,
     equipmentId: context.selectedEquipment?.id || null,
     mode: "simulation",
+    completionStatus: warning ? "partial" : "complete",
+    warning,
     ...guardNarrative(answer),
     totalTokens,
     trace,

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { numericalEvidence, guardNarrative } from "./agent-evidence.mjs";
 import { site, registry, worldContext, ObservationStore } from "./world.mjs";
 import { investigate } from "./immersive-agent.mjs";
+import { streamCompletion } from "./provider-stream.mjs";
 const observations = new ObservationStore();
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -375,6 +376,24 @@ const server = http.createServer(async (req, res) => {
         try {
           if (method === "investigation") {
             const streaming = args.stream === true;
+            const controller = new AbortController();
+            const disconnect = () => {
+              if (!res.writableEnded)
+                controller.abort(
+                  new Error("Investigation viewer disconnected"),
+                );
+            };
+            res.on("close", disconnect);
+            const deadline = setTimeout(
+              () =>
+                controller.abort(
+                  new Error(
+                    "Investigation reached its four-minute time budget",
+                  ),
+                ),
+              240000,
+            );
+            let heartbeat;
             const write = (value) => {
               if (res.destroyed)
                 throw new Error("Investigation viewer disconnected");
@@ -387,41 +406,39 @@ const server = http.createServer(async (req, res) => {
                 "X-Accel-Buffering": "no",
               });
               res.flushHeaders();
+              heartbeat = setInterval(() => {
+                if (!res.destroyed)
+                  write({ type: "heartbeat", at: new Date().toISOString() });
+              }, 10000);
             }
-            const result = await investigate({
-              session,
-              args,
-              rpc,
-              model,
-              onEvent: streaming
-                ? (event) => write({ type: "event", event })
-                : undefined,
-              complete: async (payload) => {
-                const response = await fetch(
-                  "https://openrouter.ai/api/v1/chat/completions",
-                  {
-                    method: "POST",
-                    headers: {
-                      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                      "Content-Type": "application/json",
-                      "X-Title": "HeatPilot immersive agents",
-                    },
-                    body: JSON.stringify(payload),
-                    signal: AbortSignal.timeout(35000),
-                  },
-                );
-                if (!response.ok)
-                  throw new Error(
-                    `AI provider returned HTTP ${response.status}`,
-                  );
-                return response.json();
-              },
-            });
-            if (streaming) {
-              write({ type: "result", result });
-              return res.end();
+            try {
+              const result = await investigate({
+                session,
+                args,
+                rpc,
+                model,
+                signal: controller.signal,
+                onEvent: streaming
+                  ? (event) => write({ type: "event", event })
+                  : undefined,
+                complete: (payload, options) =>
+                  streamCompletion(payload, {
+                    apiKey: process.env.OPENROUTER_API_KEY,
+                    signal: controller.signal,
+                    onDelta: options?.onDelta,
+                  }),
+              });
+              if (streaming) {
+                write({ type: "result", result });
+                return res.end();
+              }
+              return send(res, 200, result);
+            } finally {
+              clearInterval(heartbeat);
+              clearTimeout(deadline);
+              res.off("close", disconnect);
+              controller.abort(new Error("Investigation finished"));
             }
-            return send(res, 200, result);
           }
           return send(
             res,

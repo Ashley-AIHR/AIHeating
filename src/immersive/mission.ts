@@ -4,6 +4,12 @@ export type MissionEvent = {
   tool: string;
   status: "running" | "completed" | "failed";
   at: string;
+  round?: number;
+  kind?: string;
+  text?: string;
+  message?: string;
+  arguments?: Record<string, unknown>;
+  result?: unknown;
 };
 export type Mission = {
   phase: "investigating" | "ready" | "applied" | "blocked" | "failed";
@@ -16,9 +22,13 @@ export type Mission = {
   affected: string[];
   events: MissionEvent[];
   message: string;
+  draft?: string;
+  draftRound?: number;
 };
 export const toolNames: Record<string, string> = {
   agent_decision: "Agent selecting the next investigation step",
+  agent_output: "Agent writing its explanation",
+  agent_recovery: "Recovering the public explanation",
   inspect_world: "Tracing the connected network",
   diagnose_building: "Checking thermal and hydraulic evidence",
   simulate_controls: "Testing an alternative in the physical model",
@@ -30,12 +40,15 @@ export async function streamInvestigation<T>(
   args: unknown,
   code: string,
   onEvent: (event: MissionEvent) => void,
+  signal?: AbortSignal,
 ): Promise<T> {
   const res = await fetch("/api/investigation", {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-AI-Access-Code": code },
     body: JSON.stringify({ ...(args as object), stream: true }),
-    signal: AbortSignal.timeout(150000),
+    signal: signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(255000)])
+      : AbortSignal.timeout(255000),
   });
   if (!res.ok)
     throw new Error((await res.json()).error || "Investigation failed");

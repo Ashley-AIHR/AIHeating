@@ -94,18 +94,20 @@ try {
   // A labelled transport mock checks UI wiring only; this is not evidence of a live model call.
   await page.route("**/api/investigation", async (route) => {
     const a = route.request().postDataJSON();
+    const result = {
+      runId: "browser-mock",
+      role: a.role,
+      model: "mock",
+      revision: a.revision,
+      assetId: a.assetId,
+      answer: "Mocked browser wiring test — inspect source evidence.",
+      totalTokens: 0,
+      trace: [{ tool: "inspect_world", result: { mode: "mock" } }],
+      optimisation: null,
+    };
     await route.fulfill({
-      json: {
-        runId: "browser-mock",
-        role: a.role,
-        model: "mock",
-        revision: a.revision,
-        assetId: a.assetId,
-        answer: "Mocked browser wiring test — inspect source evidence.",
-        totalTokens: 0,
-        trace: [{ tool: "inspect_world", result: { mode: "mock" } }],
-        optimisation: null,
-      },
+      contentType: "application/x-ndjson",
+      body: JSON.stringify({ type: "result", result }) + "\n",
     });
   });
   const input = page.getByLabel("Operator access code");
@@ -118,9 +120,7 @@ try {
     await page
       .getByRole("button", { name: "Run diagnostic agent", exact: true })
       .click();
-    await page
-      .getByText("Mocked browser wiring test", { exact: false })
-      .waitFor();
+    await page.locator(".agent-result .narrative").waitFor();
   }
   await page.getByRole("button", { name: "Evidence", exact: true }).click();
   const download = page.waitForEvent("download");

@@ -1,4 +1,5 @@
 import { fmt, type Twin } from "../operations/types";
+import { useEffect, useRef } from "react";
 import { toolNames, type Mission } from "./mission";
 import type { Optimisation } from "./Workspace";
 
@@ -22,6 +23,14 @@ type Props = {
 };
 const delta = (n: number, digits = 1) => `${n > 0 ? "+" : ""}${fmt(n, digits)}`;
 export default function MissionControl(p: Props) {
+  const liveStatus = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (p.mission?.phase === "investigating")
+      liveStatus.current?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+  }, [p.mission?.phase]);
   const m = p.mission,
     o = p.optimisation;
   const outcome = m?.phase === "applied" && m.after && m.baseline;
@@ -110,7 +119,16 @@ export default function MissionControl(p: Props) {
       </div>
       {m && (
         <>
-          <div className={`mission-status ${m.phase}`} aria-live="polite">
+          {m.phase === "investigating" && (
+            <button className="full" onClick={p.onStop}>
+              Stop investigation
+            </button>
+          )}
+          <div
+            ref={liveStatus}
+            className={`mission-status ${m.phase}`}
+            aria-live="polite"
+          >
             <small>
               {m.origin === "llm"
                 ? "LLM-DIRECTED MISSION"
@@ -123,7 +141,7 @@ export default function MissionControl(p: Props) {
             className="mission-events"
             aria-label="Executed mission activity"
           >
-            {m.events.slice(-6).map((e, i) => (
+            {m.events.map((e, i) => (
               <div key={i} data-status={e.status}>
                 <span>
                   {e.status === "completed"
@@ -132,9 +150,48 @@ export default function MissionControl(p: Props) {
                       ? "!"
                       : "◌"}
                 </span>
-                {toolNames[e.tool] || e.tool}
+                <section>
+                  <small>
+                    {e.at.slice(11, 19)} · {e.status}
+                  </small>
+                  <strong>{toolNames[e.tool] || e.tool}</strong>
+                  {e.message && <p>{e.message}</p>}
+                  {!!(e.arguments || e.result) && (
+                    <details>
+                      <summary>
+                        {e.arguments
+                          ? "Tool inputs"
+                          : "Tool result · model evidence"}
+                      </summary>
+                      <pre>
+                        {JSON.stringify(e.arguments || e.result, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </section>
               </div>
             ))}
+          </div>
+          <div
+            className="agent-live-output"
+            aria-label="Live agent explanation"
+          >
+            <small>
+              {m.phase === "investigating"
+                ? "LIVE DRAFT · UNVERIFIED MODEL TEXT"
+                : "AGENT EXPLANATION"}
+            </small>
+            <p>
+              {m.draft ||
+                (m.phase === "investigating"
+                  ? "Connected. Waiting for public assistant output; executed tools appear above."
+                  : "Review the retained tool activity above.")}
+            </p>
+            <small>
+              Only public response text is shown, not private reasoning.
+              Numerical tool results are authoritative; draft text never applies
+              controls.
+            </small>
           </div>
         </>
       )}
