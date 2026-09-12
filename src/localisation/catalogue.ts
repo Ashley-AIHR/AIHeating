@@ -1,6 +1,8 @@
 // English source phrases are stable catalogue keys. IDs, units and raw evidence
 // are intentionally not translated. The legacy prototype keeps its own copy.
+import { engineeringZh } from "./engineering-zh";
 export const zh: Record<string, string> = {
+  ...engineeringZh,
   "Contextual operations panel": "上下文运行面板",
   "· revision": "· 版本",
   "Geographic source unavailable": "地理数据源不可用",
@@ -595,6 +597,17 @@ export const zh: Record<string, string> = {
 
 // Explicit templates localise dynamic messages without altering values or IDs.
 export const templates: [string, string][] = [
+  ["Inspect {0}: {1}", "检查 {0}：{1}"],
+  ["{0} extent", "{0} 方向尺寸"],
+  ["View {0}", "视角 {0}"],
+  [
+    "{0} explicit IFC port relations reference this component.",
+    "此构件有 {0} 个显式 IFC 端口关系。",
+  ],
+  [
+    "{0} · local import · source units must be verified",
+    "{0} · 本地导入 · 源单位需验证",
+  ],
   ["Revision {0}", "版本 {0}"],
   ["{0} mesh objects · {1}", "{0} 个网格对象 · {1}"],
   [

@@ -6,7 +6,7 @@ import {
   defaultBrief,
   type Locale,
 } from "../localisation";
-import { useEffect, useRef, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import {
   api,
   fmt,
@@ -14,11 +14,8 @@ import {
   type Diagnosis,
   type Candidate,
 } from "../operations/types";
-import {
-  validateGlb,
-  type BimModel,
-  type Measurement,
-} from "../engineering/model";
+import { validateGlb } from "../engineering/model";
+import type { EngineeringReview } from "../engineering/review";
 import CityScene, { type Geography } from "./CityScene";
 import visionGeometry from "../../public/site-assets/vision-district.json";
 import "./immersive.css";
@@ -34,7 +31,7 @@ import {
   type Mission,
   type MissionEvent,
 } from "./mission";
-const EngineeringScene = lazy(() => import("../engineering/EngineeringScene"));
+const ConnectedStudio = lazy(() => import("../engineering/ConnectedStudio"));
 type Forecast = Candidate["trace"][number] & {
   state?: Twin;
   buildings?: Record<
@@ -129,7 +126,6 @@ const scenarioNames: Record<string, string> = {
   sensor: "Sensor disagreement",
   window: "Local heat loss",
 };
-const fixed = () => {};
 function download(name: string, value: unknown) {
   const u = URL.createObjectURL(
     new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }),
@@ -181,10 +177,7 @@ export default function Workspace() {
     [sceneView, setSceneView] = useState<"district" | "plant">("district"),
     [equipment, setEquipment] = useState("HX-A"),
     [bimOpen, setBimOpen] = useState(false),
-    [bim, setBim] = useState<BimModel | null>(null),
-    [bimSelected, setBimSelected] = useState(""),
-    [clip, setClip] = useState<"none" | "x" | "y" | "z">("none"),
-    [bimFocus, setBimFocus] = useState(0),
+    [bimVisited, setBimVisited] = useState(false),
     [search, setSearch] = useState("");
   const [imported, setImported] = useState<ArrayBuffer | null>(null),
     [importName, setImportName] = useState("");
@@ -198,17 +191,13 @@ export default function Workspace() {
     [operationEvents, setOperationEvents] = useState<OperationEvent[]>([]);
   const eventId = useRef(0),
     previousFindings = useRef(new Set<string>());
-  const [bimMeasure, setBimMeasure] = useState(false),
-    [bimMeasurement, setBimMeasurement] = useState<Measurement | null>(null),
-    [bimIsolated, setBimIsolated] = useState<string | null>(null),
-    [bimAction, setBimAction] = useState<"fit" | "focus">("fit");
   const inFlight = useRef(false),
     alive = useRef(true);
   const agentAbort = useRef<AbortController | null>(null);
-  const bimCommand = useMemo(
-    () => ({ id: bimFocus, type: bimAction }),
-    [bimFocus, bimAction],
-  );
+  function openStudio() {
+    setBimVisited(true);
+    setBimOpen(true);
+  }
   async function work(label: string, fn: () => Promise<void>) {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -289,16 +278,6 @@ export default function Workspace() {
     );
     return () => clearInterval(timer);
   }, [playing]);
-  useEffect(() => {
-    if (!bimOpen || bim) return;
-    void fetch("/engineering-assets/duplex-mep.json")
-      .then((r) => {
-        if (!r.ok) throw new Error("BIM source unavailable");
-        return r.json();
-      })
-      .then(setBim)
-      .catch((e) => setError(e.message));
-  }, [bimOpen, bim]);
   useEffect(() => {
     if (panel !== "connection" || !code) return;
     let dead = false;
@@ -426,6 +405,7 @@ export default function Workspace() {
     continuing = false,
     brief = question,
     role = "optimisation",
+    engineeringReview?: EngineeringReview,
   ) {
     if (!twin) return;
     if (!continuing) setCyclesRemaining(0);
@@ -495,6 +475,7 @@ export default function Workspace() {
                     ? equipment
                     : undefined,
                 question: brief,
+                engineeringReview,
                 objective,
                 revision: origin.revision,
                 contextId: origin.contextId,
@@ -871,6 +852,10 @@ export default function Workspace() {
             </button>
           )),
         )}
+        <button aria-label={tx("BIM work studio")} onClick={openStudio}>
+          <b aria-hidden="true">▧</b>
+          {tx("BIM Studio")}
+        </button>
         <div className="rail-bottom">
           {tx("3D")}
           <br />
@@ -1339,6 +1324,7 @@ export default function Workspace() {
                 ),
               )}
               <div className="dock-actions">
+                <button onClick={openStudio}>{tx("BIM work studio")}</button>
                 <button className="primary" onClick={() => setPanel("agents")}>
                   {tx("✧ Investigate this asset")}
                 </button>
@@ -1889,7 +1875,7 @@ export default function Workspace() {
         {tx(
           panel === "sources" && (
             <>
-              <button className="full" onClick={() => setBimOpen(true)}>
+              <button className="full" onClick={openStudio}>
                 {tx("Open source BIM library ↗")}
               </button>
               <p className="muted">
@@ -2248,149 +2234,54 @@ export default function Workspace() {
           </div>
         ),
       )}
-      {tx(
-        bimOpen && (
-          <section
-            className="bim-overlay"
-            role="dialog"
-            aria-label={tx("Contextual BIM inspection")}
-          >
-            <header>
-              <div>
-                <div className="eyebrow">
-                  {tx(selected)}
-                  {tx(" / CONTEXT RETAINED")}
-                </div>
-                <h2>{tx("Engineering reference inspection")}</h2>
+      {bimVisited && (
+        <Suspense
+          fallback={
+            bimOpen ? (
+              <div className="status-toast">
+                {tx("Loading BIM viewer…")}
+                <button onClick={() => setBimOpen(false)}>
+                  {tx("Return to district ×")}
+                </button>
               </div>
-              <button onClick={() => setBimOpen(false)}>
-                {tx("Return to district ×")}
-              </button>
-            </header>
-            <p className="warning">
-              {tx(
-                "Public buildingSMART Duplex MEP reference. NOT the selected building or an as-built model of the selected city's heating station. No telemetry is mapped to these components.",
-              )}
-            </p>
-            <div className="bim-tools">
-              <button
-                onClick={() => {
-                  setBimAction("fit");
-                  setBimFocus((x) => x + 1);
-                }}
-              >
-                {tx("Fit model")}
-              </button>
-              <button
-                disabled={!bimSelected}
-                onClick={() => {
-                  setBimAction("focus");
-                  setBimFocus((x) => x + 1);
-                }}
-              >
-                {tx("Focus component")}
-              </button>
-              <button
-                disabled={!bimSelected && !bimIsolated}
-                aria-pressed={!!bimIsolated}
-                onClick={() => setBimIsolated(bimIsolated ? null : bimSelected)}
-              >
-                {tx(bimIsolated ? "Show full assembly" : "Isolate component")}
-              </button>
-              <button
-                aria-pressed={bimMeasure}
-                onClick={() => {
-                  setBimMeasure((v) => !v);
-                  setBimMeasurement(null);
-                }}
-              >
-                {tx(bimMeasure ? "Stop measuring" : "Measure clearance")}
-              </button>
-              <label>
-                {tx("Section")}
-                <select
-                  value={clip}
-                  onChange={(e) => setClip(e.target.value as typeof clip)}
-                >
-                  <option value="none">{tx("Off")}</option>
-                  <option value="x">{tx("X")}</option>
-                  <option value="y">{tx("Y")}</option>
-                  <option value="z">{tx("Z")}</option>
-                </select>
-              </label>
-              <span>
-                {tx(
-                  bimSelected ||
-                    "Select a component to inspect its source identity",
-                )}
-              </span>
-            </div>
-            {tx(
-              bimMeasure && (
-                <p className="bim-measurement" role="status">
-                  {tx(
-                    bimMeasurement
-                      ? `Picked-point distance: ${fmt(bimMeasurement.distance, 3)} ${bim?.units || "model units"}. Source geometry only.`
-                      : "Pick two surfaces in the reference model to measure their distance.",
-                  )}
-                </p>
-              ),
-            )}
-            <div className="bim-canvas">
-              <Suspense fallback={<p>{tx("Loading BIM viewer…")}</p>}>
-                <EngineeringScene
-                  dark
-                  mode="bim"
-                  bim={bim}
-                  network={null}
-                  localGlb={null}
-                  selected={bimSelected}
-                  kind="all"
-                  hidden={[]}
-                  isolated={bimIsolated}
-                  highlight={[]}
-                  removed={[]}
-                  clipAxis={clip}
-                  clipPercent={50}
-                  measure={bimMeasure}
-                  command={bimCommand}
-                  onSelect={setBimSelected}
-                  onMeasure={setBimMeasurement}
-                  onPose={fixed}
-                  onLocalAssets={fixed}
-                />
-              </Suspense>
-            </div>
-            {tx(
-              bimSelected && (
-                <details className="bim-properties">
-                  <summary>
-                    {tx(
-                      bim?.assets.find((a) => a.id === bimSelected)?.name ||
-                        bimSelected,
-                    )}
-                    {tx(" ")}
-                    {tx("· source properties")}
-                  </summary>
-                  <pre>
-                    {tx(
-                      JSON.stringify(
-                        bim?.assets.find((a) => a.id === bimSelected),
-                        null,
-                        2,
-                      ),
-                    )}
-                  </pre>
-                </details>
-              ),
-            )}
-            <footer>
-              {tx(
-                "BSI (2020) “Duplex Apartment Test Files”, buildingSMART International · CC BY 4.0 · Public reference geometry / 926 components",
-              )}
-            </footer>
-          </section>
-        ),
+            ) : null
+          }
+        >
+          <ConnectedStudio
+            open={bimOpen}
+            twin={twin}
+            selected={selected}
+            busy={!!busy}
+            canRun={!!config?.aiConfigured}
+            mission={mission}
+            error={error}
+            onClose={() => setBimOpen(false)}
+            onSelect={(id) => {
+              select(id);
+              if (id === "ST01") setSceneView("plant");
+              else setSceneView("district");
+            }}
+            onInvestigate={(role, evidence) =>
+              void startMission(
+                true,
+                false,
+                translate(
+                  "Review the attached engineering evidence against the selected heat supply circuit. Distinguish reference geometry from simulated operation; test a relevant physical hypothesis and propose a verified intervention only if supported.",
+                ),
+                role,
+                evidence,
+              )
+            }
+            onOperate={() => {
+              setBimOpen(false);
+              openControls();
+            }}
+            onPlan={() => {
+              setBimOpen(false);
+              setPanel("agents");
+            }}
+          />
+        </Suspense>
       )}
     </main>
   );

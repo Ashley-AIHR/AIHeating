@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { guardNarrative } from "./agent-evidence.mjs";
 import { worldContext, registry } from "./world.mjs";
 import { compactEvidence } from "./agent-context.mjs";
+import { engineeringEvidence } from "./engineering-review.mjs";
 import { prepareInvestigation } from "./investigation-context.mjs";
 import {
   agentLocale,
@@ -53,6 +54,8 @@ export async function investigate({
   }
   const trace = [],
     events = [];
+  const review = engineeringEvidence(args.engineeringReview, context);
+  if (review) context.engineeringReview = review;
   const progress = (tool, status, detail = {}) => {
     const event = {
       tool,
@@ -73,6 +76,7 @@ export async function investigate({
     });
     return result;
   };
+  if (review) record("inspect_engineering_review", review);
   progress("diagnose_building", "running");
   const diagnosis = record(
     "diagnose_building",

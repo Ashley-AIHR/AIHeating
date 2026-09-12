@@ -28,6 +28,7 @@ export type Mission = {
   draftRound?: number;
 };
 export const toolNames: Record<string, string> = {
+  inspect_engineering_review: "Validating BIM review and circuit context",
   context_sync: "Scene synchronised with the server",
   agent_decision: "Agent selecting the next investigation step",
   agent_output: "Agent writing its explanation",

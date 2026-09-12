@@ -6,6 +6,8 @@ The active immersive workspace supports `en` (British English) and `zh-CN` (Simp
 
 Language changes do not reset the simulator, rebuild the orbitable scene, discard a plan, or rewrite a custom operator brief. The standard brief follows the selected language. Three-dimensional markers and BIM viewer controls update their accessible labels without changing geometry or selection. Raw BIM properties, tool argument keys and numerical tool-result JSON deliberately retain their source format for engineering auditability.
 
+The restored connected BIM studio and its standalone engineering compatibility route share this locale. Engineering phrases live in `src/localisation/engineering-zh.ts`. Asset filters keep canonical values regardless of the displayed language. See `docs/connected-bim-studio.md` for the agent and supply-chain integration.
+
 ## Agent contract
 
 `POST /api/investigation` accepts `locale: "en" | "zh-CN"`, defaulting to `en` for older clients. Invalid values are rejected before streaming or paid-request accounting. The chosen locale is pinned for the run and returned in its result and event metadata. The public tool-selection prose, no-intervention reason and separate report generation all receive explicit language instructions. Report repair retains those instructions. Chinese failures use Chinese fallback explanations; Unicode decimal measurements remain subject to the existing numerical-claim guard.

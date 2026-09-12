@@ -81,7 +81,7 @@ try {
     .getByRole("status")
     .filter({ hasText: "926 mesh objects" })
     .waitFor({ timeout: 60000 });
-  const bimBox = await page.locator(".bim-canvas canvas").boundingBox();
+  const bimBox = await page.locator(".bim-studio-shell .eng-canvas canvas").boundingBox();
   assert(bimBox.height > 200);
   await page.screenshot({ path: out + "/integrated-bim.png" });
   await page.getByRole("button", { name: "Return to district ×" }).click();

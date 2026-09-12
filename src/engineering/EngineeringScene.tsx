@@ -15,6 +15,7 @@ import type {
 } from "./model";
 
 type Props = {
+  suspended?: boolean;
   dark?: boolean;
   mode: "bim" | "network";
   bim: BimModel | null;
@@ -557,6 +558,7 @@ export default function EngineeringScene(props: Props) {
     function draw() {
       if (dead) return;
       frame = requestAnimationFrame(draw);
+      if (latest.current.suspended) return;
       orbit.update();
       renderer.render(scene, camera);
     }

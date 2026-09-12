@@ -145,7 +145,7 @@ try {
   await page
     .getByRole("button", { name: "打开公共 BIM 资料库 ↗", exact: true })
     .click();
-  await page.getByRole("dialog", { name: "关联 BIM 检查" }).waitFor();
+  await page.getByRole("dialog", { name: "BIM 工作室", exact: true }).waitFor();
   await page.getByRole("button", { name: "返回片区 ×", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   const selector = await page
