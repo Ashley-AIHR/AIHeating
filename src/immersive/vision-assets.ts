@@ -200,7 +200,7 @@ export function createVisionDistrict(cityId = "yinchuan") {
   plant.root.position.copy(stationPosition);
   const mats = {
     stone: material("#b7b4ab"),
-    trim: material("#d4d1c7"),
+    trim: material("#b9b8ae"),
     dark: material("#42494a"),
     snow: material("#edf3f3", 0.92),
     ground: material(shanghai ? "#45594b" : "#edf3f3", 0.92),
@@ -237,11 +237,12 @@ export function createVisionDistrict(cityId = "yinchuan") {
   // Shanghai is an authored snow-free winter landscape, not surveyed geography.
   mats.snow.visible = !shanghai;
   if (shanghai) {
+    mats.stone.color.set("#bbc4c8");
     mats.trim.color.set("#a9b9b8");
     mats.glass.color.set("#365e6b");
     mats.water.color.set("#386a72");
   }
-  mats.stone.map = noiseTexture("#bcb8ac", "stone");
+  mats.stone.map = noiseTexture(shanghai ? "#b9c0be" : "#c5b99f", "stone");
   worldMapped(mats.stone, 4);
   const textures = Object.values(mats)
     .map((m) => m.map)
@@ -337,7 +338,9 @@ export function createVisionDistrict(cityId = "yinchuan") {
         for (let floor = 0; floor < floors; floor++) {
           const yy = 2.3 + floor * 3.3;
           b.box(
-            (col + floor) % 7 === 0 ? mats.warm : mats.glass,
+            Math.sin(x * 3.13 + floor * 11.7 + col * 5.91 + side * 2.1) > 0.46
+              ? mats.warm
+              : mats.glass,
             xx,
             yy,
             zz + side * 0.15,
@@ -718,6 +721,11 @@ export function createVisionDistrict(cityId = "yinchuan") {
       v.box(mats.red, s * 0.58, 0.85, -length / 2 - 0.02, 0.3, 0.12, 0.05);
     }
     const group = v.finish();
+    // GTAO supplies live contact shading; avoid frozen vehicle shadows in the
+    // cached district shadow map as the decorative traffic moves.
+    group.traverse((object) => {
+      if (object instanceof T.Mesh) object.castShadow = false;
+    });
     group.position.set(x, 0, z);
     group.rotation.y = rotation;
     b.root.add(group);

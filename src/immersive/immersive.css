@@ -922,6 +922,53 @@ button:focus-visible {
   bottom: 55px;
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 32px);
+}
+.city-reference-dialog {
+  width: min(1220px, 95vw);
+  max-height: 94dvh;
+  padding: 22px;
+  background: #0b1a29;
+  border: 1px solid #3e6974;
+  color: #dbe9ed;
+  border-radius: 12px;
+}
+.city-reference-dialog::backdrop {
+  background: #030812dd;
+  backdrop-filter: blur(7px);
+}
+.city-reference-dialog header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+.city-reference-dialog small {
+  color: #8adbc9;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+}
+.city-reference-dialog h2 {
+  font-size: 23px;
+  margin: 7px 0;
+}
+.city-reference-dialog p {
+  color: #a8bdc9;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+.city-reference-dialog img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.city-reference-dialog header button {
+  font-size: 24px;
+  padding: 8px 15px;
 }
 .render-settings button {
   background: #0c2131e8;

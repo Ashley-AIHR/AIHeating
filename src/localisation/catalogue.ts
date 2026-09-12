@@ -2,6 +2,22 @@
 // are intentionally not translated. The legacy prototype keeps its own copy.
 import { engineeringZh } from "./engineering-zh";
 export const zh: Record<string, string> = {
+  "Shanghai · river city": "上海 · 滨江之城",
+  "Yinchuan · mountain and wetland city": "银川 · 山水湖城",
+  "Lujiazui-inspired skyline · shikumen lanes · plane trees":
+    "陆家嘴地标启发的天际线 · 石库门里弄 · 梧桐",
+  "Helan-inspired ridgeline · Gulou pavilion · reed wetlands":
+    "贺兰山启发的山脊 · 鼓楼意象 · 芦苇湿地",
+  "City vision": "城市愿景",
+  "City life: on": "城市动态：开",
+  "City life: paused": "城市动态：暂停",
+  "Decorative traffic and water motion; does not advance simulation":
+    "装饰性车流与水面动态，不推进物理仿真",
+  "City visual reference": "城市视觉参考",
+  "AI-GENERATED VISION · NOT LIVE 3D": "AI 生成愿景 · 非实时三维",
+  "Close city reference": "关闭城市参考",
+  "Fictional district composition inspired by local landmarks. This image is a visual target, not an as-built survey or the orbitable simulation.":
+    "受本地地标启发的虚构片区构图。此图是视觉目标，非竣工实测模型或可旋转的仿真场景。",
   ...engineeringZh,
   "Contextual operations panel": "上下文运行面板",
   "· revision": "· 版本",

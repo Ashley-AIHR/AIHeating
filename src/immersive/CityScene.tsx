@@ -9,6 +9,8 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { createCityAtmosphere, cityIdentity } from "./city-atmosphere";
 import type { Twin, Finding } from "../operations/types";
 import {
   createVisionDistrict,
@@ -62,7 +64,20 @@ export default function CityScene(props: Props) {
   latest.current = props;
   const [error, setError] = useState(""),
     [dusk, setDusk] = useState(true),
+    [ambientMotion, setAmbientMotion] = useState(true),
+    [referenceOpen, setReferenceOpen] = useState(false),
     [highQuality, setHighQuality] = useState(() => window.innerWidth > 760);
+  const referenceDialog = useRef<HTMLDialogElement>(null);
+  const motion = useRef(true);
+  motion.current = ambientMotion;
+  const identity =
+    props.frame.cityId === "shanghai"
+      ? cityIdentity.shanghai
+      : cityIdentity.yinchuan;
+  useEffect(() => {
+    if (referenceOpen) referenceDialog.current?.showModal();
+    else referenceDialog.current?.close();
+  }, [referenceOpen]);
   const lighting = useRef(false),
     quality = useRef(true);
   lighting.current = dusk;
@@ -125,6 +140,16 @@ export default function CityScene(props: Props) {
     orbit.minDistance = 8;
     orbit.maxDistance = 1000;
     const model = createVisionDistrict(props.frame.cityId);
+    const shanghai = props.frame.cityId === "shanghai";
+    (scene.fog as T.FogExp2).density = shanghai ? 0.0006 : 0.00035;
+    const atmosphere = createCityAtmosphere(
+      props.frame.cityId || "yinchuan",
+      model.materials,
+    );
+    model.root.add(atmosphere.root);
+    el.dataset.identity = atmosphere.identity.title;
+    el.dataset.cameraSettled = "false";
+    el.dataset.ambientTime = "0";
     el.dataset.city = props.frame.cityId || "yinchuan";
     scene.add(model.root);
     el.dataset.instances = String(model.stats.instances);
@@ -147,10 +172,12 @@ export default function CityScene(props: Props) {
     composer.addPass(ao);
     const antialias = new SMAAPass();
     composer.addPass(antialias);
+    const bloom = new UnrealBloomPass(new T.Vector2(1, 1), 0.14, 0.32, 1.15);
+    composer.addPass(bloom);
     const output = new OutputPass();
     composer.addPass(output);
-    const overviewTarget = new T.Vector3(-7, 3, 22),
-      overviewOffset = new T.Vector3(160, 145, 225);
+    const overviewTarget = new T.Vector3(-7, 20, -25),
+      overviewOffset = new T.Vector3(130, 110, 365);
     const destination = {
       position: overviewTarget.clone().add(overviewOffset),
       target: overviewTarget.clone(),
@@ -623,6 +650,8 @@ export default function CityScene(props: Props) {
     renderer.domElement.addEventListener("pointerup", up);
     renderer.domElement.addEventListener("keydown", key);
     const clock = new T.Clock();
+    let ambientTime = 0;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let last = performance.now(),
       previousDusk: boolean | undefined;
     function animate() {
@@ -634,17 +663,40 @@ export default function CityScene(props: Props) {
         dt = (now - last) / 1000;
       if (dt < 1 / 30) return;
       last = now;
+      const animated = motion.current && !reducedMotion.matches;
+      if (animated) ambientTime += Math.min(dt, 0.1);
+      atmosphere.update(ambientTime, lighting.current);
+      model.movingCars.forEach((car, i) => {
+        const lane = i % 6,
+          direction = lane % 2 ? 1 : -1;
+        const progress = (Math.floor(i / 6) * 137.5 + ambientTime * 7.5) % 550;
+        car.position.set(
+          [-128.2, -119.8, -4.2, 4.2, 119.8, 128.2][lane],
+          0,
+          direction > 0 ? -330 + progress : 220 - progress,
+        );
+        car.rotation.y = direction > 0 ? 0 : Math.PI;
+      });
+      el.dataset.ambientTime = ambientTime.toFixed(2);
+      el.dataset.ambientMotion = String(animated);
+      el.dataset.identity = atmosphere.identity.title;
       if (previousDusk !== lighting.current) {
         previousDusk = lighting.current;
         const dark = lighting.current;
-        const colour = dark ? "#1a2c48" : "#c0cfda";
+        const colour = dark
+          ? shanghai
+            ? "#657c99"
+            : "#868895"
+          : shanghai
+            ? "#bac9d3"
+            : "#b1cbdc";
         (scene.background as T.Color).set(colour);
         (scene.fog as T.FogExp2).color.set(colour);
-        sun.color.set(dark ? "#98bbec" : "#ffe8c5");
-        sun.intensity = dark ? 0.65 : 3.8;
+        sun.color.set(dark ? (shanghai ? "#ffd5b3" : "#ffbc7e") : "#ffe8c5");
+        sun.intensity = dark ? (shanghai ? 1.05 : 1.45) : 3.8;
         skyLight.color.set(dark ? "#517cad" : "#bfd5ef");
-        skyLight.intensity = dark ? 0.58 : 0.48;
-        model.materials.warm.emissiveIntensity = dark ? 2.6 : 0.35;
+        skyLight.intensity = dark ? 0.72 : 0.48;
+        model.materials.warm.emissiveIntensity = dark ? 1.25 : 0.25;
         flowMaterial.emissiveIntensity = dark ? 2 : 0.85;
         returnMaterial.emissiveIntensity = dark ? 1.5 : 0.65;
         plantLights.forEach((light) => (light.intensity = dark ? 180 : 0));
@@ -722,6 +774,7 @@ export default function CityScene(props: Props) {
       }
       renderer.info.reset();
       ao.enabled = quality.current;
+      bloom.enabled = quality.current && lighting.current;
       composer.render();
       el.dataset.drawCalls = String(renderer.info.render.calls);
       el.dataset.triangles = String(renderer.info.render.triangles);
@@ -759,6 +812,7 @@ export default function CityScene(props: Props) {
       ao.dispose();
       output.dispose();
       antialias.dispose();
+      bloom.dispose();
       composer.dispose();
       renderer.dispose();
       renderer.domElement.remove();
@@ -812,6 +866,18 @@ export default function CityScene(props: Props) {
         ),
       )}
       <div className="render-settings">
+        <button onClick={() => setReferenceOpen(true)}>
+          {tx("City vision")}
+        </button>
+        <button
+          onClick={() => setAmbientMotion(!ambientMotion)}
+          aria-pressed={ambientMotion}
+          title={tx(
+            "Decorative traffic and water motion; does not advance simulation",
+          )}
+        >
+          {tx(ambientMotion ? "City life: on" : "City life: paused")}
+        </button>
         <button
           onClick={() => setDusk(!dusk)}
           aria-pressed={dusk}
@@ -828,6 +894,32 @@ export default function CityScene(props: Props) {
           {tx(highQuality ? "Quality: cinematic" : "Quality: performance")}
         </button>
       </div>
+      <dialog
+        className="city-reference-dialog"
+        ref={referenceDialog}
+        aria-label={tx("City visual reference")}
+        onCancel={() => setReferenceOpen(false)}
+      >
+        <header>
+          <div>
+            <small>{tx("AI-GENERATED VISION · NOT LIVE 3D")}</small>
+            <h2>{tx(identity.title)}</h2>
+          </div>
+          <button
+            onClick={() => setReferenceOpen(false)}
+            aria-label={tx("Close city reference")}
+          >
+            ×
+          </button>
+        </header>
+        <p>{tx(identity.details)}</p>
+        {referenceOpen && <img src={identity.image} alt={tx(identity.title)} />}
+        <p>
+          {tx(
+            "Fictional district composition inspired by local landmarks. This image is a visual target, not an as-built survey or the orbitable simulation.",
+          )}
+        </p>
+      </dialog>
       <div className="orbit-hint">
         {tx("DRAG TO ORBIT ")}
         <span>·</span>

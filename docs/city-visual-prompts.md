@@ -1,0 +1,34 @@
+# Distinct city vision images
+
+Generated using the built-in image-generation tool. These are fictional visual targets, not camera captures, surveyed models or outputs of the live renderer. Originals retained; copied to versioned project assets and user deliverables.
+
+## Shanghai prompt
+
+Use case: photorealistic-natural. Asset type: premium district-heating digital-twin visual reference, one cinematic 16:9 landscape image, no UI or text.
+Primary request: exceptionally photorealistic aerial architectural visualisation of a FICTIONAL modern residential energy district in Shanghai, instantly recognisable as Shanghai, beautifully alive, sophisticated, believable civil engineering. This is an illustrative vision composition rather than a geographical survey.
+Scene: layered mixed-height Shanghai residential neighbourhood with refined grey stone and pale contemporary apartment towers, balconies and highly detailed occupied interiors, a foreground pocket of authentic shikumen-inspired redbrick lane houses with stone-framed entrances and dark pitched roofs. A Huangpu-inspired riverfront behind the district, embankment promenade, a working ferry and soft rippling water; Lujiazui skyline at a credible atmospheric distance, including the recognisable spiralling Shanghai Tower, trapezoid-opening Shanghai World Financial Center and Oriental Pearl spheres. Absolutely no mountains.
+Street life: plane-tree-lined pavements, cyclists and a few pedestrians, electric buses, realistically marked roads, warm ground-floor shops, subtly damp asphalt with realistic broken reflections after a winter shower. NO snow. Subtropical evergreen shrubs alongside bare winter plane branches.
+Heating context: a believable low-rise energy centre in the foreground with an elegant roof cutaway exposing detailed stainless-steel insulated headers, flanged pipework, blue plate heat exchangers and circulation pumps. Thin restrained orange supply and cyan return route accents follow actual road-edge utility corridors to the apartment entrances, coherent subtle digital-twin overlay not thick glowing toys. Do not pretend decorative skyline landmarks are heated by the foreground plant.
+Camera: elevated oblique drone viewpoint about 80m above ground, 35mm architectural lens, generous district coverage and layered skyline. Full image sharp enough to inspect foreground equipment and architecture, physically correct scale, no miniature tilt-shift.
+Lighting: luminous wet-winter blue hour with last warm peach light in sky, detailed medium-value architecture, realistic warm windows and understated street lighting, filmic contrast but buildings clearly legible. Path-traced-quality global illumination, ambient contact shadows, brushed metal, individual brick joints, concrete variation, glass depth, realistic foliage, beautifully textured surfaces. World-class architectural competition rendering comparable to high-end V-Ray / Unreal cinematics. Avoid plastic blocks, toy diorama, cartoon, unrealistic neon haze, diagrams, labels, logos, watermarks.
+
+## Yinchuan prompt
+
+Use case: photorealistic-natural. Asset type: premium district-heating digital-twin visual reference, one cinematic 16:9 landscape image, no UI or text.
+Primary request: exceptionally photorealistic aerial architectural visualisation of a FICTIONAL residential district-heating neighbourhood in Yinchuan, Ningxia, unmistakably different from Shanghai, visually alive, sophisticated and materially rich. Illustrative vision composition, NOT a surveyed reconstruction.
+Scene: dry clear continental winter air, bold recognisable distant Helan Mountain ridgeline stretching across the western horizon beyond the flat Yinchuan plain. A restrained Yuehai-inspired urban wetland margin with reed beds, frosted vegetation and partly frozen sheltered water, not a wide shipping river. Near the neighbourhood edge a modest historic civic drum-tower pavilion inspired by Yinchuan's Gulou: masonry podium, red timber pavilion, layered dark-grey tiled Chinese roofs; a local cultural accent, not a fantasy palace. The neighbourhood itself is mostly inhabited contemporary northern-Chinese mid-rise residential slabs, six to twelve storeys, warm buff stone and brick with dark window frames, projecting glazed balconies, roof plant and realistic service details, spaced sunlit courtyards. Low density horizon, NO Oriental Pearl, NO Shanghai skyscrapers, NO tropical palms, NO dunes swallowing the city.
+Street life: clean snow rests on shaded roofs, verges and landscaped courtyards, roads are largely cleared with tyre marks and wet edges. Winter-dressed pedestrians, a city bus, a delivery van and understated traffic. Tall leafless poplars, hardy pines, straw-gold dormant planting, local stone walls.
+Heating context: a substantial low-rise secondary-network heat-exchange station in foreground with tasteful roof cutaway revealing highly detailed stainless insulation jackets, large flanges, blue plate exchangers, blue pump motors and maintenance walkways. Restrained thin amber supply and cyan return route accents track coherent road-edge utility corridors to buildings. No giant neon tubes. Show gentle realistic winter condensation at a ventilation outlet, not pollution stacks.
+Camera: elevated oblique drone view about 80m high, 35mm architectural lens; rich district detail foreground, wetland and mountain horizon behind. No miniature tilt-shift.
+Lighting: crystal-clear cold winter dusk, low golden light on warm stone facades and mountain faces, blue snow shadows, warm occupied windows, subtle street lamps. Photographic colour, physically based global illumination and shadows, detailed concrete/granite/brick/stainless steel, realistic bark and snow irregularity. Luxurious architectural competition rendering, tangible and believable, no generic toy blocks, no cartoon, no excessive neon, no text, labels, logos or watermarks.
+
+## Local identity research
+
+- Shanghai shikumen: https://english.shanghai.gov.cn/en-ScenicSpots/20231211/98e70b4d4c54401895104e4dee9f16d8.html
+- Shanghai plane trees: https://english.shanghai.gov.cn/en-Parks/20250220/636b3df5761e4055b731a92d2abddcb3.html
+- Yinchuan mountain/water/lake/city character: https://whhlyt.nx.gov.cn/zwgk/fdzdgknr/tzgg/202601/t20260109_5131423_zzb.html
+- Gulou–Yuhuangge heritage district: https://www.nx.gov.cn/zwgk/qzfwj/202102/t20210208_2596163.html
+
+## Runtime distinction
+
+The orbitable scene uses authored landmark-inspired scenery, not geometry reconstructed from these images. The twelve building IDs, station mechanical bindings and numerical model remain unchanged. Ambient road traffic, pedestrians and water animation do not advance the physics clock and can be paused; reduced-motion preferences are respected. Images open explicitly through **City vision**, never as a substituted 3D viewport. Landmark placement and relative scale are art-directed, not geographical data.
