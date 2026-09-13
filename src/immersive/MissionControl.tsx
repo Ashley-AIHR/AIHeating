@@ -50,7 +50,7 @@ export default function MissionControl(p: Props) {
     ? 0
     : m.phase === "applied"
       ? 5
-      : m.phase === "ready"
+      : ["ready", "engineering"].includes(m.phase)
         ? 3
         : m.events.some((e) =>
               ["simulate_controls", "optimise_network"].includes(e.tool),

@@ -14,7 +14,13 @@ export type MissionEvent = {
 };
 export type Mission = {
   locale?: Locale;
-  phase: "investigating" | "ready" | "applied" | "blocked" | "failed";
+  phase:
+    | "investigating"
+    | "ready"
+    | "engineering"
+    | "applied"
+    | "blocked"
+    | "failed";
   origin: "llm" | "numerical";
   before: Twin;
   after?: Twin;

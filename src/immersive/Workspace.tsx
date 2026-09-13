@@ -614,6 +614,7 @@ export default function Workspace() {
         try {
           let o: Optimisation | null;
           let partialWarning: string | undefined;
+          let engineeringAvailable = false;
           if (useAgent) {
             agentAbort.current = new AbortController();
             const r = await streamInvestigation<Run>(
@@ -697,6 +698,9 @@ export default function Workspace() {
             );
             setRun(r);
             if (r.engineeringStudy) setEngineeringStudy(r.engineeringStudy);
+            engineeringAvailable = !!r.engineeringStudy?.rows.some(
+              (row) => row.passed,
+            );
             if (r.diagnosis) setDiagnosis(r.diagnosis);
             setMission((m) => m && { ...m, draft: r.answer });
             if (r.completionStatus === "partial") {
@@ -767,6 +771,17 @@ export default function Workspace() {
                 },
             );
             preview("intervention", true);
+          } else if (engineeringAvailable) {
+            setCyclesRemaining(0);
+            setMission(
+              (m) =>
+                m && {
+                  ...m,
+                  phase: "engineering",
+                  message:
+                    "Engineering alternatives verified. Review a modified scenario; original equipment remains unchanged.",
+                },
+            );
           } else
             setMission(
               (m) =>
@@ -835,7 +850,7 @@ export default function Workspace() {
   useEffect(() => {
     if (!cyclesRemaining || busy || inFlight.current || !mission) return;
     if (
-      ["failed", "blocked"].includes(mission.phase) ||
+      ["failed", "blocked", "engineering"].includes(mission.phase) ||
       (mission.phase === "ready" && stalePlan)
     ) {
       setCyclesRemaining(0);

@@ -54,6 +54,7 @@ try {
     .first()
     .waitFor({ timeout: 30000 });
   assert.equal((await state()).revision, original.revision);
+  await page.locator(".mission-status.engineering").waitFor();
   assert(
     (await page
       .getByLabel("Executed mission activity")

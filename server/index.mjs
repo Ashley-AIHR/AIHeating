@@ -52,11 +52,14 @@ function rpc(session, method, args = {}) {
     );
   return new Promise((resolve, reject) => {
     const id = randomUUID();
+    // Includes queue time behind another bounded engineering comparison.
+    // Search trials omit visual snapshots; only verified outputs include them.
     const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error("Physical engine timed out."));
       failWorker();
       worker.terminate();
-      reject(new Error("Physical engine timed out."));
-    }, 25000);
+    }, 120000);
     pending.set(id, { resolve, reject, timer });
     worker.postMessage({ id, session, method, args });
   });

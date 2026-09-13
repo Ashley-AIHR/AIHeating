@@ -237,7 +237,14 @@ export function advance(s, steps = 6, controls) {
 export function candidateControls(s, args) {
   return validate({ ...s.engine.controls, ...args }, s.engine.controls);
 }
-export function rollout(s, controls, hours = 3, second, schedule) {
+export function rollout(
+  s,
+  controls,
+  hours = 3,
+  second,
+  schedule,
+  detailed = true,
+) {
   const goalSamples = [],
     buildingHeatKwh = Object.fromEntries(
       Object.keys(s.engine.temperatures).map((id) => [id, 0]),
@@ -287,7 +294,7 @@ export function rollout(s, controls, hours = 3, second, schedule) {
       pumpKwh: (e.pumpJ - initialPump) / 3.6e6,
       auxiliaryKwh: ((e.auxiliaryJ || 0) - initialAuxiliary) / 3.6e6,
     });
-    if ((i + 1) % 6 === 0)
+    if (detailed && (i + 1) % 6 === 0)
       trace.push({
         minutes: (i + 1) * 5,
         minimumC: Math.min(...temps),
@@ -508,7 +515,7 @@ export function optimise(s, args = {}) {
     const key = x.map((v) => v.toFixed(5)).join(",");
     if (!cache.has(key)) {
       const [a, b] = controls(x),
-        row = rollout(s, a, 3, b, path(x)),
+        row = rollout(s, a, 3, b, path(x), false),
         cost =
           weights[0] * row.heatKwh +
           weights[1] * (row.pumpKwh + row.auxiliaryKwh) +
@@ -527,7 +534,7 @@ export function optimise(s, args = {}) {
     return cache.get(key);
   };
   let x = Array(blocks * 5).fill(0);
-  const baseline = evaluate(x)[1];
+  const baseline = reference || rollout(s, c, 3, c);
   if (goal) {
     // Coordinated seeds cross valleys that a single-coordinate sweep cannot.
     const seeds = [
@@ -562,8 +569,7 @@ export function optimise(s, args = {}) {
     feasibleTrials.sort((a, b) => a[1][0] - b[1][0]);
     if (feasibleTrials.length) x = feasibleTrials[0][0].split(",").map(Number);
   }
-  const chosen = evaluate(x)[1],
-    [a, b] = controls(x),
+  const [a, b] = controls(x),
     check = rollout(s, a, 3, b, path(x)),
     goalResult = goal ? assessGoal(goal, check, reference) : null,
     feasible = valid(check) && (!goalResult || goalResult.passed);
@@ -586,7 +592,7 @@ export function optimise(s, args = {}) {
       )
       .digest("hex");
   const result = {
-    ...chosen,
+    ...check,
     id: "optimised",
     label: "Numerically optimised schedule",
     verified: feasible,

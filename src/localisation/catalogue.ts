@@ -2,14 +2,19 @@
 // are intentionally not translated. The legacy prototype keeps its own copy.
 import { engineeringZh } from "./engineering-zh";
 export const zh: Record<string, string> = {
-  "This engineering scenario preserves its original target and deadline. Commissioned local valves and explicit physical amendments operate only in the modified model.":"此工程场景保留原目标与截止时刻，已调试楼栋阀门及明确的物理改动仅在修改模型中运行。",
-  "Commissioned local valve":"已调试楼栋阀门",
-  "Modified engineering model only. Manual changes may disrupt the original goal.":"仅操作工程修改模型，手动调节可能影响原目标。",
-  "Local valve opening":"楼栋阀位",
-  "Verify local valve and simulate 30 min":"校验楼栋阀位并仿真30分钟",
-  "Verifying commissioned local valve":"正在校验已调试楼栋阀门",
-  "Allow coordinated station and all branch controls":"允许站内与所有支路协同控制",
-  "Comparing physical engineering alternatives":"正在比较物理工程方案",
+  "Engineering alternatives verified. Review a modified scenario; original equipment remains unchanged.":
+    "工程备选方案已通过验证。请审查修改场景，原设备模型尚未改变。",
+  "This engineering scenario preserves its original target and deadline. Commissioned local valves and explicit physical amendments operate only in the modified model.":
+    "此工程场景保留原目标与截止时刻，已调试楼栋阀门及明确的物理改动仅在修改模型中运行。",
+  "Commissioned local valve": "已调试楼栋阀门",
+  "Modified engineering model only. Manual changes may disrupt the original goal.":
+    "仅操作工程修改模型，手动调节可能影响原目标。",
+  "Local valve opening": "楼栋阀位",
+  "Verify local valve and simulate 30 min": "校验楼栋阀位并仿真30分钟",
+  "Verifying commissioned local valve": "正在校验已调试楼栋阀门",
+  "Allow coordinated station and all branch controls":
+    "允许站内与所有支路协同控制",
+  "Comparing physical engineering alternatives": "正在比较物理工程方案",
   BEIJING: "北京",
   ". Art-directed architecture and mechanical design with adapted public facade and vegetation meshes. Local design coordinates, not a surveyed reconstruction.":
     "。采用美术设计的建筑与机械系统，并适配公开立面和植被网格。使用本地设计坐标，非实测重建。",
