@@ -2097,3 +2097,128 @@ html[lang="zh-CN"] .immersive .ops-dock {
     letter-spacing: 0;
   }
 }
+.goal-workbench,
+.goal-outcome {
+  margin: 12px 0;
+  padding: 16px;
+  border: 1px solid #345368;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #102532, #0b151f);
+}
+.specialist-grid,
+.goal-fields,
+.goal-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.specialist-grid button {
+  min-height: 42px;
+  white-space: normal;
+}
+.specialist-grid button[aria-pressed="true"] {
+  background: #174b50;
+  border-color: #62dbc5;
+  color: #d4fff5;
+}
+.goal-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: #abc0cf;
+}
+.goal-fields input,
+.goal-fields select {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  background: #081721;
+  color: #f0f8fc;
+  border: 1px solid #355062;
+  border-radius: 6px;
+}
+.goal-checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.goal-checkbox input {
+  width: auto !important;
+}
+.goal-workbench .muted {
+  font-size: 11px;
+  line-height: 1.65;
+}
+.goal-outcome.passed {
+  border-color: #4dccaa;
+}
+.goal-outcome.missed {
+  border-color: #bc8240;
+}
+.goal-values span {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11px;
+}
+.goal-values b {
+  font-size: 22px;
+  color: #e7f6ff;
+  font-variant-numeric: tabular-nums;
+}
+.goal-outcome p,
+.goal-outcome small {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.scene-provenance {
+  position: absolute;
+  bottom: 74px;
+  left: 18px;
+  pointer-events: none;
+  font-size: 9px;
+  color: #d6e7f1;
+  text-shadow: 0 1px 4px #000;
+}
+.scene-goal {
+  position: absolute;
+  top: 195px;
+  left: 30px;
+  z-index: 3;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 13px 16px;
+  text-align: left;
+  background: #09222ee8;
+  border: 1px solid #5dbdaa;
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+}
+.scene-goal small {
+  color: #83dac9;
+  font-size: 10px;
+}
+.scene-goal strong {
+  color: #e3f4f6;
+  font-size: 12px;
+}
+.scene-goal span {
+  color: #dfb781;
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .scene-goal {
+    left: 12px;
+    top: 170px;
+    max-width: 230px;
+    padding: 8px;
+  }
+  .scene-provenance {
+    display: none;
+  }
+}

@@ -70,7 +70,7 @@ try {
       .locator(
         ".city-scene[data-city=" +
           city +
-          "][data-camera-settled=true][data-facades=professional-cc0][data-vegetation=professional-cc0][data-environment=outdoor-hdri]",
+          "][data-camera-settled=true][data-backdrop=city-panorama][data-facades=professional-cc0][data-vegetation=professional-cc0][data-environment=outdoor-hdri]",
       )
       .waitFor({ timeout: 60000 });
     assert.match(

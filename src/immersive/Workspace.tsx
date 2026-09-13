@@ -20,6 +20,10 @@ import CityScene, { type Geography } from "./CityScene";
 import visionGeometry from "../../public/site-assets/vision-district.json";
 import "./immersive.css";
 import MissionControl from "./MissionControl";
+import GoalWorkbench, {
+  type OperatingGoal,
+  type GoalResult,
+} from "./GoalWorkbench";
 import DirectControl, {
   type CommandPreview,
   type OperationEvent,
@@ -50,6 +54,8 @@ type Plan = Omit<Candidate, "trace"> & {
   planHash: string;
 };
 export type Optimisation = {
+  goal?: OperatingGoal | null;
+  goalResult?: GoalResult | null;
   contextId?: string;
   revision: number;
   baseline: Omit<Candidate, "trace"> & { trace: Forecast[] };
@@ -163,6 +169,48 @@ export default function Workspace() {
   const [code, setCode] = useState(""),
     [question, setQuestion] = useState(translate(defaultBrief)),
     [objective, setObjective] = useState("balanced");
+  const [specialist, setSpecialist] = useState("optimisation");
+  const [goalDraft, setGoalDraft] = useState<OperatingGoal | null>(null);
+  const goal = goalDraft && {
+    ...goalDraft,
+    assetId:
+      goalDraft.scope === "district"
+        ? "ST01"
+        : goalDraft.scope === "branch"
+          ? twin?.buildings.find((b) => b.id === selected)?.zone || selected
+          : selected,
+  };
+  function chooseSpecialist(task: string) {
+    setSpecialist(task);
+    setOptimisation(null);
+    setMission(null);
+    setRun(null);
+    setCyclesRemaining(0);
+    current();
+    if (["sensor", "engineering"].includes(task)) {
+      setGoalDraft(null);
+      return;
+    }
+    const metric: OperatingGoal["metric"] =
+      task === "energy"
+        ? "heatReduction"
+        : task === "pump"
+          ? "pumpReduction"
+          : task === "balance"
+            ? "temperatureSpread"
+            : "temperature";
+    setGoalDraft({
+      metric,
+      scope:
+        task === "comfort" && selected.startsWith("B") ? "asset" : "district",
+      assetId: selected,
+      target: task === "comfort" ? 21 : task === "balance" ? 1 : 8,
+      deadlineMinutes: 120,
+      minC: task === "comfort" ? 18 : 20,
+      maxC: 23,
+      allowShared: true,
+    });
+  }
   useEffect(() => {
     setQuestion((q) =>
       [defaultBrief, translate(defaultBrief, "zh-CN")].includes(q)
@@ -354,6 +402,16 @@ export default function Workspace() {
     };
   }, [panel, code]);
   function select(id: string) {
+    if (id !== selected) {
+      if (goal) {
+        setOptimisation(null);
+        setMission(null);
+        setRun(null);
+        current();
+      }
+      setGoalDraft(null);
+      setSpecialist("optimisation");
+    }
     setControlsOpen(false);
     setSelected(id);
     setFocus((x) => x + 1);
@@ -363,7 +421,8 @@ export default function Workspace() {
     forecast =
       (forecastSide === "baseline"
         ? optimisation?.baseline.trace
-        : plan?.trace) || [];
+        : (plan || (optimisation?.goalResult ? optimisation.bestAttempt : null))
+            ?.trace) || [];
   useEffect(() => {
     if (!previewPlaying || timeMode !== "forecast") return;
     const timer = setInterval(
@@ -411,6 +470,8 @@ export default function Workspace() {
     setTimeIndex(0);
   }
   async function resetWorld(cityId: string, scenario: string) {
+    setGoalDraft(null);
+    setSpecialist("optimisation");
     setPlaying(false);
     setCyclesRemaining(0);
     setPreviewPlaying(false);
@@ -438,7 +499,7 @@ export default function Workspace() {
     setCyclesRemaining(0);
     await work("Optimising + verifying nonlinear trajectories", async () => {
       setPlaying(false);
-      const o = await api<Optimisation>("optimise", { objective });
+      const o = await api<Optimisation>("optimise", { objective, goal });
       setOptimisation(o);
       setMission(null);
       setForecastSide("intervention");
@@ -461,7 +522,9 @@ export default function Workspace() {
     useAgent: boolean,
     continuing = false,
     brief = question,
-    role = "optimisation",
+    role = ["sensor", "engineering"].includes(specialist)
+      ? "diagnostic"
+      : "optimisation",
     engineeringReview?: EngineeringReview,
   ) {
     if (!twin) return;
@@ -526,6 +589,18 @@ export default function Workspace() {
             const r = await streamInvestigation<Run>(
               {
                 role,
+                task: engineeringReview
+                  ? role === "diagnostic"
+                    ? "engineering"
+                    : "optimisation"
+                  : role === "diagnostic"
+                    ? ["sensor", "engineering"].includes(specialist)
+                      ? specialist
+                      : "diagnostic"
+                    : ["sensor", "engineering"].includes(specialist)
+                      ? "optimisation"
+                      : specialist,
+                goal: role === "optimisation" ? goal : undefined,
                 assetId,
                 equipmentId:
                   assetId === "ST01" && sceneView === "plant"
@@ -626,7 +701,7 @@ export default function Workspace() {
               status: "running",
               at: new Date().toISOString(),
             });
-            o = await api<Optimisation>("optimise", { objective });
+            o = await api<Optimisation>("optimise", { objective, goal });
             event({
               tool: "optimise_network",
               status: "completed",
@@ -1133,6 +1208,28 @@ export default function Workspace() {
         onSelect={select}
         onAlarms={() => setPanel("alarms")}
       />
+      {goal && (
+        <button className="scene-goal" onClick={() => setPanel("agents")}>
+          <small>
+            {tx("Binding operating goal")} · {goal.assetId}
+          </small>
+          <strong>
+            {tx(
+              goal.metric === "temperature"
+                ? "Target indoor temperature"
+                : goal.metric === "temperatureSpread"
+                  ? "Maximum temperature spread"
+                  : "Required energy reduction",
+            )}{" "}
+            · {goal.target}
+            {goal.metric.includes("Reduction") ? "%" : "°C"} /{" "}
+            {goal.deadlineMinutes} {tx("min")}
+          </strong>
+          {optimisation?.goalResult && (
+            <span>{tx(optimisation.goalResult.message)}</span>
+          )}
+        </button>
+      )}
       <div className="scene-caption">
         <span className="legend-dot warm" />
         {tx(" Supply")}
@@ -1368,7 +1465,14 @@ export default function Workspace() {
                             setSceneView("district");
                           }}
                           onOperate={openControls}
-                          onAgent={() => setPanel("agents")}
+                          onAgent={() => {
+                            chooseSpecialist(
+                              equipment.startsWith("P")
+                                ? "pump"
+                                : "engineering",
+                            );
+                            setPanel("agents");
+                          }}
                         />
                       ),
                     )}
@@ -1394,6 +1498,14 @@ export default function Workspace() {
               <div className="dock-actions">
                 <button onClick={openStudio}>
                   {tx("Open item BIM")} · {item.equipmentId || selected}
+                </button>
+                <button
+                  onClick={() => {
+                    chooseSpecialist("comfort");
+                    setPanel("agents");
+                  }}
+                >
+                  {tx("Set a precise operating goal")}
                 </button>
                 <button className="primary" onClick={() => setPanel("agents")}>
                   {tx("✧ Investigate this asset")}
@@ -1478,6 +1590,21 @@ export default function Workspace() {
                       className="finding-bim"
                       onClick={() => {
                         select(f.asset);
+                        chooseSpecialist(
+                          /sensor|reading|bias/i.test(f.title)
+                            ? "sensor"
+                            : "balance",
+                        );
+                        setQuestion(`${tx(f.title)} · ${tx(f.evidence)}`);
+                        setPanel("agents");
+                      }}
+                    >
+                      {tx("Investigate this finding with an agent")}
+                    </button>
+                    <button
+                      className="finding-bim"
+                      onClick={() => {
+                        select(f.asset);
                         setSceneView(f.asset === "ST01" ? "plant" : "district");
                         openStudio();
                       }}
@@ -1498,6 +1625,21 @@ export default function Workspace() {
         {tx(
           panel === "agents" && (
             <>
+              <GoalWorkbench
+                task={specialist}
+                goal={goal}
+                selected={selected}
+                busy={!!busy}
+                onPreset={chooseSpecialist}
+                onChange={(g) => {
+                  setGoalDraft(g);
+                  setOptimisation(null);
+                  setMission(null);
+                  setRun(null);
+                  setCyclesRemaining(0);
+                  current();
+                }}
+              />
               {linkedReview && (
                 <section className="item-bim-card">
                   <strong>
@@ -1509,6 +1651,8 @@ export default function Workspace() {
                 </section>
               )}
               <MissionControl
+                preciseGoal={!!goal}
+                inspectionOnly={["sensor", "engineering"].includes(specialist)}
                 mission={mission}
                 optimisation={optimisation}
                 current={twin}
@@ -1534,6 +1678,7 @@ export default function Workspace() {
                 }}
                 cyclesRemaining={cyclesRemaining}
                 onAutonomous={() => {
+                  if (goal) return;
                   setCyclesRemaining(3);
                   void startMission(true, true);
                 }}

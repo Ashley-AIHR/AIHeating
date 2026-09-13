@@ -290,7 +290,7 @@ export function createVisionDistrict(cityId = "yinchuan") {
       color: "#b4c6ad",
     }),
     cardGeometry = new T.PlaneGeometry(1, 1);
-  b.box(shanghai ? mats.ground : mats.snow, 0, -0.5, 0, 1900, 1, 1900);
+  b.box(shanghai ? mats.ground : mats.snow, 0, -0.5, -60, 850, 1, 900);
   b.box(mats.pave, 0, -0.04, 9, 257, 0.12, 234);
   // A legible hierarchy of avenues, local streets and pedestrian courtyards.
   for (const x of [-124, 0, 124]) {

@@ -17,11 +17,15 @@ globalThis.fetch = async (url, options = {}) => {
   const chinese = payload.messages[0].content.includes("Simplified Chinese");
   const first =
     !!payload.tools && !payload.messages.some((m) => m.role === "tool");
-  const tool = payload.tools?.some(
-    (t) => t.function.name === "optimise_network",
-  )
-    ? "optimise_network"
-    : "inspect_world";
+  const task = JSON.parse(brief).specialistMission;
+  const tool =
+    task === "sensor"
+      ? "inspect_signal_quality"
+      : task === "engineering"
+        ? "inspect_heat_path"
+        : payload.tools?.some((t) => t.function.name === "optimise_network")
+          ? "optimise_network"
+          : "inspect_world";
   const packets = first
     ? [
         {
@@ -59,12 +63,24 @@ globalThis.fetch = async (url, options = {}) => {
             },
           ],
         },
-        { choices: [{ delta: { content: chinese ? "需要进行水力平衡。" : "needs careful balancing. " } }] },
         {
           choices: [
             {
               delta: {
-                content: chinese ? "应用方案前，请检查物理模型依据。" : "Review the physical evidence before applying a plan.",
+                content: chinese
+                  ? "需要进行水力平衡。"
+                  : "needs careful balancing. ",
+              },
+            },
+          ],
+        },
+        {
+          choices: [
+            {
+              delta: {
+                content: chinese
+                  ? "应用方案前，请检查物理模型依据。"
+                  : "Review the physical evidence before applying a plan.",
               },
             },
           ],

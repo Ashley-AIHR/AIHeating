@@ -4,6 +4,7 @@ import { worldContext, registry } from "./world.mjs";
 import { compactEvidence } from "./agent-context.mjs";
 import { engineeringEvidence } from "./engineering-review.mjs";
 import { prepareInvestigation } from "./investigation-context.mjs";
+import { operatingGoal } from "./operating-goal.mjs";
 import {
   agentLocale,
   responseLanguage,
@@ -30,6 +31,23 @@ export async function investigate({
 }) {
   const locale = agentLocale(args.locale);
   const role = args.role || "diagnostic";
+  const task =
+    args.task || (role === "diagnostic" ? "diagnostic" : "optimisation");
+  if (
+    ![
+      "diagnostic",
+      "optimisation",
+      "comfort",
+      "energy",
+      "balance",
+      "pump",
+      "sensor",
+      "engineering",
+    ].includes(task)
+  )
+    throw Error("Unknown specialist mission");
+  if (["sensor", "engineering"].includes(task) && role !== "diagnostic")
+    throw Error("Inspection missions cannot prepare control plans");
   if (!["diagnostic", "optimisation"].includes(role))
     throw new Error("Unknown agent role");
   const selected = args.assetId || "ST01";
@@ -41,6 +59,7 @@ export async function investigate({
     );
   const snapshot = await rpc(session, "snapshot");
   prepareInvestigation(snapshot, args);
+  const goal = operatingGoal(args.goal, snapshot);
   const context = worldContext(snapshot, selected),
     startedAt = new Date().toISOString(),
     runId = randomUUID();
@@ -77,6 +96,7 @@ export async function investigate({
     return result;
   };
   if (review) record("inspect_engineering_review", review);
+  if (goal) record("operating_goal", goal);
   progress("diagnose_building", "running");
   const diagnosis = record(
     "diagnose_building",
@@ -102,6 +122,14 @@ export async function investigate({
     })),
   };
   const tools = [
+    schema(
+      "inspect_signal_quality",
+      "Compare sensor readings with synthetic model temperatures, identify suspect signals and required field checks. Never treat model agreement as proof of sensor calibration.",
+    ),
+    schema(
+      "inspect_heat_path",
+      "Trace the selected asset through its branch and shared station. Read delay, flow, local heat delivery and the actual available actuators.",
+    ),
     schema(
       "inspect_world",
       "Read authoritative spatial identity, connected branch, simulation timestamp and physical limitations.",
@@ -140,6 +168,13 @@ export async function investigate({
       },
     ),
   ];
+  if (review)
+    tools.push(
+      schema(
+        "inspect_engineering_review",
+        "Read the explicitly linked item reference and its unverified geometry notes. It is not an instrument or hydraulic binding.",
+      ),
+    );
   if (role === "optimisation")
     tools.push(
       schema(
@@ -173,6 +208,8 @@ export async function investigate({
       role: "user",
       content: JSON.stringify({
         question: args.question,
+        specialistMission: task,
+        operatingGoal: goal,
         context: compactEvidence(context),
         diagnosis,
         optimisation,
@@ -182,6 +219,7 @@ export async function investigate({
   ];
   messages[0].content +=
     " Your final explanation must contain no numerical measurements, thresholds, dates, numbered lists or spelled-out substitutes for quantities. B01–B12 asset IDs are permitted. Refer to the authoritative numerical evidence card instead. This lexical guard is not a semantic fact checker.";
+  messages[0].content += ` Specialist mission: ${task}. ${task === "sensor" ? "Prioritise inspect_signal_quality and distinguish measured bias from physical discomfort. Do not recommend heat changes solely to compensate for an untrusted reading." : task === "engineering" ? "Prioritise inspect_engineering_review and inspect_heat_path. Identify missing asset mapping and maintenance evidence; never infer physical faults from appearance." : task === "pump" ? "Evaluate shared pumping electricity and network-wide comfort consequences." : task === "balance" ? "Evaluate temperature distribution and coupled branch flow rather than total heat alone." : task === "energy" ? "Evaluate the explicit energy-reduction target against the unchanged baseline and preserve the specified comfort limits." : "Trace the affected building and its supplying branch before drawing conclusions."} The structured operatingGoal, when provided, is the binding target and cannot be relaxed or replaced by you. Free-form text may guide investigation but does not override that contract. A physics-feasible result that misses the goal is not an achieved goal. Read goalResult and explain the constraint, not a fabricated success.`;
   messages[0].content = messages[0].content.replace(
     "in British English",
     `in ${responseLanguage(locale)}`,
@@ -308,6 +346,44 @@ export async function investigate({
             applied: false,
           };
         } else if (name === "inspect_world") result = context;
+        else if (name === "inspect_engineering_review") result = review;
+        else if (name === "inspect_signal_quality")
+          result = {
+            assets: snapshot.buildings
+              .filter(
+                (b) =>
+                  goal?.scope === "district" ||
+                  !selected.startsWith("B") ||
+                  b.id === selected,
+              )
+              .map((b) => ({
+                id: b.id,
+                readingC: b.indoorC,
+                physicalModelC: b.modelC,
+                quality: b.quality,
+                differenceC: b.indoorC - b.modelC,
+              })),
+            basis:
+              "Synthetic scenario comparison, not a calibrated virtual sensor. Investigate timestamp, reference thermometer and sensor mapping before changing heat.",
+          };
+        else if (name === "inspect_heat_path")
+          result = {
+            selected: context.selected,
+            connected: context.relatedAssets,
+            branches: snapshot.zones.filter(
+              (z) =>
+                goal?.scope === "district" ||
+                context.relatedAssets.some((a) => a.id === z.id),
+            ),
+            buildings: snapshot.buildings.filter(
+              (b) =>
+                goal?.buildingIds.includes(b.id) ||
+                context.relatedAssets.some((a) => a.id === b.id),
+            ),
+            source: { supplyC: snapshot.supplyC, pumpHz: snapshot.pumpHz },
+            controls:
+              "Shared station supply and pump; one valve per branch. Individual building and equipment geometries are not independent actuators.",
+          };
         else if (name === "optimise_network") {
           if (
             p.objective &&
@@ -316,6 +392,7 @@ export async function investigate({
             throw new Error("Unknown optimisation objective");
           optimisation = await rpc(session, "optimise", {
             objective: p.objective || args.objective || "balanced",
+            goal: args.goal,
           });
           result = optimisation;
         } else if (name === "diagnose_building") {
@@ -439,6 +516,8 @@ export async function investigate({
     locale,
     runId,
     role,
+    task,
+    goal,
     model,
     startedAt,
     completedAt: new Date().toISOString(),

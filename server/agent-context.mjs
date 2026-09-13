@@ -7,7 +7,7 @@ export function compactEvidence(value) {
     Object.entries(value)
       .filter(
         ([key]) =>
-          !["history", "events", "frames", "weather", "profiles"].includes(key),
+          !["history", "events", "frames", "weather", "profiles", "goalSamples"].includes(key),
       )
       .map(([key, v]) => [
         key,

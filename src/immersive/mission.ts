@@ -28,6 +28,9 @@ export type Mission = {
   draftRound?: number;
 };
 export const toolNames: Record<string, string> = {
+  operating_goal: "Validating the binding operating goal",
+  inspect_signal_quality: "Comparing sensor and model evidence",
+  inspect_heat_path: "Tracing shared controls and heat delivery",
   inspect_engineering_review: "Validating BIM review and circuit context",
   context_sync: "Scene synchronised with the server",
   agent_decision: "Agent selecting the next investigation step",

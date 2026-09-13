@@ -1,4 +1,74 @@
 export const engineeringZh: Record<string, string> = {
+  "SPECIALIST MISSIONS": "专业任务",
+  "Investigate this finding with an agent": "让智能体诊断此发现",
+  "Preview best tested trajectory · not applicable":
+    "预览最佳测试轨迹 · 不可应用",
+  "Specialist mission and precise goal": "专业任务与精确目标",
+  "Comfort recovery": "舒适恢复",
+  "Heat budget": "热量预算",
+  "Hydraulic balancing": "水力平衡",
+  "Pump efficiency": "水泵能效",
+  "Sensor investigation": "传感器诊断",
+  "Engineering review": "工程审查",
+  "Binding operating goal": "约束性运行目标",
+  "Goal scope": "目标范围",
+  "Selected building": "所选建筑",
+  "Supplying branch": "所属供热支路",
+  "Whole district": "整个区域",
+  "Target indoor temperature": "目标室内温度",
+  "Maximum temperature spread": "最大温差",
+  "Required energy reduction": "要求节能比例",
+  "Goal target": "目标值",
+  "Deadline from current state": "距当前状态的期限",
+  "Goal deadline": "目标期限",
+  "All-building minimum at deadline": "期限到达时所有建筑最低温度",
+  "All-building maximum at deadline": "期限到达时所有建筑最高温度",
+  "Comfort minimum": "舒适下限",
+  "Comfort maximum": "舒适上限",
+  "Allow shared station supply and pump adjustments":
+    "允许调整共享换热站供温与泵频",
+  "Use legacy weighted objective": "使用原有加权目标",
+  "Select a specialist mission to define a precise target, or run the existing weighted optimiser below.":
+    "选择专业任务定义精确目标，或运行下方现有加权优化器。",
+  "Inspection missions gather evidence without preparing an automatic control plan. Select a control mission to set a measurable goal.":
+    "检查任务收集依据，不生成自动控制方案。选择控制任务可设置可衡量目标。",
+  "The structured goal is binding. Temperature tolerance is ±0.3°C. Existing comfort violations must not worsen before the deadline; the full comfort band is enforced from the deadline onwards. Building goals operate the supplying branch, not an invented individual valve.":
+    "结构化目标具有约束性，温度容差为 ±0.3°C。期限之前不得加剧已有舒适越限；期限到达后执行完整舒适区间约束。建筑目标通过所属支路调节，不虚构独立楼栋阀门。",
+  "Numerical goal outcome": "数值目标结果",
+  "Goal achieved in model": "模型内已达成目标",
+  "Requested goal not reached within the tested control envelope":
+    "在已测试控制范围内未达到所设目标",
+  Requested: "要求值",
+  "Best tested result": "最佳已测试结果",
+  Met: "已满足",
+  "Not met": "未满足",
+  "Comfort guardrails": "舒适约束",
+  "Affected guardrails": "越限建筑",
+  "Target buildings at deadline": "期限到达时的目标建筑温度",
+  "No application token issued. A missed goal is not evidence of physical impossibility; the bounded search may not find every feasible schedule.":
+    "未签发应用凭证。未达标不代表物理上不可能；有界搜索可能无法找到所有可行调度。",
+  "Precise goals require review after each applied step so the deadline and savings baseline are not silently reset.":
+    "精确目标每次应用后需重新审查，以避免期限与节能基准被静默重置。",
+  "Set a precise operating goal": "设置精确运行目标",
+  "Validating the binding operating goal": "验证约束性运行目标",
+  "Comparing sensor and model evidence": "对比传感器与模型依据",
+  "Tracing shared controls and heat delivery": "追踪共享控制与热量输送",
+  "City background unavailable. Interactive geometry remains available.":
+    "城市背景暂不可用，交互几何仍可使用。",
+  "Reference-derived distant scenery · orbitable operational foreground":
+    "参考图生成远景 · 可旋转交互运行前景",
+  "Invalid operating goal": "运行目标格式无效",
+  "Temperature spread requires a branch or district":
+    "温差目标需选择支路或区域范围",
+  "Invalid operating goal bounds": "运行目标边界无效",
+  "Unknown operating goal scope": "运行目标范围未知",
+  "Temperature target is outside the comfort guardrails":
+    "目标温度超出舒适约束",
+  "Pump electricity is shared; use district scope":
+    "水泵耗电为共享指标，请使用区域范围",
+  asset: "资产",
+  branch: "支路",
+  district: "区域",
   "Expand to full screen": "全屏展开",
   "Restore panel": "还原面板",
   "Open item BIM": "打开此资产 BIM",

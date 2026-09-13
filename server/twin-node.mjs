@@ -1,6 +1,7 @@
 import { randomUUID, createHash } from "node:crypto";
 import { p, createEngine, step, validate } from "./physics-node.mjs";
 import { cityProfile } from "./cities.mjs";
+import { operatingGoal, assessGoal } from "./operating-goal.mjs";
 export const SCENARIOS = {
   imbalance: {
     name: "Cold at the end of the network",
@@ -217,6 +218,10 @@ export function candidateControls(s, args) {
   return validate({ ...s.engine.controls, ...args }, s.engine.controls);
 }
 export function rollout(s, controls, hours = 3, second) {
+  const goalSamples = [],
+    buildingHeatKwh = Object.fromEntries(
+      Object.keys(s.engine.temperatures).map((id) => [id, 0]),
+    );
   const e = structuredClone(s.engine),
     initialHeat = e.heatJ,
     initialPump = e.pumpJ,
@@ -245,6 +250,15 @@ export function rollout(s, controls, hours = 3, second) {
         (sum, t) => sum + Math.max(20 - t, 0) ** 2 + Math.max(t - 22, 0) ** 2,
         0,
       ) / 12;
+    for (const [id, b] of Object.entries(f.buildings))
+      buildingHeatKwh[id] += (b.heat * 300) / 3.6e6;
+    goalSamples.push({
+      minutes: (i + 1) * 5,
+      temperatures: { ...e.temperatures },
+      buildingHeatKwh: { ...buildingHeatKwh },
+      heatKwh: (e.heatJ - initialHeat) / 3.6e6,
+      pumpKwh: (e.pumpJ - initialPump) / 3.6e6,
+    });
     if ((i + 1) % 6 === 0)
       trace.push({
         minutes: (i + 1) * 5,
@@ -263,6 +277,7 @@ export function rollout(s, controls, hours = 3, second) {
   }
   return {
     heatKwh: (e.heatJ - initialHeat) / 3.6e6,
+    goalSamples,
     pumpKwh: (e.pumpJ - initialPump) / 3.6e6,
     minimumC,
     endMinimumC: Math.min(...Object.values(e.temperatures)),
@@ -414,6 +429,7 @@ export function compare(s) {
   };
 }
 export function optimise(s, args = {}) {
+  const goal = operatingGoal(args.goal, snapshot(s));
   const objective = args.objective || "balanced",
     weights = {
       balanced: [0.01, 0.1, 1],
@@ -428,6 +444,17 @@ export function optimise(s, args = {}) {
     ramp = [2, 2, 10, 10, 10],
     cache = new Map();
   const controls = (x) => {
+    if (goal && goal.scope !== "district")
+      x = x.map((v, i) => {
+        const j = i % 5;
+        return j < 2
+          ? goal.allowShared
+            ? v
+            : 0
+          : goal.branchIds.includes(["near", "mid", "far"][j - 2])
+            ? v
+            : 0;
+      });
     const a = start.map((v, i) => clamp(v + x[i] * ramp[i], lo[i], hi[i])),
       b = a.map((v, i) => clamp(v + x[i + 5] * ramp[i], lo[i], hi[i]));
     return [a, b].map((v) => ({
@@ -438,6 +465,7 @@ export function optimise(s, args = {}) {
   };
   const valid = (r) =>
     r.verified && r.maxResidual <= 1e-6 && r.maxPressureKpa <= 250;
+  const reference = goal ? rollout(s, c, 3, c) : null;
   const evaluate = (x) => {
     const key = x.map((v) => v.toFixed(5)).join(",");
     if (!cache.has(key)) {
@@ -447,8 +475,14 @@ export function optimise(s, args = {}) {
           weights[0] * row.heatKwh +
           weights[1] * row.pumpKwh +
           weights[2] * row.comfortPenalty;
+      const assessment = goal ? assessGoal(goal, row, reference) : null;
+      const score = assessment
+        ? assessment.targetError ** 2 * 10000 +
+          assessment.guardrailPenalty * 1e6 +
+          cost * 0.001
+        : cost;
       cache.set(key, [
-        valid(row) ? cost : 1e9 + Math.max(0, 18 - row.minimumC) * 1e6 + cost,
+        valid(row) ? score : 1e9 + Math.max(0, 18 - row.minimumC) * 1e6 + score,
         row,
       ]);
     }
@@ -456,7 +490,7 @@ export function optimise(s, args = {}) {
   };
   let x = Array(10).fill(0);
   const baseline = evaluate(x)[1];
-  for (const mesh of [1, 0.5])
+  for (const mesh of goal ? [1, 0.5, 0.25, 0.125] : [1, 0.5])
     for (let i = 0; i < 10; i++) {
       const trials = [
         x,
@@ -468,10 +502,20 @@ export function optimise(s, args = {}) {
         evaluate(t)[0] < evaluate(best)[0] ? t : best,
       );
     }
+  // Soft search penalties guide exploration; never discard a feasible tested
+  // schedule in favour of a slightly cheaper near-miss at the final iterate.
+  if (goal) {
+    const feasibleTrials = [...cache.entries()].filter(
+      ([, [, row]]) => valid(row) && assessGoal(goal, row, reference).passed,
+    );
+    feasibleTrials.sort((a, b) => a[1][0] - b[1][0]);
+    if (feasibleTrials.length) x = feasibleTrials[0][0].split(",").map(Number);
+  }
   const chosen = evaluate(x)[1],
     [a, b] = controls(x),
     check = rollout(s, a, 3, b),
-    feasible = valid(check);
+    goalResult = goal ? assessGoal(goal, check, reference) : null,
+    feasible = valid(check) && (!goalResult || goalResult.passed);
   const schedule = [
       { minute: 0, ...a },
       { minute: 90, ...b },
@@ -484,6 +528,7 @@ export function optimise(s, args = {}) {
           cityId: s.cityId,
           contextId: s.contextId,
           schedule,
+          goal,
           model: "P1A-coherent-v1.2-node",
         }),
       )
@@ -495,6 +540,7 @@ export function optimise(s, args = {}) {
     verified: feasible,
     schedule,
     planHash,
+    goalResult,
   };
   if (feasible)
     result.candidateId = storePlan(s, {
@@ -506,6 +552,8 @@ export function optimise(s, args = {}) {
   return {
     revision: s.revision,
     objective,
+    goal,
+    goalResult,
     contextId: s.contextId,
     baseline,
     recommendation: feasible ? result : null,
@@ -515,6 +563,8 @@ export function optimise(s, args = {}) {
     status: feasible ? "feasible best found" : "no feasible plan found",
     verification: {
       passed: feasible,
+      physicsPassed: valid(check),
+      goalPassed: goalResult?.passed ?? null,
       minimumC: check.minimumC,
       maxResidual: check.maxResidual,
       maxPressureKpa: check.maxPressureKpa,

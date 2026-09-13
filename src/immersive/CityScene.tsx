@@ -13,6 +13,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { createCityAtmosphere, cityIdentity } from "./city-atmosphere";
+import { cinematicEnvironment, cinematicGrade } from "./cinematic-environment";
 import type { Twin, Finding } from "../operations/types";
 import {
   createVisionDistrict,
@@ -118,7 +119,45 @@ export default function CityScene(props: Props) {
     el.appendChild(renderer.domElement);
     const scene = new T.Scene();
     scene.background = new T.Color("#c0cfda");
-    scene.fog = new T.FogExp2("#c0cfda", 0.0011);
+    scene.fog = new T.FogExp2("#c0cfda", 0.0006);
+    const cityBackdrop = cinematicEnvironment(
+      scene,
+      props.frame.cityId || "yinchuan",
+      () => {
+        el.dataset.backdrop = "city-panorama";
+        // Distant landmark placeholders are superseded by reference-derived scenery.
+        // Courtyard and street geometry inside the operational district stays 3D.
+        atmosphere.root.traverse((o) => {
+          if (o instanceof T.InstancedMesh) {
+            const matrix = new T.Matrix4(),
+              position = new T.Vector3();
+            let kept = 0;
+            for (let i = 0; i < o.count; i++) {
+              o.getMatrixAt(i, matrix);
+              position.setFromMatrixPosition(matrix);
+              if (position.length() <= 500) o.setMatrixAt(kept++, matrix);
+            }
+            o.count = kept;
+            o.computeBoundingSphere();
+            o.instanceMatrix.needsUpdate = true;
+          } else if (o instanceof T.Mesh) {
+            o.geometry.computeBoundingBox();
+            const centre = o.geometry
+              .boundingBox!.getCenter(new T.Vector3())
+              .add(o.position);
+            if (centre.length() > 500) o.visible = false;
+          }
+        });
+      },
+      () => {
+        if (!dead) {
+          el.dataset.backdrop = "unavailable";
+          setError(
+            "City background unavailable. Interactive geometry remains available.",
+          );
+        }
+      },
+    );
     const pmrem = new T.PMREMGenerator(renderer),
       room = new RoomEnvironment(),
       environment = pmrem.fromScene(room, 0.035);
@@ -237,6 +276,8 @@ export default function CityScene(props: Props) {
     composer.addPass(bloom);
     const output = new OutputPass();
     composer.addPass(output);
+    const grade = cinematicGrade();
+    composer.addPass(grade);
     const overviewTarget = new T.Vector3(-7, 20, -25),
       overviewOffset = new T.Vector3(130, 110, 365);
     const destination = {
@@ -249,7 +290,9 @@ export default function CityScene(props: Props) {
     function setLighting(plant: boolean) {
       const centre = plant ? stationPosition : overviewTarget,
         extent = plant ? 26 : 210;
-      sun.position.copy(centre).add(new T.Vector3(-110, 125, 95));
+      sun.position
+        .copy(centre)
+        .add(new T.Vector3(-110, lighting.current ? 65 : 125, 95));
       sun.target.position.copy(centre);
       const s = sun.shadow.camera;
       s.left = -extent;
@@ -751,12 +794,16 @@ export default function CityScene(props: Props) {
           : shanghai
             ? "#bac9d3"
             : "#b1cbdc";
-        (scene.background as T.Color).set(colour);
+        if (scene.background instanceof T.Color) scene.background.set(colour);
+        scene.backgroundIntensity = dark ? 0.8 : 1.12;
         (scene.fog as T.FogExp2).color.set(colour);
         sun.color.set(dark ? (shanghai ? "#ffd5b3" : "#ffbc7e") : "#ffe8c5");
-        sun.intensity = dark ? (shanghai ? 1.05 : 1.45) : 3.8;
+        sun.intensity = dark ? (shanghai ? 2.0 : 2.8) : 3.8;
         skyLight.color.set(dark ? "#517cad" : "#bfd5ef");
-        skyLight.intensity = dark ? 0.72 : 0.48;
+        skyLight.intensity = dark ? 0.42 : 0.48;
+        renderer.toneMappingExposure = dark ? 1.12 : 1.0;
+        setLighting(latest.current.view === "plant");
+        renderer.shadowMap.needsUpdate = true;
         model.materials.warm.emissiveIntensity = dark ? 1.25 : 0.25;
         flowMaterial.emissiveIntensity = dark ? 2 : 0.85;
         returnMaterial.emissiveIntensity = dark ? 1.5 : 0.65;
@@ -837,6 +884,7 @@ export default function CityScene(props: Props) {
       renderer.info.reset();
       ao.enabled = quality.current;
       bloom.enabled = quality.current && lighting.current;
+      grade.enabled = quality.current;
       composer.render();
       el.dataset.drawCalls = String(renderer.info.render.calls);
       el.dataset.triangles = String(renderer.info.render.triangles);
@@ -872,6 +920,8 @@ export default function CityScene(props: Props) {
       model.textures.forEach((t) => t.dispose());
       environment.dispose();
       outdoorEnvironment?.dispose();
+      cityBackdrop.dispose();
+      grade.dispose();
       sun.shadow.dispose();
       ao.dispose();
       output.dispose();
@@ -968,6 +1018,11 @@ export default function CityScene(props: Props) {
           {tx(highQuality ? "Quality: cinematic" : "Quality: performance")}
         </button>
       </div>
+      <small className="scene-provenance">
+        {tx(
+          "Reference-derived distant scenery · orbitable operational foreground",
+        )}
+      </small>
       <dialog
         className="city-reference-dialog"
         ref={referenceDialog}

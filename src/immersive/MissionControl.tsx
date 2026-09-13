@@ -3,8 +3,11 @@ import { fmt, type Twin } from "../operations/types";
 import { useEffect, useRef } from "react";
 import { toolNames, type Mission } from "./mission";
 import type { Optimisation } from "./Workspace";
+import { GoalOutcome } from "./GoalWorkbench";
 
 type Props = {
+  preciseGoal?: boolean;
+  inspectionOnly?: boolean;
   mission: Mission | null;
   optimisation: Optimisation | null;
   current: Twin;
@@ -89,7 +92,10 @@ export default function MissionControl(p: Props) {
         >
           {tx("✧ Run agent mission")}
         </button>
-        <button disabled={p.busy} onClick={() => p.onRun(false)}>
+        <button
+          disabled={p.busy || p.inspectionOnly}
+          onClick={() => p.onRun(false)}
+        >
           {tx("Explore with numerical solver")}
         </button>
       </div>
@@ -119,7 +125,9 @@ export default function MissionControl(p: Props) {
           ) : (
             <button
               className="full"
-              disabled={p.busy || !p.canRunAgent}
+              disabled={
+                p.busy || !p.canRunAgent || p.preciseGoal || p.inspectionOnly
+              }
               onClick={p.onAutonomous}
             >
               {tx("Run 3 agent control cycles")}
@@ -129,7 +137,31 @@ export default function MissionControl(p: Props) {
         <small>
           {tx("Up to 3 paid agent runs · automatic simulator application only")}
         </small>
+        {p.preciseGoal && (
+          <small>
+            {tx(
+              "Precise goals require review after each applied step so the deadline and savings baseline are not silently reset.",
+            )}
+          </small>
+        )}
       </div>
+      {o?.goalResult && <GoalOutcome result={o.goalResult} />}
+      {o?.goalResult && !o.recommendation && (
+        <div className="dock-actions">
+          <button
+            disabled={p.busy || p.stale}
+            onClick={() => p.onPreview("intervention")}
+          >
+            {tx("Preview best tested trajectory · not applicable")}
+          </button>
+          <button
+            disabled={p.busy || p.stale}
+            onClick={() => p.onPreview("baseline")}
+          >
+            {tx("Continue unchanged")}
+          </button>
+        </div>
+      )}
       {tx(
         m && (
           <>
