@@ -187,6 +187,19 @@ test("agent automatically exposes engineering evidence after a failed operating 
     }),
   });
   assert.equal(run.engineeringStudy.preferredId, "emitters-3");
+  assert.equal(
+    round,
+    1,
+    "completed engineering study uses tool-derived report, not contradictory provider prose",
+  );
+  assert.match(run.answer, /tripled emitter UA/);
+  assert.match(run.answer, /supplementary electric heat/);
+  assert.equal(run.narrativeWithheld, false);
+  assert(
+    run.events.some(
+      (e) => e.tool === "agent_report" && e.source === "verified-tool-results",
+    ),
+  );
   assert(run.trace.some((t) => t.tool === "compare_engineering_options"));
   assert.deepEqual(dispatch(id, "snapshot"), state);
 });

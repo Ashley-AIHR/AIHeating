@@ -8,7 +8,7 @@ Precise goals use six 30-minute stages with coordinated seeds followed by bounde
 
 ## Engineering alternatives
 
-`engineering_study` clones the current model and compares existing controls, commissioned local valves, doubled selected-building emitter UA, a 30% envelope-conductance reduction, a 35% supplying-branch pipe-resistance reduction, and auxiliary electric heat sized on a discrete grid. The grid stops at its first passing capacity; it is not a certified minimum. Resistance reduction is an engineering hypothesis, not proof of obstruction or a diagnosed repair.
+`engineering_study` clones the current model and compares existing controls, commissioned local valves, doubled and tripled selected-building emitter UA, a 30% envelope-conductance reduction, a 35% supplying-branch pipe-resistance reduction, and auxiliary electric heat sized on a discrete grid. The grid stops at its first passing capacity; it is not a certified minimum. Resistance reduction is an engineering hypothesis, not proof of obstruction or a diagnosed repair.
 
 Local valves modify both flow distribution and normalised equivalent branch resistance. At all-open settings, the hydraulic equations recover the accepted original fixture. This model does not reproduce a surveyed building circuit or a particular pressure-independent valve. A design alternative assumes commissioning complete at its start, including initial valve positions. Installation time is outside the operational horizon.
 
@@ -21,6 +21,8 @@ Auxiliary heat is a local, capacity-limited ideal thermostat. Its heat enters th
 The operator must explicitly confirm `engineering_open` to create a modified simulation, preserve the original and apply the first verified half-hour. `engineering_step` replans one step at a time using the remaining original deadline. This mission state lasts in the server session, not through a restart. Manual commissioned building valves are available from the selected building's 3D controls; manual overrides can disrupt the goal. `engineering_restore` recovers the original state with a fresh identity.
 
 ## Reproduction and limitations
+
+Engineering feasibility summaries are bilingual, deterministic text derived from completed solver flags, explicitly labelled as tool-result summaries. The LLM chooses tools but does not reinterpret which engineering alternatives passed. This prevents a fluent explanation from contradicting the evidence cards. Normal diagnostic and operating missions retain provider-generated reporting.
 
 The Beijing catalogue finds two passing routes: tripled selected-building emitter UA with local valves, and local valves plus a 60 kW auxiliary heater. Both complete four actual half-hour steps. Final B10 temperatures are approximately 20.78°C and 21.01°C respectively, both within the original ±0.3°C tolerance. Other buildings remain within the task's 18–23°C band, but some remain below 20°C; this is not district-wide 20°C comfort compliance. The catalogue order is not an economic ranking. Auxiliary electricity is included in the optimiser's illustrative electricity penalty as well as reported separately.
 

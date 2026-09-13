@@ -5,6 +5,7 @@ import { compactEvidence } from "./agent-context.mjs";
 import { engineeringEvidence } from "./engineering-review.mjs";
 import { prepareInvestigation } from "./investigation-context.mjs";
 import { operatingGoal } from "./operating-goal.mjs";
+import { engineeringOutcomeReport } from "./engineering-report.mjs";
 import {
   agentLocale,
   responseLanguage,
@@ -468,6 +469,26 @@ export async function investigate({
     // A completed optimiser already contains counterfactuals and verification.
     // Do not spend the remaining turns repeating tools after obtaining a plan.
     if (optimisation || engineeringStudy || concluded || calls >= 8) break;
+  }
+  if (engineeringStudy && !signal?.aborted) {
+    // Free-form provider prose can contradict feasibility flags without digits.
+    // Publish an explicitly sourced result summary instead.
+    answer = engineeringOutcomeReport(engineeringStudy, locale);
+    progress("agent_report", "running", {
+      round: 4,
+      source: "verified-tool-results",
+    });
+    for (const paragraph of answer.split("\n\n"))
+      progress("agent_output", "running", {
+        round: 4,
+        kind: "text",
+        text: paragraph + "\n\n",
+        source: "verified-tool-results",
+      });
+    progress("agent_report", "completed", {
+      round: 4,
+      source: "verified-tool-results",
+    });
   }
   // Reporting is independent of the tool budget. No tool definitions or prior
   // assistant/tool protocol messages are sent, so the provider cannot continue
