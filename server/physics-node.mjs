@@ -27,10 +27,27 @@ export function validate(c, previous) {
   }
   return structuredClone(c);
 }
-export function hydraulics(c) {
+export function hydraulics(c, openings = {}, design = {}) {
   const k = p.branches.map(
     (b, i) =>
-      b.pipe_k_pa_s2_m6 + b.valve_ref_k_pa_s2_m6 / (c.valvesPct[i] / 100) ** 2,
+      (b.pipe_k_pa_s2_m6 * (design.branchResistance?.[zones[i]] || 1) +
+        b.valve_ref_k_pa_s2_m6 / (c.valvesPct[i] / 100) ** 2) *
+      (() => {
+        const bs = p.buildings.filter((v) => v.zone === zones[i]);
+        // Normalised equivalent parallel-building resistance. At 100% this
+        // exactly recovers the accepted fixture; it is not surveyed pipework.
+        return (
+          (sum(bs.map((v) => v.flow_share_weight)) /
+            sum(
+              bs.map(
+                (v) =>
+                  (v.flow_share_weight * (openings[v.building_id] ?? 100)) /
+                  100,
+              ),
+            )) **
+          2
+        );
+      })(),
   );
   const shut =
     rho *
@@ -98,14 +115,14 @@ function linear(t, eq, conductance, cap, dt) {
     change = -Math.expm1(-x);
   return [t + (eq - t) * change, eq + ((t - eq) * change) / x];
 }
-function building(profile, initial, outlets, mass, w, window) {
+function building(profile, initial, outlets, mass, w, window, auxiliaryW = 0) {
   const solar =
     w.solar * profile.effective_solar_area_m2 * profile.orientation_factor;
   const internal = profile.internal_gain_w,
     loss =
       1 / profile.thermal_resistance_k_w +
       profile.window_conductance_w_k * window;
-  const forcing = solar + internal + loss * w.outdoor,
+  const forcing = solar + internal + auxiliaryW + loss * w.outdoor,
     cap = profile.thermal_capacitance_j_k;
   const conductance =
     mass > 0
@@ -151,9 +168,11 @@ function building(profile, initial, outlets, mass, w, window) {
     envelope,
     windowLoss,
     storage,
+    auxiliaryW,
     mass,
     returnC: mass ? supply - heat / (mass * cp) : supply,
-    residual: storage - (heat + solar + internal - envelope - windowLoss),
+    residual:
+      storage - (heat + solar + internal + auxiliaryW - envelope - windowLoss),
     required: Math.max(
       0,
       loss * (p.target_indoor_c - w.outdoor) - solar - internal,
@@ -169,7 +188,26 @@ export function step(engine, w, change, windows = {}) {
     engine.elapsed % 1800
   )
     throw Error("Control changes require a 30-minute boundary");
-  const h = hydraulics(c),
+  const design = engine.design || {};
+  const openings = Object.fromEntries(
+    p.buildings.map((b) => {
+      const id = b.building_id;
+      if (!design.localValves) return [id, 100];
+      const desired =
+        design.manualValves?.[id] ??
+        Math.max(
+          1,
+          Math.min(
+            100,
+            40 +
+              80 * ((design.setpoints?.[id] ?? 21) - engine.temperatures[id]),
+          ),
+        );
+      const old = engine.localOpenings?.[id] ?? 100;
+      return [id, Math.max(old - 10, Math.min(old + 10, desired))];
+    }),
+  );
+  const h = hydraulics(c, openings, design),
     buffers = structuredClone(engine.buffers);
   const energy = (bs) =>
     rho * cp * sum(bs.flatMap((b) => b.packets.map(([v, t]) => v * t)));
@@ -178,17 +216,50 @@ export function step(engine, w, change, windows = {}) {
     branch = [];
   for (let i = 0; i < 3; i++) {
     const profiles = p.buildings.filter((b) => b.zone === zones[i]),
-      weight = sum(profiles.map((b) => b.flow_share_weight));
-    const outlets = transport(buffers[i], c.supplyC, h.flows[i], dt);
-    for (const b of profiles)
-      buildings[b.building_id] = building(
-        b,
-        engine.temperatures[b.building_id],
-        outlets,
-        (rho * h.flows[i] * b.flow_share_weight) / weight,
-        w,
-        windows[b.building_id] || 0,
+      weight = sum(
+        profiles.map(
+          (b) => (b.flow_share_weight * openings[b.building_id]) / 100,
+        ),
       );
+    const outlets = transport(buffers[i], c.supplyC, h.flows[i], dt);
+    for (const original of profiles) {
+      const id = original.building_id,
+        amendment = design.buildings?.[id] || {};
+      const b = {
+        ...original,
+        radiator_ua_w_k:
+          original.radiator_ua_w_k * (amendment.emitterFactor || 1),
+        thermal_resistance_k_w:
+          original.thermal_resistance_k_w / (amendment.lossFactor || 1),
+      };
+      const mass =
+        (rho * h.flows[i] * b.flow_share_weight * openings[id]) / 100 / weight;
+      const evaluate = (power) =>
+        building(
+          b,
+          engine.temperatures[id],
+          outlets,
+          mass,
+          w,
+          windows[id] || 0,
+          power,
+        );
+      let result = evaluate(0);
+      if (
+        amendment.auxiliaryKw > 0 &&
+        result.temp < (amendment.targetC ?? 21)
+      ) {
+        let lo = 0,
+          hi = amendment.auxiliaryKw * 1000;
+        for (let j = 0; j < 16; j++) {
+          const mid = (lo + hi) / 2;
+          if (evaluate(mid).temp < (amendment.targetC ?? 21)) lo = mid;
+          else hi = mid;
+        }
+        result = evaluate(hi);
+      }
+      buildings[id] = { ...result, localValvePct: openings[id] };
+    }
     branch.push({
       id: zones[i],
       flowM3h: h.flows[i] * 3600,
@@ -223,6 +294,7 @@ export function step(engine, w, change, windows = {}) {
           Math.abs(b.heat) +
             Math.abs(b.solar) +
             Math.abs(b.internal) +
+            Math.abs(b.auxiliaryW) +
             Math.abs(b.envelope) +
             Math.abs(b.windowLoss),
           1,
@@ -232,10 +304,13 @@ export function step(engine, w, change, windows = {}) {
   if (!Number.isFinite(residual) || residual > 1e-7)
     throw Error("Physical energy-balance verification failed");
   engine.controls = c;
+  engine.localOpenings = openings;
   engine.buffers = buffers;
   engine.elapsed += dt;
   engine.heatJ += heat * dt;
   engine.pumpJ += h.power * dt;
+  engine.auxiliaryJ =
+    (engine.auxiliaryJ || 0) + sum(values.map((b) => b.auxiliaryW)) * dt;
   engine.temperatures = Object.fromEntries(
     Object.entries(buildings).map(([id, b]) => [id, b.temp]),
   );

@@ -63,6 +63,7 @@ export async function investigate({
   const context = worldContext(snapshot, selected),
     startedAt = new Date().toISOString(),
     runId = randomUUID();
+  context.engineeringScenario = snapshot.engineering || null;
   if (args.equipmentId) {
     const equipment = context.mechanicalAssembly?.equipment.find(
       (e) => e.id === args.equipmentId,
@@ -105,6 +106,7 @@ export async function investigate({
     }),
   );
   let optimisation = null;
+  let engineeringStudy = null;
   const limit = snapshot.limits?.supplyC ? snapshot.limits : null;
   const envelope = limit && {
     supplyC: [
@@ -168,6 +170,19 @@ export async function investigate({
       },
     ),
   ];
+  const canEngineer =
+    role === "optimisation" &&
+    goal?.metric === "temperature" &&
+    goal?.scope === "asset" &&
+    goal?.allowShared &&
+    !snapshot.engineering;
+  if (canEngineer)
+    tools.push(
+      schema(
+        "compare_engineering_options",
+        "Compare existing controls, commissioned building valves, emitter and envelope upgrades, branch resistance and sized auxiliary electric heat in cloned models. Preserve the operator goal. Returns engineering evidence, never installation or operating authority.",
+      ),
+    );
   if (review)
     tools.push(
       schema(
@@ -256,7 +271,11 @@ export async function investigate({
         trace.some((t) => t.tool === "simulate_controls" && !t.result?.error));
     const availableTools = decisionStage
       ? tools.filter((t) =>
-          ["optimise_network", "finish_without_plan"].includes(t.function.name),
+          [
+            "optimise_network",
+            "compare_engineering_options",
+            "finish_without_plan",
+          ].includes(t.function.name),
         )
       : tools;
     let data,
@@ -346,7 +365,14 @@ export async function investigate({
             applied: false,
           };
         } else if (name === "inspect_world") result = context;
-        else if (name === "inspect_engineering_review") result = review;
+        else if (name === "compare_engineering_options") {
+          engineeringStudy = await rpc(session, "engineering_study", {
+            goal: args.goal,
+            revision: snapshot.revision,
+            contextId: snapshot.contextId,
+          });
+          result = engineeringStudy;
+        } else if (name === "inspect_engineering_review") result = review;
         else if (name === "inspect_signal_quality")
           result = {
             assets: snapshot.buildings
@@ -381,8 +407,9 @@ export async function investigate({
                 context.relatedAssets.some((a) => a.id === b.id),
             ),
             source: { supplyC: snapshot.supplyC, pumpHz: snapshot.pumpHz },
-            controls:
-              "Shared station supply and pump; one valve per branch. Individual building and equipment geometries are not independent actuators.",
+            controls: snapshot.engineering
+              ? "Commissioned local building valves and explicit design amendments in an isolated engineering model; not installed field equipment."
+              : "Shared station supply and pump; one valve per branch. Individual building and equipment geometries are not independent actuators.",
           };
         else if (name === "optimise_network") {
           if (
@@ -409,6 +436,28 @@ export async function investigate({
         result = { error: error.message, controlEnvelope: envelope };
       }
       record(name, result);
+      // A failed operating search starts a bounded engineering comparison,
+      // not a weaker target. It remains read-only and visible in the stream.
+      if (
+        name === "optimise_network" &&
+        optimisation &&
+        !optimisation.recommendation &&
+        canEngineer &&
+        !engineeringStudy &&
+        !signal?.aborted
+      ) {
+        progress("compare_engineering_options", "running");
+        try {
+          engineeringStudy = await rpc(session, "engineering_study", {
+            goal: args.goal,
+            revision: snapshot.revision,
+            contextId: snapshot.contextId,
+          });
+          record("compare_engineering_options", engineeringStudy);
+        } catch (error) {
+          record("compare_engineering_options", { error: error.message });
+        }
+      }
       messages.push({
         role: "tool",
         tool_call_id: call.id,
@@ -418,7 +467,7 @@ export async function investigate({
     }
     // A completed optimiser already contains counterfactuals and verification.
     // Do not spend the remaining turns repeating tools after obtaining a plan.
-    if (optimisation || concluded || calls >= 8) break;
+    if (optimisation || engineeringStudy || concluded || calls >= 8) break;
   }
   // Reporting is independent of the tool budget. No tool definitions or prior
   // assistant/tool protocol messages are sent, so the provider cannot continue
@@ -534,6 +583,7 @@ export async function investigate({
     events,
     diagnosis,
     optimisation,
+    engineeringStudy,
     context: {
       siteId: context.site.id,
       modelVersion: context.modelVersion,

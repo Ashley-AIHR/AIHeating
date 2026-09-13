@@ -1,4 +1,6 @@
 export type Building = {
+  auxiliaryKw?: number;
+  localValvePct?: number | null;
   id: string;
   zone: string;
   areaM2: number;
@@ -36,6 +38,22 @@ export type History = {
   meanC: number;
 };
 export type Twin = {
+  engineering?: {
+    label: string;
+    goal: {
+      assetId: string;
+      target: number;
+      deadlineMinutes: number;
+      metric: "temperature";
+      scope: "asset";
+      minC: number;
+      maxC: number;
+      allowShared: boolean;
+    };
+    remainingMinutes: number;
+    auxiliaryKwh: number;
+    design: { localValves?: boolean; manualValves?: Record<string, number> };
+  } | null;
   contextId?: string;
   cityId?: string;
   city?: {

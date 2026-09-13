@@ -29,6 +29,7 @@ type Props = {
   busy: boolean;
   onPending: (label: string) => void;
   onApplied: (state: Twin, command: CommandPreview) => void;
+  onLocalApplied?: (state: Twin) => void;
   onNotice: (title: string, detail: string, failed: boolean) => void;
   onAgent: () => void;
   onClose: () => void;
@@ -58,6 +59,26 @@ export default function DirectControl(p: Props) {
     [proposal, setProposal] = useState<CommandPreview | null>(null),
     [error, setError] = useState("");
   const value = draft ?? actual;
+  const [localValue, setLocalValue] = useState(50);
+  const local =
+    p.state.engineering && p.state.buildings.find((b) => b.id === p.selected);
+  async function applyLocal() {
+    p.onPending("Verifying commissioned local valve");
+    setError("");
+    try {
+      p.onLocalApplied?.(
+        await api<Twin>("engineering/valve", {
+          revision: p.state.revision,
+          assetId: p.selected,
+          value: localValue,
+        }),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      p.onPending("");
+    }
+  }
   const disabled = !p.enabled || p.busy;
   async function test() {
     p.onPending("Testing manual control against the physical model");
@@ -118,6 +139,36 @@ export default function DirectControl(p: Props) {
           ×
         </button>
       </header>
+      {local && (
+        <div className="engineering-local-control">
+          <strong>
+            {local.id} · {tx("Commissioned local valve")}{" "}
+            {local.localValvePct?.toFixed(1)}%
+          </strong>
+          <p>
+            {tx(
+              "Modified engineering model only. Manual changes may disrupt the original goal.",
+            )}
+          </p>
+          <input
+            aria-label={tx("Local valve opening")}
+            type="range"
+            min="1"
+            max="100"
+            value={localValue}
+            onChange={(e) => setLocalValue(Number(e.target.value))}
+          />
+          <span>{localValue}%</span>
+          <button
+            disabled={
+              !p.enabled || p.busy || !p.state.engineering?.remainingMinutes
+            }
+            onClick={() => void applyLocal()}
+          >
+            {tx("Verify local valve and simulate 30 min")}
+          </button>
+        </div>
+      )}
       {tx(
         branch && p.selected !== branch && (
           <p>

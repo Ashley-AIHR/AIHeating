@@ -43,6 +43,7 @@ export default function GoalWorkbench(p: {
   onPreset: (task: string) => void;
   onChange: (goal: OperatingGoal | null) => void;
   selected: string;
+  engineered?: boolean;
 }) {
   const g = p.goal;
   return (
@@ -189,12 +190,14 @@ export default function GoalWorkbench(p: {
                   p.onChange({ ...g, allowShared: e.target.checked })
                 }
               />
-              {tx("Allow shared station supply and pump adjustments")}
+              {tx("Allow coordinated station and all branch controls")}
             </label>
           )}
           <p className="muted">
             {tx(
-              "The structured goal is binding. Temperature tolerance is ±0.3°C. Existing comfort violations must not worsen before the deadline; the full comfort band is enforced from the deadline onwards. Building goals operate the supplying branch, not an invented individual valve.",
+              p.engineered
+                ? "This engineering scenario preserves its original target and deadline. Commissioned local valves and explicit physical amendments operate only in the modified model."
+                : "The structured goal is binding. Temperature tolerance is ±0.3°C. Existing comfort violations must not worsen before the deadline; the full comfort band is enforced from the deadline onwards. Building goals operate the supplying branch, not an invented individual valve.",
             )}
           </p>
           <button disabled={p.busy} onClick={() => p.onChange(null)}>

@@ -24,6 +24,9 @@ import GoalWorkbench, {
   type OperatingGoal,
   type GoalResult,
 } from "./GoalWorkbench";
+import EngineeringWorkbench, {
+  type EngineeringStudy,
+} from "./EngineeringWorkbench";
 import DirectControl, {
   type CommandPreview,
   type OperationEvent,
@@ -74,6 +77,7 @@ export type Optimisation = {
   limitations: string[];
 };
 type Run = {
+  engineeringStudy?: EngineeringStudy | null;
   locale?: Locale;
   contextId?: string;
   completionStatus?: "complete" | "partial";
@@ -171,15 +175,25 @@ export default function Workspace() {
     [objective, setObjective] = useState("balanced");
   const [specialist, setSpecialist] = useState("optimisation");
   const [goalDraft, setGoalDraft] = useState<OperatingGoal | null>(null);
-  const goal = goalDraft && {
-    ...goalDraft,
-    assetId:
-      goalDraft.scope === "district"
-        ? "ST01"
-        : goalDraft.scope === "branch"
-          ? twin?.buildings.find((b) => b.id === selected)?.zone || selected
-          : selected,
-  };
+  const [engineeringStudy, setEngineeringStudy] =
+    useState<EngineeringStudy | null>(null);
+  const [engineeringPreview, setEngineeringPreview] = useState(false);
+  const goal = twin?.engineering
+    ? twin.engineering.remainingMinutes > 0
+      ? {
+          ...twin.engineering.goal,
+          deadlineMinutes: twin.engineering.remainingMinutes,
+        }
+      : null
+    : goalDraft && {
+        ...goalDraft,
+        assetId:
+          goalDraft.scope === "district"
+            ? "ST01"
+            : goalDraft.scope === "branch"
+              ? twin?.buildings.find((b) => b.id === selected)?.zone || selected
+              : selected,
+      };
   function chooseSpecialist(task: string) {
     setSpecialist(task);
     setOptimisation(null);
@@ -465,9 +479,25 @@ export default function Workspace() {
     if (stalePlan && timeMode === "forecast") setTimeMode("current");
   }, [stalePlan, timeMode]);
   function current() {
+    setEngineeringPreview(false);
     setPreviewPlaying(false);
     setTimeMode("current");
     setTimeIndex(0);
+  }
+  function engineeringState(s: Twin) {
+    setPlaying(false);
+    setTwin(s);
+    setFrames((f) =>
+      s.contextId === twin?.contextId ? [...f, s].slice(-48) : [s],
+    );
+    setOptimisation(null);
+    setMission(null);
+    setRun(null);
+    setCyclesRemaining(0);
+    setDiagnosis(null);
+    setEngineeringStudy(null);
+    setControlsOpen(false);
+    current();
   }
   async function resetWorld(cityId: string, scenario: string) {
     setGoalDraft(null);
@@ -666,6 +696,7 @@ export default function Workspace() {
               },
             );
             setRun(r);
+            if (r.engineeringStudy) setEngineeringStudy(r.engineeringStudy);
             if (r.diagnosis) setDiagnosis(r.diagnosis);
             setMission((m) => m && { ...m, draft: r.answer });
             if (r.completionStatus === "partial") {
@@ -1030,6 +1061,7 @@ export default function Workspace() {
                   setBusy(label);
                 }}
                 onApplied={manualApplied}
+                onLocalApplied={engineeringState}
                 onNotice={notice}
                 onAgent={() => {
                   setControlsOpen(false);
@@ -1208,6 +1240,31 @@ export default function Workspace() {
         onSelect={select}
         onAlarms={() => setPanel("alarms")}
       />
+      {engineeringPreview && !twin.engineering && (
+        <button
+          className="scene-engineering"
+          onClick={() => setPanel("agents")}
+        >
+          {locale === "zh-CN"
+            ? "工程备选轨迹预览 · 原模型未修改"
+            : "ENGINEERING PREVIEW · ORIGINAL MODEL UNCHANGED"}
+        </button>
+      )}
+      {twin.engineering && (
+        <button
+          className="scene-engineering"
+          onClick={() => setPanel("agents")}
+        >
+          {locale === "zh-CN"
+            ? "工程修改模型 · 非现场运行"
+            : "ENGINEERING SCENARIO · NOT FIELD OPERATION"}
+          <span>
+            {twin.engineering.goal.assetId} ·{" "}
+            {twin.engineering.remainingMinutes} min ·{" "}
+            {twin.engineering.auxiliaryKwh.toFixed(1)} kWh
+          </span>
+        </button>
+      )}
       {goal && (
         <button className="scene-goal" onClick={() => setPanel("agents")}>
           <small>
@@ -1626,10 +1683,11 @@ export default function Workspace() {
           panel === "agents" && (
             <>
               <GoalWorkbench
+                engineered={!!twin.engineering}
                 task={specialist}
                 goal={goal}
                 selected={selected}
-                busy={!!busy}
+                busy={!!busy || !!twin.engineering}
                 onPreset={chooseSpecialist}
                 onChange={(g) => {
                   setGoalDraft(g);
@@ -1688,6 +1746,23 @@ export default function Workspace() {
                     new Error("Investigation stopped by operator"),
                   );
                 }}
+              />
+              <EngineeringWorkbench
+                state={twin}
+                goal={goal}
+                selected={selected}
+                study={engineeringStudy}
+                busy={!!busy}
+                onBusy={setBusy}
+                onStudy={setEngineeringStudy}
+                onPreview={(o) => {
+                  setPlaying(false);
+                  setOptimisation({ ...o, recommendation: null });
+                  setMission(null);
+                  setEngineeringPreview(true);
+                  preview("intervention");
+                }}
+                onState={engineeringState}
               />
               <label>
                 {tx("Mission objective")}

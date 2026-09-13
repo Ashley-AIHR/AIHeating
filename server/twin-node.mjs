@@ -2,6 +2,10 @@ import { randomUUID, createHash } from "node:crypto";
 import { p, createEngine, step, validate } from "./physics-node.mjs";
 import { cityProfile } from "./cities.mjs";
 import { operatingGoal, assessGoal } from "./operating-goal.mjs";
+import {
+  engineeringStudy,
+  openEngineeringScenario,
+} from "./engineering-options.mjs";
 export const SCENARIOS = {
   imbalance: {
     name: "Cold at the end of the network",
@@ -115,6 +119,8 @@ export function snapshot(s, history = true) {
       modelC: v.temp,
       quality: biased ? "suspect" : "simulated",
       heatKw: v.heat / 1000,
+      auxiliaryKw: (v.auxiliaryW || 0) / 1000,
+      localValvePct: e.design?.localValves ? v.localValvePct : null,
       flowM3h: (v.mass / p.water.rho_water) * 3600,
       returnC: v.returnC,
       envelopeKw: v.envelope / 1000,
@@ -130,6 +136,20 @@ export function snapshot(s, history = true) {
   return {
     cityId: s.cityId || "yinchuan",
     contextId: s.contextId,
+    engineering: s.engineeringOrigin
+      ? {
+          label: s.engineeringLabel,
+          originalContextId: s.engineeringOrigin.contextId,
+          goal: s.engineeringGoal,
+          deadlineElapsedMinutes: s.engineeringDeadline,
+          remainingMinutes: Math.max(0, s.engineeringDeadline - e.elapsed / 60),
+          auxiliaryKwh:
+            ((e.auxiliaryJ || 0) -
+              (s.engineeringOrigin.engine.auxiliaryJ || 0)) /
+            3.6e6,
+          design: e.design,
+        }
+      : null,
     city: cityProfile(s.cityId),
     scenario: s.scenario,
     scenarioName: SCENARIOS[s.scenario].name,
@@ -217,7 +237,7 @@ export function advance(s, steps = 6, controls) {
 export function candidateControls(s, args) {
   return validate({ ...s.engine.controls, ...args }, s.engine.controls);
 }
-export function rollout(s, controls, hours = 3, second) {
+export function rollout(s, controls, hours = 3, second, schedule) {
   const goalSamples = [],
     buildingHeatKwh = Object.fromEntries(
       Object.keys(s.engine.temperatures).map((id) => [id, 0]),
@@ -225,6 +245,7 @@ export function rollout(s, controls, hours = 3, second) {
   const e = structuredClone(s.engine),
     initialHeat = e.heatJ,
     initialPump = e.pumpJ,
+    initialAuxiliary = e.auxiliaryJ || 0,
     trace = [];
   let minimumC = Math.min(...Object.values(e.temperatures)),
     overheated = 0,
@@ -236,7 +257,13 @@ export function rollout(s, controls, hours = 3, second) {
     const f = step(
         e,
         weather(s, i * 300),
-        i === 0 ? controls : i === 18 ? second : null,
+        schedule
+          ? schedule.find((b) => b.minute === i * 5)?.controls
+          : i === 0
+            ? controls
+            : i === 18
+              ? second
+              : null,
         s.windows,
       ),
       temps = Object.values(e.temperatures);
@@ -258,6 +285,7 @@ export function rollout(s, controls, hours = 3, second) {
       buildingHeatKwh: { ...buildingHeatKwh },
       heatKwh: (e.heatJ - initialHeat) / 3.6e6,
       pumpKwh: (e.pumpJ - initialPump) / 3.6e6,
+      auxiliaryKwh: ((e.auxiliaryJ || 0) - initialAuxiliary) / 3.6e6,
     });
     if ((i + 1) % 6 === 0)
       trace.push({
@@ -279,6 +307,7 @@ export function rollout(s, controls, hours = 3, second) {
     heatKwh: (e.heatJ - initialHeat) / 3.6e6,
     goalSamples,
     pumpKwh: (e.pumpJ - initialPump) / 3.6e6,
+    auxiliaryKwh: ((e.auxiliaryJ || 0) - initialAuxiliary) / 3.6e6,
     minimumC,
     endMinimumC: Math.min(...Object.values(e.temperatures)),
     overheatingPct: (100 * overheated) / count,
@@ -442,9 +471,11 @@ export function optimise(s, args = {}) {
     lo = [40, 30, 20, 20, 20],
     hi = [60, 50, 100, 100, 100],
     ramp = [2, 2, 10, 10, 10],
+    blocks = goal ? 6 : 2,
+    blockMinutes = goal ? 30 : 90,
     cache = new Map();
   const controls = (x) => {
-    if (goal && goal.scope !== "district")
+    if (goal && goal.scope !== "district" && !goal.allowShared)
       x = x.map((v, i) => {
         const j = i % 5;
         return j < 2
@@ -455,14 +486,21 @@ export function optimise(s, args = {}) {
             ? v
             : 0;
       });
-    const a = start.map((v, i) => clamp(v + x[i] * ramp[i], lo[i], hi[i])),
-      b = a.map((v, i) => clamp(v + x[i + 5] * ramp[i], lo[i], hi[i]));
-    return [a, b].map((v) => ({
-      supplyC: v[0],
-      pumpHz: v[1],
-      valvesPct: v.slice(2),
-    }));
+    let previous = start;
+    return Array.from({ length: blocks }, (_, block) => {
+      const v = previous.map((value, i) =>
+        clamp(value + x[block * 5 + i] * ramp[i], lo[i], hi[i]),
+      );
+      previous = v;
+      return {
+        supplyC: v[0],
+        pumpHz: v[1],
+        valvesPct: v.slice(2),
+      };
+    });
   };
+  const path = (x) =>
+    controls(x).map((controls, i) => ({ minute: i * blockMinutes, controls }));
   const valid = (r) =>
     r.verified && r.maxResidual <= 1e-6 && r.maxPressureKpa <= 250;
   const reference = goal ? rollout(s, c, 3, c) : null;
@@ -470,10 +508,10 @@ export function optimise(s, args = {}) {
     const key = x.map((v) => v.toFixed(5)).join(",");
     if (!cache.has(key)) {
       const [a, b] = controls(x),
-        row = rollout(s, a, 3, b),
+        row = rollout(s, a, 3, b, path(x)),
         cost =
           weights[0] * row.heatKwh +
-          weights[1] * row.pumpKwh +
+          weights[1] * (row.pumpKwh + row.auxiliaryKwh) +
           weights[2] * row.comfortPenalty;
       const assessment = goal ? assessGoal(goal, row, reference) : null;
       const score = assessment
@@ -488,10 +526,23 @@ export function optimise(s, args = {}) {
     }
     return cache.get(key);
   };
-  let x = Array(10).fill(0);
+  let x = Array(blocks * 5).fill(0);
   const baseline = evaluate(x)[1];
+  if (goal) {
+    // Coordinated seeds cross valleys that a single-coordinate sweep cannot.
+    const seeds = [
+      [1, 1, -1, 0, 1],
+      [-1, 0, -1, -1, 1],
+      [-1, -1, -1, -1, -1],
+      [1, 1, -1, -1, 1],
+    ];
+    for (const seed of seeds) {
+      const trial = Array.from({ length: blocks }, () => seed).flat();
+      if (evaluate(trial)[0] < evaluate(x)[0]) x = trial;
+    }
+  }
   for (const mesh of goal ? [1, 0.5, 0.25, 0.125] : [1, 0.5])
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < blocks * 5; i++) {
       const trials = [
         x,
         ...[-1, 1].map((d) =>
@@ -513,13 +564,13 @@ export function optimise(s, args = {}) {
   }
   const chosen = evaluate(x)[1],
     [a, b] = controls(x),
-    check = rollout(s, a, 3, b),
+    check = rollout(s, a, 3, b, path(x)),
     goalResult = goal ? assessGoal(goal, check, reference) : null,
     feasible = valid(check) && (!goalResult || goalResult.passed);
-  const schedule = [
-      { minute: 0, ...a },
-      { minute: 90, ...b },
-    ],
+  const schedule = controls(x).map((c, i) => ({
+      minute: i * blockMinutes,
+      ...c,
+    })),
     planHash = createHash("sha256")
       .update(
         JSON.stringify({
@@ -529,7 +580,8 @@ export function optimise(s, args = {}) {
           contextId: s.contextId,
           schedule,
           goal,
-          model: "P1A-coherent-v1.2-node",
+          model: "P1A-node-engineering-v2",
+          engineeringDesign: s.engine.design || null,
         }),
       )
       .digest("hex");
@@ -546,6 +598,8 @@ export function optimise(s, args = {}) {
     result.candidateId = storePlan(s, {
       controls: a,
       second: b,
+      schedule: path(x),
+      goal,
       expires: Date.now() + 300000,
       optimised: true,
     });
@@ -559,7 +613,9 @@ export function optimise(s, args = {}) {
     recommendation: feasible ? result : null,
     bestAttempt: result,
     evaluations: cache.size + 1,
-    solver: "Bounded coordinate pattern search; two 90-minute control blocks",
+    solver: goal
+      ? "Seeded bounded pattern search; six 30-minute control blocks"
+      : "Bounded coordinate pattern search; two 90-minute control blocks",
     status: feasible ? "feasible best found" : "no feasible plan found",
     verification: {
       passed: feasible,
@@ -615,6 +671,66 @@ export function dispatch(id, method, args = {}) {
   if (method === "compare") return compare(s);
   if (method === "simulate") return rollout(s, candidateControls(s, args));
   if (method === "optimise") return optimise(s, args);
+  const engineeringTools = { snapshot, optimise, advance };
+  if (method === "engineering_study")
+    return engineeringStudy(s, args, engineeringTools);
+  if (method === "engineering_open")
+    return openEngineeringScenario(s, args, engineeringTools);
+  if (method === "engineering_restore") {
+    if (!s.engineeringOrigin || args.revision !== s.revision)
+      throw Error("No matching original engineering scenario");
+    const origin = structuredClone(s.engineeringOrigin);
+    origin.contextId = randomUUID();
+    origin.revision = s.revision + 1;
+    sessions.set(id, origin);
+    return snapshot(origin);
+  }
+  if (method === "engineering_step") {
+    if (!s.engineeringOrigin || args.revision !== s.revision)
+      throw Error("Engineering state changed");
+    const remaining = s.engineeringDeadline - s.engine.elapsed / 60;
+    if (remaining <= 0)
+      throw Error(
+        "Original engineering deadline reached; inspect the achieved state",
+      );
+    const result = optimise(s, {
+      goal: { ...s.engineeringGoal, deadlineMinutes: remaining },
+      objective: "comfort",
+    });
+    if (!result.recommendation)
+      return { state: snapshot(s), optimisation: result, applied: false };
+    const controls = result.recommendation.schedule[0];
+    advance(s, 6, {
+      supplyC: controls.supplyC,
+      pumpHz: controls.pumpHz,
+      valvesPct: controls.valvesPct,
+    });
+    return { state: snapshot(s), optimisation: result, applied: true };
+  }
+  if (method === "engineering_valve") {
+    if (
+      !s.engine.design?.localValves ||
+      args.revision !== s.revision ||
+      !p.buildings.some((b) => b.building_id === args.assetId)
+    )
+      throw Error("No commissioned local valve on this asset or stale state");
+    if (
+      args.value !== null &&
+      (!Number.isFinite(args.value) || args.value < 1 || args.value > 100)
+    )
+      throw Error("Local valve must be 1–100% or automatic");
+    const copy = structuredClone(s);
+    copy.engine.design.manualValves ||= {};
+    if (args.value === null)
+      delete copy.engine.design.manualValves[args.assetId];
+    else copy.engine.design.manualValves[args.assetId] = args.value;
+    const check = rollout(copy, copy.engine.controls);
+    if (!check.verified || check.maxPressureKpa > 250)
+      throw Error("Local valve failed model limits");
+    advance(copy, 6);
+    Object.assign(s, copy);
+    return snapshot(s);
+  }
   if (method === "control_preview") {
     if (args.revision !== s.revision)
       throw Error("State changed. Refresh the control before testing it.");
@@ -670,9 +786,14 @@ export function dispatch(id, method, args = {}) {
         "Recommendation expired; compare again against the current state",
       );
     const controls = candidateControls(s, proposal.controls),
-      check = rollout(s, controls, 3, proposal.second);
+      check = rollout(s, controls, 3, proposal.second, proposal.schedule);
     if (!check.verified)
       throw Error("Trajectory did not pass the simulation floor");
+    if (
+      proposal.goal &&
+      !assessGoal(proposal.goal, check, rollout(s, s.engine.controls)).passed
+    )
+      throw Error("Goal no longer passes numerical verification");
     if (
       proposal.optimised &&
       (check.maxResidual > 1e-6 || check.maxPressureKpa > 250)

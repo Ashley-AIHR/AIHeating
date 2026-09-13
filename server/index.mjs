@@ -314,6 +314,11 @@ const server = http.createServer(async (req, res) => {
         "/api/world": "world",
         "/api/replay": "replay",
         "/api/optimise": "optimise",
+        "/api/engineering/study": "engineering_study",
+        "/api/engineering/open": "engineering_open",
+        "/api/engineering/restore": "engineering_restore",
+        "/api/engineering/step": "engineering_step",
+        "/api/engineering/valve": "engineering_valve",
         "/api/control/preview": "control_preview",
       }[url.pathname];
       if (!method) return send(res, 404, { error: "Unknown endpoint." });

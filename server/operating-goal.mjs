@@ -77,7 +77,7 @@ export function operatingGoal(input, snapshot) {
       snapshot.buildings.map((b) => [b.id, b.modelC]),
     ),
     authority:
-      "Operator-defined simulator goal. All buildings must satisfy the comfort band from the deadline onwards. Before it, do not worsen existing band violations. Shared physical controls only; no individual building valve exists.",
+      "Operator-defined simulator goal. All buildings must satisfy the comfort band from the deadline onwards. Before it, do not worsen existing band violations. Shared permission includes station and all branch valves; local valves exist only in explicitly commissioned engineering alternatives.",
   };
 }
 

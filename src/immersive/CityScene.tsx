@@ -562,7 +562,7 @@ export default function CityScene(props: Props) {
                 ? "△ "
                 : "") +
           (building
-            ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}`
+            ? `${marker.id}  ${building.indoorC.toFixed(1)}°${delta !== null ? ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}°` : ""}${building.auxiliaryKw ? ` · +${building.auxiliaryKw.toFixed(0)} kW` : ""}`
             : zone
               ? `${tx(marker.id.toUpperCase())} · ${zone.flowM3h.toFixed(1)} m³/h · ${zone.delayMinutes.toFixed(0)} ${tx("min")}`
               : marker.id === "ST01"

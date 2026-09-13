@@ -1,0 +1,1162 @@
+{
+  "model": "P1A-node-engineering-v2",
+  "city": "beijing",
+  "simulationStart": "2025-01-15T08:30:00+08:00",
+  "goal": {
+    "metric": "temperature",
+    "scope": "asset",
+    "assetId": "B10",
+    "target": 21,
+    "deadlineMinutes": 120,
+    "minC": 18,
+    "maxC": 23,
+    "allowShared": true
+  },
+  "initial": {
+    "minutes": 0,
+    "buildingC": 18.64245210862093,
+    "minimumC": 18.64245210862093,
+    "maximumC": 23.59732143838762,
+    "auxiliaryKwh": 0,
+    "supplyC": 49,
+    "pumpHz": 43,
+    "valvesPct": [
+      78,
+      58,
+      35
+    ],
+    "energyResidual": 2.4554027612586583e-14
+  },
+  "storedHeatIncreaseKwh": 130.64744564725683,
+  "preferredId": "emitters-3",
+  "alternatives": [
+    {
+      "id": "operations",
+      "label": "Existing equipment",
+      "kind": "operations",
+      "assumptions": [
+        "Six half-hour stages; shared station and all branch valves may coordinate."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 18.778244053017843,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": false,
+        "passed": false,
+        "targetError": 1.9217559469821566,
+        "guardrailPenalty": 0.07549971487630185,
+        "violatingAssets": [
+          "B02",
+          "B01",
+          "B04"
+        ],
+        "targetBuildings": {
+          "B10": 18.778244053017843
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 657.1249192081825,
+      "pumpKwh": 1.3804252433014055,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 47,
+          "pumpHz": 41,
+          "valvesPct": [
+            68,
+            66.75,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 45,
+          "pumpHz": 39,
+          "valvesPct": [
+            58,
+            75.5,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 43,
+          "pumpHz": 37,
+          "valvesPct": [
+            48,
+            84.25,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 41,
+          "pumpHz": 35,
+          "valvesPct": [
+            38,
+            93,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 40,
+          "pumpHz": 33,
+          "valvesPct": [
+            28,
+            100,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 40,
+          "pumpHz": 31,
+          "valvesPct": [
+            20,
+            100,
+            95
+          ]
+        }
+      ],
+      "evaluations": 150,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.95029791816026e-14,
+        "maxPressureKpa": 45.79048808782618,
+        "planHash": "987d1d769c96dc1758da53e407a9d96d411f9f0fdeed6c8ef97a8ed5fa49336d",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "local-valves",
+      "label": "Commissioned building valves",
+      "kind": "engineering",
+      "assumptions": [
+        "Twelve added building valves, commissioned at the start; normalised equivalent hydraulic resistance, not surveyed pipework."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 19.151933886565097,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 1.5480661134349034,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 19.151933886565097
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 525.943325231709,
+      "pumpKwh": 1.9747608809005863,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 60,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 126,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.123215053657758e-14,
+        "maxPressureKpa": 133.60349998286225,
+        "planHash": "7de27817a9c0be9d3f5c843c2442a3fa0da3b15dd82d6cbd90eca0d02b32a49e",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "emitters",
+      "label": "Building valves and larger emitter",
+      "kind": "engineering",
+      "assumptions": [
+        "Selected building emitter UA doubled; same thermal mass and initial temperature. Capacity and installation need engineering review."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 20.13700651264434,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 0.5629934873556592,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 20.13700651264434
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 581.7941671365371,
+      "pumpKwh": 1.9747608809005863,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 2,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.123215053657758e-14,
+        "maxPressureKpa": 133.60349998286225,
+        "planHash": "6827eb00c955c487b7ebafda54a1011bb0a47027ccd8ead01c739b48b9db5914",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "emitters-3",
+      "label": "Building valves and triple emitter UA",
+      "kind": "engineering",
+      "assumptions": [
+        "Selected building emitter UA tripled, not heat output tripled. Space, circuit pressure drop and equipment capacity require verification; this is a proposed retrofit, not a repair already performed."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 20.779550562037873,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": true,
+        "guardrailsMet": true,
+        "passed": true,
+        "targetError": 0,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 20.779550562037873
+        },
+        "message": "Goal achieved in model",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 618.4302293664987,
+      "pumpKwh": 1.9626645703662038,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 3,
+      "lossFactor": 1,
+      "passed": true,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": true,
+        "physicsPassed": true,
+        "goalPassed": true,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.171616951849833e-14,
+        "maxPressureKpa": 134.0310215107089,
+        "planHash": "c3a5145af8da96cb1347849a01661eee904c5e027bbc6fc5de565aad45abd0ca",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "envelope",
+      "label": "Building valves and envelope retrofit",
+      "kind": "engineering",
+      "assumptions": [
+        "Selected building envelope conductance reduced by 30%; not a measured insulation product performance."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 19.477132880880983,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 1.2228671191190166,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 19.477132880880983
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 525.5548073272611,
+      "pumpKwh": 1.9747608809005863,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 1,
+      "lossFactor": 0.7,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.123215053657758e-14,
+        "maxPressureKpa": 133.60349998286225,
+        "planHash": "0e2ec5dbc3c2b12aa327edd78c4e497823283cdfe905dcdce3b14ecdb7217147",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "resistance",
+      "label": "Building valves and lower branch resistance",
+      "kind": "engineering",
+      "assumptions": [
+        "Selected branch pipe resistance reduced by 35%; an upgrade or verified obstruction-removal hypothesis, not an established fault."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 19.16743433750008,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 1.5325656624999204,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 19.16743433750008
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 529.1910241538545,
+      "pumpKwh": 2.0575838293159143,
+      "auxiliaryKwh": 0,
+      "auxiliaryCapacityKw": 0,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 60,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 126,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.0942425267521286e-14,
+        "maxPressureKpa": 130.2032225227759,
+        "planHash": "f6ce5b732766a83e4fee412ab3864ad424ed104704429e7707a48d160f1e4294",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "auxiliary-20",
+      "label": "Building valves and local auxiliary heat",
+      "kind": "engineering",
+      "assumptions": [
+        "Added local electric resistance heat with ideal thermostat and COP 1; electrical supply, protection and installation must be verified separately."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 19.841530420605853,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 0.858469579394147,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 19.841530420605853
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 525.1143432609898,
+      "pumpKwh": 1.9747608809005863,
+      "auxiliaryKwh": 40,
+      "auxiliaryCapacityKw": 20,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.123215053657758e-14,
+        "maxPressureKpa": 133.60349998286225,
+        "planHash": "f68e1e327f97cb6b4f8b4f3a699eaae7fb2c09990ec5a21ff45d78d865220808",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "auxiliary-40",
+      "label": "Building valves and local auxiliary heat",
+      "kind": "engineering",
+      "assumptions": [
+        "Added local electric resistance heat with ideal thermostat and COP 1; electrical supply, protection and installation must be verified separately."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 20.528686683524572,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": false,
+        "guardrailsMet": true,
+        "passed": false,
+        "targetError": 0.17131331647542752,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 20.528686683524572
+        },
+        "message": "Requested goal not reached within the tested control envelope",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 524.2029652271775,
+      "pumpKwh": 1.9715738517027275,
+      "auxiliaryKwh": 80,
+      "auxiliaryCapacityKw": 40,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": false,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": false,
+        "physicsPassed": true,
+        "goalPassed": false,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.22680678987761e-14,
+        "maxPressureKpa": 133.60349998286225,
+        "planHash": "0d5e9bf30528dd7525bf2c44b6e699fbace601d255a0f37197b0c363d8678887",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    },
+    {
+      "id": "auxiliary-60",
+      "label": "Building valves and local auxiliary heat",
+      "kind": "engineering",
+      "assumptions": [
+        "Added local electric resistance heat with ideal thermostat and COP 1; electrical supply, protection and installation must be verified separately."
+      ],
+      "goalResult": {
+        "target": 21,
+        "achieved": 21.011848381638934,
+        "unit": "°C",
+        "deadlineMinutes": 120,
+        "targetMet": true,
+        "guardrailsMet": true,
+        "passed": true,
+        "targetError": 0,
+        "guardrailPenalty": 0,
+        "violatingAssets": [],
+        "targetBuildings": {
+          "B10": 21.011848381638934
+        },
+        "message": "Goal achieved in model",
+        "scope": "asset",
+        "assetId": "B10",
+        "metric": "temperature"
+      },
+      "heatKwh": 521.5147032927343,
+      "pumpKwh": 1.9384785888490128,
+      "auxiliaryKwh": 110.65902709960938,
+      "auxiliaryCapacityKw": 60,
+      "emitterFactor": 1,
+      "lossFactor": 1,
+      "passed": true,
+      "schedule": [
+        {
+          "minute": 0,
+          "supplyC": 51,
+          "pumpHz": 45,
+          "valvesPct": [
+            68,
+            48,
+            45
+          ]
+        },
+        {
+          "minute": 30,
+          "supplyC": 53,
+          "pumpHz": 47,
+          "valvesPct": [
+            58,
+            38,
+            55
+          ]
+        },
+        {
+          "minute": 60,
+          "supplyC": 55,
+          "pumpHz": 49,
+          "valvesPct": [
+            48,
+            28,
+            65
+          ]
+        },
+        {
+          "minute": 90,
+          "supplyC": 57,
+          "pumpHz": 50,
+          "valvesPct": [
+            38,
+            20,
+            75
+          ]
+        },
+        {
+          "minute": 120,
+          "supplyC": 59,
+          "pumpHz": 50,
+          "valvesPct": [
+            28,
+            20,
+            85
+          ]
+        },
+        {
+          "minute": 150,
+          "supplyC": 57.25,
+          "pumpHz": 50,
+          "valvesPct": [
+            20,
+            20,
+            95
+          ]
+        }
+      ],
+      "evaluations": 129,
+      "verification": {
+        "passed": true,
+        "physicsPassed": true,
+        "goalPassed": true,
+        "minimumC": 18.64245210862093,
+        "maxResidual": 4.059519163666969e-14,
+        "maxPressureKpa": 136.04227794476313,
+        "planHash": "9c0a87314d492dabd3a2b51d7e856bd8f4bcace97bc683a33b101314102b0a45",
+        "scope": "Fresh rollout using the same model; not independent field validation"
+      }
+    }
+  ],
+  "executions": {
+    "emitters-3": [
+      {
+        "minutes": 0,
+        "buildingC": 18.64245210862093,
+        "minimumC": 18.64245210862093,
+        "maximumC": 23.59732143838762,
+        "auxiliaryKwh": 0,
+        "supplyC": 49,
+        "pumpHz": 43,
+        "valvesPct": [
+          78,
+          58,
+          35
+        ],
+        "energyResidual": 2.4554027612586583e-14
+      },
+      {
+        "minutes": 30,
+        "buildingC": 19.074721032378978,
+        "minimumC": 19.00190212574153,
+        "maximumC": 23.43721659803149,
+        "auxiliaryKwh": 0,
+        "supplyC": 51,
+        "pumpHz": 45,
+        "valvesPct": [
+          68,
+          48,
+          45
+        ],
+        "energyResidual": 2.882979976303307e-14
+      },
+      {
+        "minutes": 60,
+        "buildingC": 19.59518500935959,
+        "minimumC": 19.102291590145136,
+        "maximumC": 23.277332089738277,
+        "auxiliaryKwh": 0,
+        "supplyC": 53,
+        "pumpHz": 47,
+        "valvesPct": [
+          58,
+          38,
+          55
+        ],
+        "energyResidual": 2.2748817096806466e-14
+      },
+      {
+        "minutes": 90,
+        "buildingC": 20.19046104464581,
+        "minimumC": 19.228960409369634,
+        "maximumC": 23.11745110572746,
+        "auxiliaryKwh": 0,
+        "supplyC": 55,
+        "pumpHz": 49,
+        "valvesPct": [
+          48,
+          28,
+          65
+        ],
+        "energyResidual": 2.0174081466662443e-14
+      },
+      {
+        "minutes": 120,
+        "buildingC": 20.779550562037873,
+        "minimumC": 19.378429334118135,
+        "maximumC": 22.957160669962235,
+        "auxiliaryKwh": 0,
+        "supplyC": 57,
+        "pumpHz": 50,
+        "valvesPct": [
+          38,
+          20,
+          75
+        ],
+        "energyResidual": 2.242653203074067e-14
+      }
+    ],
+    "auxiliary-60": [
+      {
+        "minutes": 0,
+        "buildingC": 18.64245210862093,
+        "minimumC": 18.64245210862093,
+        "maximumC": 23.59732143838762,
+        "auxiliaryKwh": 0,
+        "supplyC": 49,
+        "pumpHz": 43,
+        "valvesPct": [
+          78,
+          58,
+          35
+        ],
+        "energyResidual": 2.4554027612586583e-14
+      },
+      {
+        "minutes": 30,
+        "buildingC": 19.26251869236262,
+        "minimumC": 19.00190212574153,
+        "maximumC": 23.43721659803149,
+        "auxiliaryKwh": 30,
+        "supplyC": 51,
+        "pumpHz": 45,
+        "valvesPct": [
+          68,
+          48,
+          45
+        ],
+        "energyResidual": 2.882979976303307e-14
+      },
+      {
+        "minutes": 60,
+        "buildingC": 19.90113814716865,
+        "minimumC": 19.102291590145136,
+        "maximumC": 23.277332089738277,
+        "auxiliaryKwh": 60,
+        "supplyC": 53,
+        "pumpHz": 47,
+        "valvesPct": [
+          58,
+          38,
+          55
+        ],
+        "energyResidual": 2.2748817096806466e-14
+      },
+      {
+        "minutes": 90,
+        "buildingC": 20.55298106325424,
+        "minimumC": 19.229006771080442,
+        "maximumC": 23.117460216477447,
+        "auxiliaryKwh": 90,
+        "supplyC": 55,
+        "pumpHz": 49,
+        "valvesPct": [
+          48,
+          28,
+          65
+        ],
+        "energyResidual": 2.3459793956547094e-14
+      },
+      {
+        "minutes": 120,
+        "buildingC": 21.011848381638934,
+        "minimumC": 19.37807198651182,
+        "maximumC": 22.957232108084796,
+        "auxiliaryKwh": 110.65902709960938,
+        "supplyC": 57,
+        "pumpHz": 50,
+        "valvesPct": [
+          38,
+          20,
+          75
+        ],
+        "energyResidual": 2.967711561046683e-14
+      }
+    ]
+  },
+  "caveats": [
+    "Counterfactual engineering evidence only. Operator must explicitly open an isolated scenario. No field installation or actuation.",
+    "First passing tested capacity, not a certified minimum; weather and physical parameters are uncalibrated.",
+    "All energy results are model outputs. Heat and electricity are separate carriers; this comfort-recovery test is not an economic or carbon comparison."
+  ]
+}
